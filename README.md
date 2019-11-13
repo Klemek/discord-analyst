@@ -1,10 +1,15 @@
+[![Scc Count Badge](https://sloc.xyz/github/klemek/discord-analyst/?category=code)](https://github.com/boyter/scc/#badges-beta)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Klemek/discord-analyst.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Klemek/discord-analyst/context:python)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/Klemek/discord-analyst.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Klemek/discord-analyst/alerts/)
+
 # Discord Analyst
 
 When you need statistics about your discord server
 
+* `%help (command)` - info about commands
+* `%info` - version and uptime
 * `%emotes` - gives you a full ranking of the server emotes by usage
-* `%emotes #channel` - same for a specific channel
-* `%emotes @member` - same for a specific member of this server
+  *  Be more specific by adding some `@member` or `#channel` in arguments
 
 ## Running this bot
 
