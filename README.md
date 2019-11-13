@@ -1,6 +1,6 @@
 # Discord Analyst
 
-When you need statistics about your server
+When you need statistics about your discord server
 
 * `%emotes` - gives you a full ranking of the server emotes by usage
 * `%emotes #channel` - same for a specific channel
