@@ -8,7 +8,7 @@ import emotes
 import help
 from utils import debug
 
-VERSION = "1.1-dev"
+VERSION = "1.1"
 t0 = datetime.now()
 
 # Loading token
