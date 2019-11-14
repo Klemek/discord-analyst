@@ -1,5 +1,6 @@
 # DISCORD API
 
+
 def debug(message, txt):
     """
     Print a log with the context of the current event

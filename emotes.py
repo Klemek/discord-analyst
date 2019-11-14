@@ -6,6 +6,10 @@ import re
 import help
 from utils import debug, aggregate, no_duplicate
 
+# CONSTANTS
+
+CHUNK_SIZE = 10000
+
 
 # MAIN
 
@@ -18,7 +22,6 @@ async def compute(message, args):
     :param args: arguments of the command
     :type args: list[:class:`str`]
     """
-    debug(message, f"command '{message.content}'")
 
     guild = message.guild
 
@@ -81,6 +84,7 @@ class Emote:
     :ivar last_used: date of last use
     :vartype last_used: datetime
     """
+
     def __init__(self, emoji):
         self.emoji = emoji
         self.usages = 0
@@ -157,32 +161,37 @@ async def analyse_channel(channel, emotes, members, progress, nm0, nc):
     nm = 0
     nmm = 0
     try:
-        # Read ALL messages from the channel (pretty long : 300 msg/s)
-        async for m in channel.history(limit=None):
-            # If author is not bot or included in the selection (empty list is all)
-            if not m.author.bot and (len(members) == 0 or m.author in members):
-                # Find all emotes un the current message in the form "<:emoji:123456789>"
-                # Filter for known emotes
-                found = [name for name in re.findall(r"(<:\w+:\d+>)", m.content) if name in emotes]
-                # For each emote, update its usage
-                for name in found:
-                    emotes[name].usages += 1
-                    emotes[name].update_use(m.created_at)
-                # Count this message as impacted
-                nmm += 1
-            # If we include all members, get reactions
-            if len(members) == 0:
+        messages = [None]
+        while len(messages) >= CHUNK_SIZE or messages[-1] is None:
+            messages = await channel.history(limit=CHUNK_SIZE, before=messages[-1]).flatten()
+            for m in messages:
+                # If author is not bot or included in the selection (empty list is all)
+                if not m.author.bot and (len(members) == 0 or m.author in members):
+                    # Find all emotes un the current message in the form "<:emoji:123456789>"
+                    # Filter for known emotes
+                    found = [name for name in re.findall(r"(<:\w+:\d+>)", m.content) if name in emotes]
+                    # For each emote, update its usage
+                    for name in found:
+                        emotes[name].usages += 1
+                        emotes[name].update_use(m.created_at)
+                    # Count this message as impacted
+                    nmm += 1
                 # For each reaction of this message, test if known emote and update when it's the case
                 for reaction in m.reactions:
                     name = str(reaction.emoji)
                     # reaction.emoji can be only str, we don't want that
                     if not (isinstance(reaction.emoji, str)) and name in emotes:
-                        emotes[name].reactions += reaction.count
-                        emotes[name].update_use(m.created_at)
-            # Count this message as treated and show progress every 1k messages
-            nm += 1
-            if (nm0 + nm) % 1000 == 0:
-                await progress.edit(content=f"```{(nm0 + nm) // 1000}k messages and {nc} channels analysed```")
+                        if len(members) == 0:
+                            emotes[name].reactions += reaction.count
+                            emotes[name].update_use(m.created_at)
+                        """ else:
+                            users = await reaction.users().flatten()
+                            for member in members:
+                                if member in users:
+                                    emotes[name].reactions += 1
+                                    emotes[name].update_use(m.created_at)"""
+            nm += len(messages)
+            await progress.edit(content=f"```{nm0 + nm:,} messages and {nc} channels analysed```")
         return nm, nmm
     except discord.errors.HTTPException:
         # When an exception occurs (like Forbidden) sent -1
@@ -252,29 +261,29 @@ def get_intro(emotes, full, channels, members, nmm, nc):
     if len(members) == 0:
         # Full scan of the server
         if full:
-            return f"{len(emotes)} emotes in this server ({nc} channels, {nmm} messages):"
+            return f"{len(emotes)} emotes in this server ({nc} channels, {nmm:,} messages):"
         elif len(channels) < 5:
-            return f"{aggregate([c.mention for c in channels])} emotes usage in {nmm} messages:"
+            return f"{aggregate([c.mention for c in channels])} emotes usage in {nmm:,} messages:"
         else:
-            return f"These {len(channels)} channels emotes usage in {nmm} messages:"
+            return f"These {len(channels)} channels emotes usage in {nmm:,} messages:"
     elif len(members) < 5:
         if full:
-            return f"{aggregate([m.mention for m in members])} emotes usage in {nmm} messages:"
+            return f"{aggregate([m.mention for m in members])} emotes usage in {nmm:,} messages:"
         elif len(channels) < 5:
             return f"{aggregate([m.mention for m in members])} on {aggregate([c.mention for c in channels])} " \
-                   f"emotes usage in {nmm} messages:"
+                   f"emotes usage in {nmm:,} messages:"
         else:
             return f"{aggregate([m.mention for m in members])} on these {len(channels)} channels " \
-                   f"emotes usage in {nmm} messages:"
+                   f"emotes usage in {nmm:,} messages:"
     else:
         if full:
-            return f"These {len(members)} members emotes usage in {nmm} messages:"
+            return f"These {len(members)} members emotes usage in {nmm:,} messages:"
         elif len(channels) < 5:
             return f"These {len(members)} members on {aggregate([c.mention for c in channels])} " \
-                   f"emotes usage in {nmm} messages:"
+                   f"emotes usage in {nmm:,} messages:"
         else:
             return f"These {len(members)} members on these {len(channels)} channels " \
-                   f"emotes usage in {nmm} messages:"
+                   f"emotes usage in {nmm:,} messages:"
 
 
 def get_place(i):
@@ -308,7 +317,7 @@ def get_usage(emote):
     elif emote.usages == 1:
         return "1 time "
     else:
-        return f"{emote.usages} times "
+        return f"{emote.usages:,} times "
 
 
 def get_reactions(emote):
@@ -323,7 +332,7 @@ def get_reactions(emote):
     elif emote.reactions == 1:
         return "and 1 reaction "
     else:
-        return f"and {emote.reactions} reactions "
+        return f"and {emote.reactions:,} reactions "
 
 
 def get_life(emote, show_life):
@@ -377,6 +386,6 @@ def get_total(emotes, nmm):
         nu += emotes[name].usages
         nr += emotes[name].reactions
     if nr > 0:
-        return f"Total: {nu} times ({round(nu / nmm, 4)} / message) and {nr} reactions"
+        return f"Total: {nu:,} times ({nu / nmm:.4f} / message) and {nr:,} reactions"
     else:
-        return f"Total: {nu} times ({round(nu / nmm, 4)} / message)"
+        return f"Total: {nu:,} times ({nu / nmm:.4f} / message)"

@@ -1,4 +1,3 @@
-from utils import debug
 
 
 async def compute(message, args):
@@ -10,7 +9,6 @@ async def compute(message, args):
     :param args: arguments of the command
     :type args: list[str]
     """
-    debug(message, f"command '{message.content}'")
 
     # Select correct response to send
 

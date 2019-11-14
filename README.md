@@ -43,3 +43,11 @@ You will need:
 ```
 python3 bot.py
 ```
+
+## Changelog
+
+* **v1.1**:
+  * coma separator for big numbers
+  * history loading by chunks for big channels (performance increase)
+  * bug fix
+* **v1.0**: stable release
