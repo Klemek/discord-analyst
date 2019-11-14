@@ -165,7 +165,6 @@ async def analyse_channel(channel, emotes, members, progress, nm0, nc):
         while len(messages) >= CHUNK_SIZE or messages[-1] is None:
             messages = await channel.history(limit=CHUNK_SIZE, before=messages[-1]).flatten()
             for m in messages:
-                tm0 = datetime.now()
                 # If author is not bot or included in the selection (empty list is all)
                 if not m.author.bot and (len(members) == 0 or m.author in members):
                     # Find all emotes un the current message in the form "<:emoji:123456789>"

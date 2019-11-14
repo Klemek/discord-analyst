@@ -1,4 +1,3 @@
-from utils import debug
 
 
 async def compute(message, args):
