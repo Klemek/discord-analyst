@@ -262,29 +262,29 @@ def get_intro(emotes, full, channels, members, nmm, nc):
     if len(members) == 0:
         # Full scan of the server
         if full:
-            return f"{len(emotes)} emotes in this server ({nc} channels, {nmm} messages):"
+            return f"{len(emotes)} emotes in this server ({nc} channels, {nmm:,} messages):"
         elif len(channels) < 5:
-            return f"{aggregate([c.mention for c in channels])} emotes usage in {nmm} messages:"
+            return f"{aggregate([c.mention for c in channels])} emotes usage in {nmm:,} messages:"
         else:
-            return f"These {len(channels)} channels emotes usage in {nmm} messages:"
+            return f"These {len(channels)} channels emotes usage in {nmm:,} messages:"
     elif len(members) < 5:
         if full:
-            return f"{aggregate([m.mention for m in members])} emotes usage in {nmm} messages:"
+            return f"{aggregate([m.mention for m in members])} emotes usage in {nmm:,} messages:"
         elif len(channels) < 5:
             return f"{aggregate([m.mention for m in members])} on {aggregate([c.mention for c in channels])} " \
-                   f"emotes usage in {nmm} messages:"
+                   f"emotes usage in {nmm:,} messages:"
         else:
             return f"{aggregate([m.mention for m in members])} on these {len(channels)} channels " \
-                   f"emotes usage in {nmm} messages:"
+                   f"emotes usage in {nmm:,} messages:"
     else:
         if full:
-            return f"These {len(members)} members emotes usage in {nmm} messages:"
+            return f"These {len(members)} members emotes usage in {nmm:,} messages:"
         elif len(channels) < 5:
             return f"These {len(members)} members on {aggregate([c.mention for c in channels])} " \
-                   f"emotes usage in {nmm} messages:"
+                   f"emotes usage in {nmm:,} messages:"
         else:
             return f"These {len(members)} members on these {len(channels)} channels " \
-                   f"emotes usage in {nmm} messages:"
+                   f"emotes usage in {nmm:,} messages:"
 
 
 def get_place(i):
@@ -318,7 +318,7 @@ def get_usage(emote):
     elif emote.usages == 1:
         return "1 time "
     else:
-        return f"{emote.usages} times "
+        return f"{emote.usages:,} times "
 
 
 def get_reactions(emote):
@@ -333,7 +333,7 @@ def get_reactions(emote):
     elif emote.reactions == 1:
         return "and 1 reaction "
     else:
-        return f"and {emote.reactions} reactions "
+        return f"and {emote.reactions:,} reactions "
 
 
 def get_life(emote, show_life):
@@ -387,6 +387,6 @@ def get_total(emotes, nmm):
         nu += emotes[name].usages
         nr += emotes[name].reactions
     if nr > 0:
-        return f"Total: {nu} times ({round(nu / nmm, 4)} / message) and {nr} reactions"
+        return f"Total: {nu:,} times ({nu / nmm:.4f} / message) and {nr:,} reactions"
     else:
-        return f"Total: {nu} times ({round(nu / nmm, 4)} / message)"
+        return f"Total: {nu:,} times ({nu / nmm:.4f} / message)"
