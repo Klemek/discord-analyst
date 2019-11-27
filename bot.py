@@ -1,5 +1,4 @@
 import os
-import traceback
 import discord
 from datetime import datetime
 from dotenv import load_dotenv
@@ -90,20 +89,4 @@ async def on_message(message):
 
 print(f"Current PID: {os.getpid()}")
 
-# Launch client and rerun on errors
-while True:
-    try:
-        client.run(token)
-        break  # clean kill
-    except Exception as e:
-        t = datetime.now()
-        print(f"Exception raised at {t:%Y-%m-%d %H:%M} : {repr(e)}")
-        fileName = f"error_{t:%Y-%m-%d_%H-%M-%S}.txt"
-        if os.path.exists(fileName):
-            print("Two many errors, killing")
-            break
-        with open(fileName, 'w') as f:
-            f.write(f"Discord Analyst v{VERSION} started at {t0:%Y-%m-%d %H:%M}\r\n"
-                    f"Exception raised at {t:%Y-%m-%d %H:%M}\r\n"
-                    f"\r\n"
-                    f"{traceback.format_exc()}")
+client.run(token)
