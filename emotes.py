@@ -138,15 +138,17 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
     async with message.channel.typing():
         progress = await message.channel.send("```Starting analysis...```")
         total_msg, total_chan = await logs.load(progress, channels)
+        msg_count = 0
         for id in logs.channels:
-            analyse_channel(
+            msg_count += analyse_channel(
                 logs.channels[id], emotes, raw_members, all_emojis="all" in args
             )
+        await progress.edit(content=f"```Computing results...```")
         # Delete custom progress message
         await progress.delete()
         # Display results
         await tell_results(
-            get_intro(emotes, full, channels, members, total_msg, total_chan),
+            get_intro(emotes, full, channels, members, msg_count, total_chan),
             emotes,
             message.channel,
             total_msg,
@@ -206,10 +208,12 @@ def analyse_channel(
     raw_members: List[int],
     *,
     all_emojis: bool,
-):
+) -> int:
+    count = 0
     for message in channel.messages:
         # If author included in the selection (empty list is all)
         if len(raw_members) == 0 or message.author in raw_members:
+            count += 1
             # Find all emotes un the current message in the form "<:emoji:123456789>"
             # Filter for known emotes
             found = EMOJI_REGEX.findall(message.content)
@@ -236,6 +240,7 @@ def analyse_channel(
                         if member in message.reactions[raw_name]:
                             emotes[name].reactions += 1
                             emotes[name].update_use(message.created_at)
+    return count
 
 
 # RESULTS
@@ -279,7 +284,6 @@ def get_intro(
     channels: List[discord.TextChannel],
     members: List[discord.Member],
     nmm: int,  # number of messages impacted
-    nc: int,  # number of channels analysed
 ) -> str:
     """
     Get the introduction sentence of the response
