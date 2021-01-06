@@ -31,7 +31,7 @@ class MessageLog:
             self.mention_everyone = message.mention_everyone
             self.tts = message.tts
             self.reference = (
-                message.reference.id if message.reference is not None else None
+                message.reference.message_id if message.reference is not None else None
             )
             self.content = message.content
             self.mentions = message.raw_mentions
@@ -46,15 +46,17 @@ class MessageLog:
                 if message["edited_at"] is not None
                 else None
             )
-            self.author = message["author"]
+            self.author = int(message["author"])
             self.pinned = message["pinned"]
             self.mention_everyone = message["mention_everyone"]
             self.tts = message["tts"]
-            self.reference = message["reference"]
+            self.reference = (
+                int(message["reference"]) if message["reference"] is not None else None
+            )
             self.content = message["content"]
-            self.mentions = message["mentions"]
-            self.role_mentions = message["role_mentions"]
-            self.channel_mentions = message["channel_mentions"]
+            self.mentions = [int(m) for m in message["mentions"]]
+            self.role_mentions = [int(m) for m in message["role_mentions"]]
+            self.channel_mentions = [int(m) for m in message["channel_mentions"]]
             self.reactions = message["reactions"]
 
     async def load(self, message: discord.Message):
