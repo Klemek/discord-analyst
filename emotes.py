@@ -4,9 +4,11 @@ from collections import defaultdict
 import discord
 import re
 import json
+import logging
 
 # Custom libs
 from utils import debug, aggregate, no_duplicate
+from log_manager import GuildLogs, ChannelLogs, MessageLog
 
 # CONSTANTS
 
@@ -88,10 +90,8 @@ def load_emojis():
             GLOBAL_EMOJIS[unicode] = shortcode
             unicode_list += [unicode_escaped]
     EMOJI_REGEX = re.compile(f"(<a?:\\w+:\\d+>|:\\w+:|{'|'.join(unicode_list)})")
+    logging.info(f"loaded {len(GLOBAL_EMOJIS)} emojis")
 
-
-load_emojis()
-print(f"loaded {len(GLOBAL_EMOJIS)} emojis")
 
 # MAIN
 
@@ -112,6 +112,7 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
     Computes the %emotes command
     """
     guild = message.guild
+    logs = GuildLogs(guild)
 
     # If "%emotes help" redirect to "%help emotes"
     if "help" in args:
@@ -131,45 +132,27 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
 
     # Get selected members
     members = no_duplicate(message.mentions)
+    raw_members = no_duplicate(message.raw_mentions)
 
     # Start computing data
     async with message.channel.typing():
-        nm = 0  # number of messages treated
-        nmm = 0  # number of impacted messages
-        nc = 0  # number of channel treated
-        t0 = datetime.now()
-        # Show custom progress message and keep it to update it later
-        progress = await message.channel.send("```starting analysis...```")
-        # Analyse every channel selected
-        for channel in channels:
-            nm1, nmm1 = await analyse_channel(
-                channel,
-                emotes,
-                members,
-                progress,
-                nm,
-                nc,
-                all_emojis="all" in args,
-                analyse_members_reactions="reactions" in args,
+        progress = await message.channel.send("```Starting analysis...```")
+        total_msg, total_chan = await logs.load(progress, channels)
+        for id in logs.channels:
+            analyse_channel(
+                logs.channels[id], emotes, raw_members, all_emojis="all" in args
             )
-            # If treatment was successful, increase numbers
-            if nm1 >= 0:
-                nm += nm1
-                nmm += nmm1
-                nc += 1
         # Delete custom progress message
         await progress.delete()
         # Display results
         await tell_results(
-            get_intro(emotes, full, channels, members, nmm, nc),
+            get_intro(emotes, full, channels, members, total_msg, total_chan),
             emotes,
             message.channel,
-            nmm,
+            total_msg,
             allow_unused=full and len(members) == 0,
             show_life=False,
         )
-        dt = (datetime.now() - t0).total_seconds()
-        debug(message, f"response sent {dt} s -> {nm / dt} m/s")
 
 
 # CLASSES
@@ -217,72 +200,42 @@ class Emote:
 # ANALYSIS
 
 
-async def analyse_channel(
-    channel: discord.TextChannel,
+def analyse_channel(
+    channel: ChannelLogs,
     emotes: Dict[str, Emote],
-    members: List[discord.Member],
-    progress: discord.Message,
-    nm0: int,  # number of already analysed messages
-    nc: int,  # number of already analysed channels,
+    raw_members: List[int],
     *,
     all_emojis: bool,
-    analyse_members_reactions: bool,
-) -> Tuple[int, int]:
-    nm = 0
-    nmm = 0
-    try:
-        last_message = None
-        done = 0
-        while done >= CHUNK_SIZE or last_message is None:
-            done = 0
-            async for m in channel.history(
-                limit=CHUNK_SIZE, before=last_message, oldest_first=False
-            ):
-                done += 1
-                last_message = m
-                # If author is not bot or included in the selection (empty list is all)
-                if not m.author.bot and (len(members) == 0 or m.author in members):
-                    # Find all emotes un the current message in the form "<:emoji:123456789>"
-                    # Filter for known emotes
-                    found = EMOJI_REGEX.findall(m.content)
-                    # For each emote, update its usage
-                    for name in found:
-                        if name not in emotes:
-                            if not all_emojis or name not in GLOBAL_EMOJIS:
-                                continue
-                            name = GLOBAL_EMOJIS[name]
-                        emotes[name].usages += 1
-                        emotes[name].update_use(m.created_at)
-                    # Count this message as impacted
-                    nmm += 1
-
-                # For each reaction of this message, test if known emote and update when it's the case
-                for reaction in m.reactions:
-                    name = str(reaction.emoji)
-                    if name not in emotes:
-                        if not all_emojis or name not in GLOBAL_EMOJIS:
-                            continue
-                        name = GLOBAL_EMOJIS[name]
-                    if len(members) == 0:
-                        emotes[name].reactions += reaction.count
-                        emotes[name].update_use(m.created_at)
-                    elif analyse_members_reactions:
-                        users = await reaction.users().flatten()
-                        for member in members:
-                            if member in users:
-                                emotes[name].reactions += 1
-                                emotes[name].update_use(m.created_at)
-            nm += done
-            # await progress.edit(
-            #     content=f"```{nm0 + nm:,} messages and {nc} channels analysed```"
-            # )
-        # await progress.edit(
-        #     content=f"```{nm0 + nm:,} messages and {nc+1} channels analysed```"
-        # )
-        return nm, nmm
-    except discord.errors.HTTPException:
-        # When an exception occurs (like Forbidden) sent -1
-        return -1, -1
+):
+    for message in channel.messages:
+        # If author included in the selection (empty list is all)
+        if len(raw_members) == 0 or message.author in raw_members:
+            # Find all emotes un the current message in the form "<:emoji:123456789>"
+            # Filter for known emotes
+            found = EMOJI_REGEX.findall(message.content)
+            # For each emote, update its usage
+            for name in found:
+                if name not in emotes:
+                    if not all_emojis or name not in GLOBAL_EMOJIS:
+                        continue
+                    name = GLOBAL_EMOJIS[name]
+                emotes[name].usages += 1
+                emotes[name].update_use(message.created_at)
+            # For each reaction of this message, test if known emote and update when it's the case
+            for name in message.reactions:
+                raw_name = name
+                if name not in emotes:
+                    if not all_emojis or name not in GLOBAL_EMOJIS:
+                        continue
+                    name = GLOBAL_EMOJIS[name]
+                if len(raw_members) == 0:
+                    emotes[name].reactions += len(message.reactions[raw_name])
+                    emotes[name].update_use(message.created_at)
+                else:
+                    for member in raw_members:
+                        if member in message.reactions[raw_name]:
+                            emotes[name].reactions += 1
+                            emotes[name].update_use(message.created_at)
 
 
 # RESULTS

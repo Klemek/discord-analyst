@@ -1,6 +1,13 @@
 from miniscord import Bot
+import logging
 
 import emotes
+
+logging.basicConfig(
+    format="[%(asctime)s][%(levelname)s][%(module)s] %(message)s", level=logging.INFO
+)
+
+emotes.load_emojis()
 
 bot = Bot(
     "Discord Analyst",  # name

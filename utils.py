@@ -1,21 +1,18 @@
+from typing import List
+import logging
+import discord
+
 # DISCORD API
 
 
-def debug(message, txt):
-    """
-    Print a log with the context of the current event
-
-    :param message: message that triggered the event
-    :type message: discord.Message
-    :param txt: text of the log
-    :type txt: str
-    """
-    print(f"{message.guild} > #{message.channel}: {txt}")
+def debug(message: discord.Message, txt: str):
+    logging.info(f"{message.guild} > #{message.channel}: {txt}")
 
 
 # LISTS
 
-def no_duplicate(seq):
+
+def no_duplicate(seq: list) -> list:
     """
     Remove any duplicates on a list
 
@@ -29,16 +26,12 @@ def no_duplicate(seq):
 
 # MESSAGE FORMATTING
 
-def aggregate(names):
+
+def aggregate(names: List[str]) -> str:
     """
     Aggregate names with , and &
 
     Example : "a, b, c & d"
-
-    :param names: list of names
-    :type names: list[str]
-    :return: correct aggregation
-    :rtype: str
     """
     if len(names) == 0:
         return ""
