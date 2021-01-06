@@ -8,6 +8,10 @@ import json
 # Custom libs
 from utils import debug, aggregate, no_duplicate
 
+# CONSTANTS
+
+CHUNK_SIZE = 1000
+
 # preload
 
 EXTRA_EMOJI = {
@@ -88,11 +92,6 @@ def load_emojis():
 
 load_emojis()
 print(f"loaded {len(GLOBAL_EMOJIS)} emojis")
-
-# CONSTANTS
-
-CHUNK_SIZE = 10000
-
 
 # MAIN
 
@@ -232,12 +231,15 @@ async def analyse_channel(
     nm = 0
     nmm = 0
     try:
-        messages = [None]
-        while len(messages) >= CHUNK_SIZE or messages[-1] is None:
-            messages = await channel.history(
-                limit=CHUNK_SIZE, before=messages[-1]
-            ).flatten()
-            for m in messages:
+        last_message = None
+        done = 0
+        while done >= CHUNK_SIZE or last_message is None:
+            done = 0
+            async for m in channel.history(
+                limit=CHUNK_SIZE, before=last_message, oldest_first=False
+            ):
+                done += 1
+                last_message = m
                 # If author is not bot or included in the selection (empty list is all)
                 if not m.author.bot and (len(members) == 0 or m.author in members):
                     # Find all emotes un the current message in the form "<:emoji:123456789>"
@@ -270,10 +272,13 @@ async def analyse_channel(
                             if member in users:
                                 emotes[name].reactions += 1
                                 emotes[name].update_use(m.created_at)
-            nm += len(messages)
-            await progress.edit(
-                content=f"```{nm0 + nm:,} messages and {nc} channels analysed```"
-            )
+            nm += done
+            # await progress.edit(
+            #     content=f"```{nm0 + nm:,} messages and {nc} channels analysed```"
+            # )
+        # await progress.edit(
+        #     content=f"```{nm0 + nm:,} messages and {nc+1} channels analysed```"
+        # )
         return nm, nmm
     except discord.errors.HTTPException:
         # When an exception occurs (like Forbidden) sent -1
