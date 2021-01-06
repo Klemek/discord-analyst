@@ -4,3 +4,4 @@ __pycache__
 .env
 error_*
 *.log
+logs/

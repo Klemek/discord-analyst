@@ -73,7 +73,7 @@ EMOJI_REGEX = re.compile("(<a?:\\w+:\\d+>|:\\w+:)")
 def load_emojis():
     global GLOBAL_EMOJIS, INV_GLOBAL_EMOJIS, EMOJI_REGEX
     emoji_list = []
-    with open("emoji.json") as f:
+    with open("emoji.json", mode="r") as f:
         emoji_list = json.loads(f.readline().strip())
     for emoji in EXTRA_EMOJI:
         emoji_list += [{"short_name": emoji, "unified": EXTRA_EMOJI[emoji]}]
