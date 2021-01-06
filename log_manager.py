@@ -2,6 +2,7 @@ from typing import Union, List, Tuple
 import os
 import discord
 import json
+import gzip
 from datetime import datetime
 import logging
 
@@ -152,8 +153,8 @@ class GuildLogs:
         if os.path.exists(self.log_file):
             channels = {}
             try:
-                with open(self.log_file, mode="r") as f:
-                    channels = json.loads(f.readline().strip())
+                with open(self.log_file, mode="rb") as f:
+                    channels = json.loads(gzip.decompress(f.read()))
                 self.channels = {int(id): ChannelLogs(channels[id]) for id in channels}
                 dt = (datetime.now() - t0).total_seconds()
                 logging.info(f"log {self.guild.id} > loaded in {dt} s")
@@ -198,8 +199,8 @@ class GuildLogs:
         logging.info(f"log {self.guild.id} > queried in {dt} s -> {total_msg / dt} m/s")
         # write logs
         t0 = datetime.now()
-        with open(self.log_file, mode="w") as f:
-            f.write(json.dumps(self.dict()))
+        with open(self.log_file, mode="wb") as f:
+            f.write(gzip.compress(bytes(json.dumps(self.dict()), "utf-8")))
         dt = (datetime.now() - t0).total_seconds()
         logging.info(f"log {self.guild.id} > written in {dt} s")
         return total_msg, total_chan
