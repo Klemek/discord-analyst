@@ -8,15 +8,11 @@ bot = Bot(
     alias="%",  # respond to '|command' messages
 )
 bot.log_calls = True
+bot.client.bot = bot  # TODO place in miniscord
 bot.register_command(
     "emotes",  # command text (regex)
     emotes.compute,  # command function
     "emotes: Emotes analysis",  # short help
-    "```\n"
-    "* %emotes : Rank emotes by their usage\n"
-    "* %emotes @user : // for a specific user\n"
-    "* %emotes #channel : // for a specific channel\n"
-    "(Add more @user or #channel to be more selective)\n"
-    "```",
+    emotes.HELP,
 )
 bot.start()

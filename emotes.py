@@ -1,10 +1,93 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 from datetime import datetime
+from collections import defaultdict
 import discord
 import re
+import json
 
 # Custom libs
 from utils import debug, aggregate, no_duplicate
+
+# preload
+
+EXTRA_EMOJI = {
+    "thumbup": "1f44d",
+    "thumbdown": "1f44e",
+    "timer": "23f2-fe0f",
+    "cowboy": "1f920",
+    "clown": "1f921",
+    "newspaper2": "1f5de-fe0f",
+    "french_bread": "1f956",
+    "nerd": "1f913",
+    "zipper_mouth": "1f910",
+    "salad": "1f957",
+    "rolling_eyes": "1f644",
+    "basketball_player": "26f9-fe0f-200d-2642-fe0f",
+    "thinking": "1f914",
+    "e_mail": "2709-fe0f",
+    "slight_frown": "1f641",
+    "skull_crossbones": "2620-fe0f",
+    "hand_splayed": "1f590-fe0f",
+    "speaking_head": "1f5e3-fe0f",
+    "cross": "271d-fe0f",
+    "crayon": "1f58d-fe0f",
+    "head_bandage": "1f915",
+    "rofl": "1f923",
+    "flag_white": "1f3f3-fe0f",
+    "slight_smile": "1f642",
+    "fork_knife_plate": "1f37d-fe0f",
+    "robot": "1f916",
+    "hugging": "1f917",
+    "biohazard": "2623-fe0f",
+    "notepad_spiral": "1f5d2-fe0f",
+    "lifter": "1f3cb-fe0f-200d-2642-fe0f",
+    "race_car": "1f3ce-fe0f",
+    "left_facing_fist": "1f91b",
+    "right_facing_fist": "1f91c",
+    "tools": "1f6e0-fe0f",
+    "umbrella2": "2602-fe0f",
+    "upside_down": "2b07-fe0f",
+    "first_place": "1f947",
+    "dagger": "1f5e1-fe0f",
+    "fox": "1f98a",
+    "menorah": "1f54e",
+    "desktop": "1f5a5-fe0f",
+    "motorcycle": "1f3cd-fe0f",
+    "levitate": "1f574-fe0f",
+    "cheese": "1f9c0",
+    "fingers_crossed": "1f91e",
+    "frowning2": "1f626",
+    "microphone2": "1f399-fe0f",
+    "flag_black": "1f3f4",
+    "chair": "1FA91",
+}
+
+GLOBAL_EMOJIS = {}
+EMOJI_REGEX = re.compile("(<a?:\\w+:\\d+>|:\\w+:)")
+
+
+def load_emojis():
+    global GLOBAL_EMOJIS, INV_GLOBAL_EMOJIS, EMOJI_REGEX
+    emoji_list = []
+    with open("emoji.json") as f:
+        emoji_list = json.loads(f.readline().strip())
+    for emoji in EXTRA_EMOJI:
+        emoji_list += [{"short_name": emoji, "unified": EXTRA_EMOJI[emoji]}]
+    unicode_list = []
+    for emoji in emoji_list:
+        shortcode = emoji["short_name"]
+        unified = emoji["unified"]
+        if unified is not None and shortcode is not None:
+            unicode_escaped = "".join([f"\\U{c:0>8}" for c in unified.split("-")])
+            unicode = bytes(unicode_escaped, "ascii").decode("unicode-escape")
+            shortcode = f":{shortcode.replace('-','_')}:"
+            GLOBAL_EMOJIS[unicode] = shortcode
+            unicode_list += [unicode_escaped]
+    EMOJI_REGEX = re.compile(f"(<a?:\\w+:\\d+>|:\\w+:|{'|'.join(unicode_list)})")
+
+
+load_emojis()
+print(f"loaded {len(GLOBAL_EMOJIS)} emojis")
 
 # CONSTANTS
 
@@ -13,6 +96,17 @@ CHUNK_SIZE = 10000
 
 # MAIN
 
+HELP = (
+    "```\n"
+    + "%emotes : Rank emotes by their usage\n"
+    + "arguments:\n"
+    + "* @member : filter for one or more member\n"
+    + "* #channel : filter for one or more channel\n"
+    + "* reactions : add reaction analysis for members (long)\n"
+    + "* all : list all common emojis in addition to this guild's\n"
+    + "```"
+)
+
 
 async def compute(client: discord.client, message: discord.Message, *args: str):
     """
@@ -20,14 +114,15 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
     """
     guild = message.guild
 
-    # TODO in miniscord
-    # # If "%emotes help" redirect to "%help emotes"
-    # if len(args) > 1 and args[1] == "help":
-    #     await help.compute(message, ["%help", "emotes"])
-    #     return
+    # If "%emotes help" redirect to "%help emotes"
+    if "help" in args:
+        await client.bot.help(client, message, "help", "emotes")
+        return
 
     # Create emotes dict from custom emojis of the guild
-    emotes = {str(emoji): Emote(emoji) for emoji in guild.emojis}
+    emotes = defaultdict(Emote)
+    for emoji in guild.emojis:
+        emotes[str(emoji)] = Emote(emoji)
 
     # Get selected channels or all of them if no channel arguments
     channels = no_duplicate(message.channel_mentions)
@@ -45,11 +140,18 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
         nc = 0  # number of channel treated
         t0 = datetime.now()
         # Show custom progress message and keep it to update it later
-        progress = await message.channel.send(f"```starting analysis...```")
+        progress = await message.channel.send("```starting analysis...```")
         # Analyse every channel selected
         for channel in channels:
             nm1, nmm1 = await analyse_channel(
-                channel, emotes, members, progress, nm, nc
+                channel,
+                emotes,
+                members,
+                progress,
+                nm,
+                nc,
+                all_emojis="all" in args,
+                analyse_members_reactions="reactions" in args,
             )
             # If treatment was successful, increase numbers
             if nm1 >= 0:
@@ -79,7 +181,7 @@ class Emote:
     Custom class to store emotes data
     """
 
-    def __init__(self, emoji: discord.Emoji):
+    def __init__(self, emoji: Optional[discord.Emoji] = None):
         self.emoji = emoji
         self.usages = 0
         self.reactions = 0
@@ -97,7 +199,8 @@ class Emote:
 
     def score(self) -> float:
         # Score is compose of usages + reactions
-        # When 2 emotes have the same score, the days since last use is stored in the digits
+        # When 2 emotes have the same score,
+        # the days since last use is stored in the digits
         # (more recent first)
         return self.usages + self.reactions + 1 / (100000 * (self.use_days() + 1))
 
@@ -121,7 +224,10 @@ async def analyse_channel(
     members: List[discord.Member],
     progress: discord.Message,
     nm0: int,  # number of already analysed messages
-    nc: int,  # number of already analysed channels
+    nc: int,  # number of already analysed channels,
+    *,
+    all_emojis: bool,
+    analyse_members_reactions: bool,
 ) -> Tuple[int, int]:
     nm = 0
     nmm = 0
@@ -136,31 +242,34 @@ async def analyse_channel(
                 if not m.author.bot and (len(members) == 0 or m.author in members):
                     # Find all emotes un the current message in the form "<:emoji:123456789>"
                     # Filter for known emotes
-                    found = [
-                        name
-                        for name in re.findall(r"(<:\w+:\d+>)", m.content)
-                        if name in emotes
-                    ]
+                    found = EMOJI_REGEX.findall(m.content)
                     # For each emote, update its usage
                     for name in found:
+                        if name not in emotes:
+                            if not all_emojis or name not in GLOBAL_EMOJIS:
+                                continue
+                            name = GLOBAL_EMOJIS[name]
                         emotes[name].usages += 1
                         emotes[name].update_use(m.created_at)
                     # Count this message as impacted
                     nmm += 1
+
                 # For each reaction of this message, test if known emote and update when it's the case
                 for reaction in m.reactions:
                     name = str(reaction.emoji)
-                    # reaction.emoji can be only str, we don't want that
-                    if not (isinstance(reaction.emoji, str)) and name in emotes:
-                        if len(members) == 0:
-                            emotes[name].reactions += reaction.count
-                            emotes[name].update_use(m.created_at)
-                        """ else:
-                            users = await reaction.users().flatten()
-                            for member in members:
-                                if member in users:
-                                    emotes[name].reactions += 1
-                                    emotes[name].update_use(m.created_at)"""
+                    if name not in emotes:
+                        if not all_emojis or name not in GLOBAL_EMOJIS:
+                            continue
+                        name = GLOBAL_EMOJIS[name]
+                    if len(members) == 0:
+                        emotes[name].reactions += reaction.count
+                        emotes[name].update_use(m.created_at)
+                    elif analyse_members_reactions:
+                        users = await reaction.users().flatten()
+                        for member in members:
+                            if member in users:
+                                emotes[name].reactions += 1
+                                emotes[name].update_use(m.created_at)
             nm += len(messages)
             await progress.edit(
                 content=f"```{nm0 + nm:,} messages and {nc} channels analysed```"
@@ -295,7 +404,7 @@ def get_life(emote: Emote, show_life: bool) -> str:
     """
     Get the correct life span displayed
     """
-    if not show_life:
+    if not show_life or emote.default:
         return ""
     else:
         return f"(in {emote.life_days()} days) "
