@@ -46,6 +46,7 @@ python3 bot.py
 
 ## Changelog
 
+* **v1.4**: insane speed with bot-side logging
 * **v1.3**: revert to v1.1 and update requirements
 * **v1.2**: don't quit on occasional exception
 * **v1.1**:
