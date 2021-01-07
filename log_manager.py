@@ -211,7 +211,7 @@ class GuildLogs:
                     dt = (datetime.now() - t0).total_seconds()
                     await code_message(
                         progress,
-                        f"Reading history...\n{tmp_msg} messages in {total_chan + 1}/{max_chan} channels ({round(tmp_queried_msg/dt)}m/s)\n{warning_msg}",
+                        f"Reading history...\n{tmp_msg:,} messages in {total_chan + 1}/{max_chan} channels ({round(tmp_queried_msg/dt)}m/s)\n{warning_msg}",
                     )
                     if done:
                         total_chan += 1
@@ -219,7 +219,7 @@ class GuildLogs:
             queried_msg += count - start_msg
         dt = (datetime.now() - t0).total_seconds()
         await code_message(
-            progress, f"Saving...\n{total_msg} messages in {total_chan} channels"
+            progress, f"Saving...\n{total_msg:,} messages in {total_chan} channels"
         )
         logging.info(
             f"log {self.guild.id} > queried in {dt} s -> {queried_msg / dt} m/s"
@@ -231,7 +231,7 @@ class GuildLogs:
         dt = (datetime.now() - t0).total_seconds()
         logging.info(f"log {self.guild.id} > written in {dt} s")
         await code_message(
-            progress, f"Analysing...\n{total_msg} messages in {total_chan} channels"
+            progress, f"Analysing...\n{total_msg:,} messages in {total_chan} channels"
         )
         current_analysis.remove(self.log_file)
         return total_msg, total_chan

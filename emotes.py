@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Union
 from datetime import datetime
 from collections import defaultdict
 import discord
@@ -24,8 +24,9 @@ HELP = (
     + "arguments:\n"
     + "* @member : filter for one or more member\n"
     + "* #channel : filter for one or more channel\n"
-    + "* all : list all common emojis in addition to this guild's\n"
     + "* <n> : top <n> emojis, default is 20\n"
+    + "* all : list all common emojis in addition to this guild's\n"
+    + "* members : show top member for each emote\n"
     + "Example: %emotes 10 all #mychannel1 #mychannel2 @user\n"
     + "```"
 )
@@ -48,7 +49,7 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
     str_mentions = [member.mention for member in message.mentions]
     for arg in args[1:]:
         if (
-            arg not in ["all"]
+            arg not in ["all", "members"]
             and not arg.isdigit()
             and arg not in str_channel_mentions
             and arg not in str_mentions
@@ -79,6 +80,7 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
 
     # check other args
     all_emojis = "all" in args
+    show_members = "members" in args and (len(members) == 0 or len(members) > 1)
 
     # Start computing data
     async with message.channel.typing():
@@ -107,6 +109,7 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
                 top=top,
                 allow_unused=full and len(members) == 0,
                 show_life=False,
+                show_members=show_members,
             )
         # Delete custom progress message
         await progress.delete()
@@ -125,13 +128,16 @@ class Emote:
         self.usages = 0
         self.reactions = 0
         self.last_used = None
+        self.members = defaultdict(int)
 
-    def update_use(self, date: datetime):
+    def update_use(self, date: datetime, members_id: List[int]):
         """
-        Update last use date if more recent
+        Update last use date if more recent and last member
         """
         if self.last_used is None or date > self.last_used:
             self.last_used = date
+        for member_id in members_id:
+            self.members[member_id] += 1
 
     def used(self) -> bool:
         return self.usages > 0 or self.reactions > 0
@@ -152,6 +158,44 @@ class Emote:
             return self.life_days()
         else:
             return (datetime.today() - self.last_used).days
+
+    def get_top_member(self) -> int:
+        return sorted(self.members.keys(), key=lambda id: self.members[id])[-1]
+
+    def to_string(self, i: int, name: str, show_life: bool, show_members: bool) -> str:
+        # place
+        output = ""
+        if i == 0:
+            output += ":first_place:"
+        elif i == 1:
+            output += ":second_place:"
+        elif i == 2:
+            output += ":third_place:"
+        else:
+            f"**#{i + 1}**"
+        output += f" {name} - "
+        if not self.used():
+            output += "never used "
+        elif self.usages == 1:
+            output += "1 time "
+        else:
+            output += f"{self.usages:,} times "
+        if self.reactions == 1:
+            output += "and 1 reaction "
+        elif self.reactions > 1:
+            output += f"and {self.reactions:,} reactions "
+        if show_life and not self.default:
+            output += f"(in {self.life_days()} days) "
+        if self.used():
+            if self.use_days() == 0:
+                output += "(last used today)"
+            elif self.use_days() == 1:
+                output += "(last used yesterday)"
+            else:
+                output += f"(last used {self.use_days()} days ago)"
+            if show_members:
+                output += f" (mostly by <@{self.get_top_member()}>)"
+        return output
 
 
 # ANALYSIS
@@ -178,7 +222,7 @@ def analyse_channel(
                     if not all_emojis or name not in emojis.unicode_list:
                         continue
                 emotes[name].usages += 1
-                emotes[name].update_use(message.created_at)
+                emotes[name].update_use(message.created_at, [message.author])
         # For each reaction of this message, test if known emote and update when it's the case
         for name in message.reactions:
             if name not in emotes:
@@ -186,12 +230,12 @@ def analyse_channel(
                     continue
             if len(raw_members) == 0:
                 emotes[name].reactions += len(message.reactions[name])
-                emotes[name].update_use(message.created_at)
+                emotes[name].update_use(message.created_at, message.reactions[name])
             else:
                 for member in raw_members:
                     if member in message.reactions[name]:
                         emotes[name].reactions += 1
-                        emotes[name].update_use(message.created_at)
+                        emotes[name].update_use(message.created_at, [member])
     return count
 
 
@@ -207,17 +251,14 @@ async def tell_results(
     *,
     allow_unused: bool,
     show_life: bool,
+    show_members: bool,
 ):
     names = [name for name in emotes]
     names.sort(key=lambda name: emotes[name].score(), reverse=True)
     names = names[:top]
     res = [intro]
     res += [
-        f"{get_place(names.index(name))} {name} - "
-        f"{get_usage(emotes[name])}"
-        f"{get_reactions(emotes[name])}"
-        f"{get_life(emotes[name], show_life)}"
-        f"{get_last_used(emotes[name])}"
+        emotes[name].to_string(names.index(name), name, show_life, show_members)
         for name in names
         if allow_unused or emotes[name].used()
     ]
@@ -278,67 +319,6 @@ def get_intro(
                 f"These {len(members)} members on these {len(channels)} channels "
                 f"emotes usage in {nmm:,} messages:"
             )
-
-
-def get_place(i: int) -> str:
-    """
-    Get the correct rank displayed (1st to 3rd have an emoji)
-    """
-    if i == 0:
-        return ":first_place:"
-    if i == 1:
-        return ":second_place:"
-    if i == 2:
-        return ":third_place:"
-    return f"**#{i + 1}**"
-
-
-def get_usage(emote: Emote) -> str:
-    """
-    Get the correct usage displayed
-    """
-    if emote.usages == 0 and emote.reactions == 0:
-        return "never used "
-    elif emote.usages == 1:
-        return "1 time "
-    else:
-        return f"{emote.usages:,} times "
-
-
-def get_reactions(emote: Emote) -> str:
-    """
-    Get the correct reactions displayed
-    """
-    if emote.reactions == 0:
-        return ""
-    elif emote.reactions == 1:
-        return "and 1 reaction "
-    else:
-        return f"and {emote.reactions:,} reactions "
-
-
-def get_life(emote: Emote, show_life: bool) -> str:
-    """
-    Get the correct life span displayed
-    """
-    if not show_life or emote.default:
-        return ""
-    else:
-        return f"(in {emote.life_days()} days) "
-
-
-def get_last_used(emote: Emote) -> str:
-    """
-    Get the correct "last used" displayed
-    """
-    if emote.usages == 0 and emote.reactions == 0:
-        return ""
-    elif emote.use_days() == 0:
-        return "(last used today)"
-    elif emote.use_days() == 1:
-        return "(last used yesterday)"
-    else:
-        return f"(last used {emote.use_days()} days ago)"
 
 
 def get_total(emotes: Dict[str, Emote], nmm: int) -> str:
