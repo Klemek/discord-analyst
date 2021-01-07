@@ -71,7 +71,7 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
         total_msg, total_chan = await logs.load(progress, channels)
         if total_msg == -1:
             await message.channel.send(
-                "f{message.author} An analysis is already running on this server, please be patient."
+                f"{message.author} An analysis is already running on this server, please be patient."
             )
         else:
             msg_count = 0
