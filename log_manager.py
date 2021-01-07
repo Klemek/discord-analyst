@@ -13,6 +13,7 @@ if not os.path.exists(LOG_DIR):
 
 
 CHUNK_SIZE = 1000
+FORMAT = 2
 
 
 class FakeMessage:
@@ -33,6 +34,7 @@ class MessageLog:
             self.reference = (
                 message.reference.message_id if message.reference is not None else None
             )
+            self.bot = message.author.bot or message.author.system
             self.content = message.content
             self.mentions = message.raw_mentions
             self.role_mentions = message.raw_role_mentions
@@ -53,6 +55,7 @@ class MessageLog:
             self.reference = (
                 int(message["reference"]) if message["reference"] is not None else None
             )
+            self.bot = message["bot"]
             self.content = message["content"]
             self.mentions = [int(m) for m in message["mentions"]]
             self.role_mentions = [int(m) for m in message["role_mentions"]]
@@ -80,8 +83,12 @@ class ChannelLogs:
             self.id = channel.id
             self.name = channel.name
             self.last_message_id = None
+            self.format = FORMAT
             self.messages = []
         elif isinstance(channel, dict):
+            self.format = channel["format"] if "format" in channel else None
+            if self.format != FORMAT:
+                return
             self.id = int(channel["id"])
             self.name = channel["name"]
             self.last_message_id = channel["last_message_id"]
@@ -99,10 +106,9 @@ class ChannelLogs:
                         oldest_first=True,
                     ):
                         self.last_message_id = message.id
-                        if not message.author.bot:
-                            m = MessageLog(message)
-                            await m.load(message)
-                            self.messages.insert(0, m)
+                        m = MessageLog(message)
+                        await m.load(message)
+                        self.messages.insert(0, m)
                     yield len(self.messages), False
             else:  # first load
                 last_message_id = None
@@ -118,10 +124,9 @@ class ChannelLogs:
                     ):
                         done += 1
                         last_message_id = message.id
-                        if not message.author.bot:
-                            m = MessageLog(message)
-                            await m.load(message)
-                            self.messages += [m]
+                        m = MessageLog(message)
+                        await m.load(message)
+                        self.messages += [m]
                     yield len(self.messages), False
                 self.last_message_id = channel.last_message_id
         except discord.errors.HTTPException:
@@ -158,6 +163,12 @@ class GuildLogs:
                 with open(self.log_file, mode="rb") as f:
                     channels = json.loads(gzip.decompress(f.read()))
                 self.channels = {int(id): ChannelLogs(channels[id]) for id in channels}
+                # remove invalid format
+                self.channels = {
+                    id: self.channels[id]
+                    for id in self.channels
+                    if self.channels[id].format == FORMAT
+                }
                 dt = (datetime.now() - t0).total_seconds()
                 logging.info(f"log {self.guild.id} > loaded in {dt} s")
             except json.decoder.JSONDecodeError:
@@ -196,7 +207,7 @@ class GuildLogs:
             total_msg += len(self.channels[channel.id].messages)
         dt = (datetime.now() - t0).total_seconds()
         await progress.edit(
-            content=f"```Analysing...\n{tmp_msg} messages in {total_chan} channels```"
+            content=f"```Saving...\n{tmp_msg} messages in {total_chan} channels```"
         )
         logging.info(f"log {self.guild.id} > queried in {dt} s -> {total_msg / dt} m/s")
         # write logs
@@ -205,4 +216,7 @@ class GuildLogs:
             f.write(gzip.compress(bytes(json.dumps(self.dict()), "utf-8")))
         dt = (datetime.now() - t0).total_seconds()
         logging.info(f"log {self.guild.id} > written in {dt} s")
+        await progress.edit(
+            content=f"```Analysing...\n{tmp_msg} messages in {total_chan} channels```"
+        )
         return total_msg, total_chan
