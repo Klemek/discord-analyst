@@ -71,7 +71,7 @@ def load_emojis():
         emoji_list = json.loads(f.readline().strip())
     for emoji in EXTRA_EMOJI:
         emoji_list += [{"short_name": emoji, "unified": EXTRA_EMOJI[emoji]}]
-    unicode_list = []
+    unicode_list_escaped = []
     for emoji in emoji_list:
         shortname = emoji["short_name"]
         unified = emoji["unified"]
@@ -80,6 +80,7 @@ def load_emojis():
             unicode = bytes(unicode_escaped, "ascii").decode("unicode-escape")
             shortcode = shortname.replace("-", "_")
             global_list[unicode] = f":{shortcode}:"
-            unicode_list += [unicode_escaped]
-    regex = re.compile(f"(<a?:\\w+:\\d+>|:\\w+:|{'|'.join(unicode_list)})")
+            unicode_list += [unicode]
+            unicode_list_escaped += [unicode_escaped]
+    regex = re.compile(f"(<a?:\\w+:\\d+>|:\\w+:|{'|'.join(unicode_list_escaped)})")
     logging.info(f"loaded {len(unicode_list)} emojis")
