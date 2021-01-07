@@ -69,25 +69,30 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
     async with message.channel.typing():
         progress = await message.channel.send("```Starting analysis...```")
         total_msg, total_chan = await logs.load(progress, channels)
-        msg_count = 0
-        chan_count = 0
-        for id in logs.channels:
-            count = analyse_channel(
-                logs.channels[id], emotes, raw_members, all_emojis="all" in args
+        if total_msg == -1:
+            await message.channel.send(
+                "f{message.author} An analysis is already running on this server, please be patient."
             )
-            msg_count += count
-            chan_count += 1 if count > 0 else 0
-        await progress.edit(content=f"```Computing results...```")
-        # Display results
-        await tell_results(
-            get_intro(emotes, full, channels, members, msg_count, chan_count),
-            emotes,
-            message.channel,
-            total_msg,
-            top=top,
-            allow_unused=full and len(members) == 0,
-            show_life=False,
-        )
+        else:
+            msg_count = 0
+            chan_count = 0
+            for id in logs.channels:
+                count = analyse_channel(
+                    logs.channels[id], emotes, raw_members, all_emojis="all" in args
+                )
+                msg_count += count
+                chan_count += 1 if count > 0 else 0
+            await progress.edit(content=f"```Computing results...```")
+            # Display results
+            await tell_results(
+                get_intro(emotes, full, channels, members, msg_count, chan_count),
+                emotes,
+                message.channel,
+                total_msg,
+                top=top,
+                allow_unused=full and len(members) == 0,
+                show_life=False,
+            )
         # Delete custom progress message
         await progress.delete()
 

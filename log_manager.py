@@ -15,6 +15,8 @@ if not os.path.exists(LOG_DIR):
 CHUNK_SIZE = 1000
 FORMAT = 2
 
+current_analysis = []
+
 
 class FakeMessage:
     def __init__(self, id: int):
@@ -151,7 +153,10 @@ class GuildLogs:
 
     async def load(
         self, progress: discord.Message, target_channels: List[discord.TextChannel] = []
-    ):
+    ) -> Tuple[int, int]:
+        if self.log_file in current_analysis:
+            return -1, -1
+        current_analysis += [self.log_file]
         await progress.edit(
             content=f"```Reading history...\n(this might take a while)```"
         )
@@ -220,4 +225,5 @@ class GuildLogs:
         await progress.edit(
             content=f"```Analysing...\n{total_msg} messages in {total_chan} channels```"
         )
+        current_analysis.remove(self.log_file)
         return total_msg, total_chan
