@@ -95,7 +95,7 @@ class ChannelLogs:
                 return
             self.id = int(channel["id"])
             self.name = channel["name"]
-            self.last_message_id = channel["last_message_id"]
+            self.last_message_id = int(channel["last_message_id"])
             self.messages = [MessageLog(message) for message in channel["messages"]]
 
     async def load(self, channel: discord.TextChannel) -> Tuple[int, int]:
