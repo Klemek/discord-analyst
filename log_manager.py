@@ -187,14 +187,17 @@ class GuildLogs:
             target_channels = self.guild.text_channels
         loading_new = 0
         total_msg = 0
+        queried_msg = 0
         total_chan = 0
         max_chan = len(target_channels)
         for channel in target_channels:
             if channel.id not in self.channels:
                 loading_new += 1
                 self.channels[channel.id] = ChannelLogs(channel)
+            start_msg = len(self.channels[channel.id].messages)
             async for count, done in self.channels[channel.id].load(channel):
                 if count > 0:
+                    tmp_queried_msg = queried_msg + count - start_msg
                     tmp_msg = total_msg + count
                     warning_msg = "(this might take a while)"
                     if len(target_channels) > 5 and loading_new > 5:
@@ -208,16 +211,19 @@ class GuildLogs:
                     dt = (datetime.now() - t0).total_seconds()
                     await code_message(
                         progress,
-                        f"Reading history...\n{tmp_msg} messages in {total_chan + 1}/{max_chan} channels ({round(tmp_msg/dt)}m/s)\n{warning_msg}",
+                        f"Reading history...\n{tmp_msg} messages in {total_chan + 1}/{max_chan} channels ({round(tmp_queried_msg/dt)}m/s)\n{warning_msg}",
                     )
                     if done:
                         total_chan += 1
             total_msg += len(self.channels[channel.id].messages)
+            queried_msg += count - start_msg
         dt = (datetime.now() - t0).total_seconds()
         await code_message(
             progress, f"Saving...\n{total_msg} messages in {total_chan} channels"
         )
-        logging.info(f"log {self.guild.id} > queried in {dt} s -> {total_msg / dt} m/s")
+        logging.info(
+            f"log {self.guild.id} > queried in {dt} s -> {queried_msg / dt} m/s"
+        )
         # write logs
         t0 = datetime.now()
         with open(self.log_file, mode="wb") as f:
