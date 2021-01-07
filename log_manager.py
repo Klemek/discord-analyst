@@ -182,6 +182,7 @@ class GuildLogs:
         loading_new = 0
         total_msg = 0
         total_chan = 0
+        max_chan = len(target_channels)
         for channel in target_channels:
             if channel.id not in self.channels:
                 loading_new += 1
@@ -200,7 +201,7 @@ class GuildLogs:
                         )
                     dt = (datetime.now() - t0).total_seconds()
                     await progress.edit(
-                        content=f"```Reading history...\n{tmp_msg} messages in {total_chan + 1} channels ({round(tmp_msg/dt)}m/s)\n{warning_msg}```"
+                        content=f"```Reading history...\n{tmp_msg} messages in {total_chan + 1}/{max_chan} channels ({round(tmp_msg/dt)}m/s)\n{warning_msg}```"
                     )
                     if done:
                         total_chan += 1
