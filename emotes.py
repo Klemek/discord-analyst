@@ -172,7 +172,7 @@ class Emote:
         elif i == 2:
             output += ":third_place:"
         else:
-            f"**#{i + 1}**"
+            output += f"**#{i + 1}**"
         output += f" {name} - "
         if not self.used():
             output += "never used "
