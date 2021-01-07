@@ -194,7 +194,7 @@ class Emote:
             else:
                 output += f"(last used {self.use_days()} days ago)"
             if show_members:
-                output += f" (mostly by <@{self.get_top_member()}>)"
+                output += f" (mostly by <@{self.get_top_member()}>: {self.members[self.get_top_member()]})"
         return output
 
 
