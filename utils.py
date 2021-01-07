@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 import logging
 import discord
 
@@ -11,6 +11,10 @@ def debug(message: discord.Message, txt: str):
 
 async def code_message(message: discord.Message, content: str):
     await message.edit(content=f"```\n{content}\n```")
+
+
+def mention(member_id: int) -> str:
+    return f"<@{member_id}>"
 
 
 # LISTS
@@ -43,3 +47,68 @@ def aggregate(names: List[str]) -> str:
         return names[0]
     else:
         return ", ".join(names[:-1]) + " & " + names[-1]
+
+
+def plural(count: int, word: str) -> str:
+    return str(count) + " " + word + "s" if count == 1 else ""
+
+
+def day_interval(interval: int) -> str:
+    if interval == 0:
+        return "today"
+    elif interval == 1:
+        return "yesterday"
+    else:
+        return f"{interval} days ago"
+
+
+# APP SPECIFIC
+
+
+def get_intro(
+    subject: str,
+    emotes: Dict[str],
+    full: bool,
+    channels: List[discord.TextChannel],
+    members: List[discord.Member],
+    nmm: int,  # number of messages impacted
+    nc: int,  # number of impacted channels
+) -> str:
+    """
+    Get the introduction sentence of the response
+    """
+    # Show all data (members, channels) when it's less than 5 units
+    if len(members) == 0:
+        # Full scan of the server
+        if full:
+            return f"{subject} in this server ({nc} channels, {nmm:,} messages):"
+        elif len(channels) < 5:
+            return f"{aggregate([c.mention for c in channels])} {subject} in {nmm:,} messages:"
+        else:
+            return f"These {len(channels)} channels {subject} in {nmm:,} messages:"
+    elif len(members) < 5:
+        if full:
+            return f"{aggregate([m.mention for m in members])} {subject} in {nmm:,} messages:"
+        elif len(channels) < 5:
+            return (
+                f"{aggregate([m.mention for m in members])} on {aggregate([c.mention for c in channels])} "
+                f"{subject} in {nmm:,} messages:"
+            )
+        else:
+            return (
+                f"{aggregate([m.mention for m in members])} on these {len(channels)} channels "
+                f"{subject} in {nmm:,} messages:"
+            )
+    else:
+        if full:
+            return f"These {len(members)} members {subject} in {nmm:,} messages:"
+        elif len(channels) < 5:
+            return (
+                f"These {len(members)} members on {aggregate([c.mention for c in channels])} "
+                f"{subject} in {nmm:,} messages:"
+            )
+        else:
+            return (
+                f"These {len(members)} members on these {len(channels)} channels "
+                f"{subject} in {nmm:,} messages:"
+            )

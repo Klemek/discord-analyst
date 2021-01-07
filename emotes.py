@@ -1,14 +1,12 @@
-from typing import Dict, List, Tuple, Optional, Union
+from typing import Dict, List, Optional
 from datetime import datetime
 from collections import defaultdict
 import discord
-import re
-import json
-import logging
+
 
 # Custom libs
 
-from utils import aggregate, no_duplicate
+from utils import no_duplicate, mention, plural, day_interval, get_intro
 from log_manager import GuildLogs, ChannelLogs
 import emojis
 
@@ -99,10 +97,18 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
                 )
                 msg_count += count
                 chan_count += 1 if count > 0 else 0
-            await progress.edit(content=f"```Computing results...```")
+            await progress.edit(content="```Computing results...```")
             # Display results
             await tell_results(
-                get_intro(emotes, full, channels, members, msg_count, chan_count),
+                get_intro(
+                    "emotes usage",
+                    emotes,
+                    full,
+                    channels,
+                    members,
+                    msg_count,
+                    chan_count,
+                ),
                 emotes,
                 message.channel,
                 total_msg,
@@ -176,25 +182,16 @@ class Emote:
         output += f" {name} - "
         if not self.used():
             output += "never used "
-        elif self.usages == 1:
-            output += "1 time "
         else:
-            output += f"{self.usages:,} times "
-        if self.reactions == 1:
-            output += "and 1 reaction "
-        elif self.reactions > 1:
-            output += f"and {self.reactions:,} reactions "
+            output += f"{plural(self.usages, 'time')} "
+        if self.reactions >= 1:
+            output += f"and {plural(self.usages, 'reaction')} "
         if show_life and not self.default:
-            output += f"(in {self.life_days()} days) "
+            output += f"(in {plural(self.life_days(), 'day')}) "
         if self.used():
-            if self.use_days() == 0:
-                output += "(last used today)"
-            elif self.use_days() == 1:
-                output += "(last used yesterday)"
-            else:
-                output += f"(last used {self.use_days()} days ago)"
+            output += f"(last used {day_interval(self.use_days())})"
             if show_members:
-                output += f" (mostly by <@{self.get_top_member()}>: {self.members[self.get_top_member()]})"
+                output += f" (mostly by {mention(self.get_top_member())}: {self.members[self.get_top_member()]})"
         return output
 
 
@@ -271,54 +268,6 @@ async def tell_results(
         response += "\n" + r
     if len(response) > 0:
         await channel.send(response)
-
-
-def get_intro(
-    emotes: Dict[str, Emote],
-    full: bool,
-    channels: List[discord.TextChannel],
-    members: List[discord.Member],
-    nmm: int,  # number of messages impacted
-    nc: int,  # number of impacted channels
-) -> str:
-    """
-    Get the introduction sentence of the response
-    """
-    # Show all data (members, channels) when it's less than 5 units
-    if len(members) == 0:
-        # Full scan of the server
-        if full:
-            return f"{len(emotes)} emotes in this server ({nc} channels, {nmm:,} messages):"
-        elif len(channels) < 5:
-            return f"{aggregate([c.mention for c in channels])} emotes usage in {nmm:,} messages:"
-        else:
-            return f"These {len(channels)} channels emotes usage in {nmm:,} messages:"
-    elif len(members) < 5:
-        if full:
-            return f"{aggregate([m.mention for m in members])} emotes usage in {nmm:,} messages:"
-        elif len(channels) < 5:
-            return (
-                f"{aggregate([m.mention for m in members])} on {aggregate([c.mention for c in channels])} "
-                f"emotes usage in {nmm:,} messages:"
-            )
-        else:
-            return (
-                f"{aggregate([m.mention for m in members])} on these {len(channels)} channels "
-                f"emotes usage in {nmm:,} messages:"
-            )
-    else:
-        if full:
-            return f"These {len(members)} members emotes usage in {nmm:,} messages:"
-        elif len(channels) < 5:
-            return (
-                f"These {len(members)} members on {aggregate([c.mention for c in channels])} "
-                f"emotes usage in {nmm:,} messages:"
-            )
-        else:
-            return (
-                f"These {len(members)} members on these {len(channels)} channels "
-                f"emotes usage in {nmm:,} messages:"
-            )
 
 
 def get_total(emotes: Dict[str, Emote], nmm: int) -> str:
