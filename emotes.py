@@ -7,7 +7,7 @@ import discord
 # Custom libs
 
 from utils import no_duplicate, mention, plural, day_interval, get_intro
-from log_manager import GuildLogs, ChannelLogs
+from log_manager import GuildLogs, MessageLog
 import emojis
 
 # CONSTANTS
@@ -92,8 +92,13 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
             msg_count = 0
             chan_count = 0
             for id in logs.channels:
-                count = analyse_channel(
-                    logs.channels[id], emotes, raw_members, all_emojis=all_emojis
+                count = sum(
+                    [
+                        analyse_message(
+                            messagelog, emotes, raw_members, all_emojis=all_emojis
+                        )
+                        for messagelog in logs.channels[id].messages
+                    ]
                 )
                 msg_count += count
                 chan_count += 1 if count > 0 else 0
@@ -198,42 +203,41 @@ class Emote:
 # ANALYSIS
 
 
-def analyse_channel(
-    channel: ChannelLogs,
+def analyse_message(
+    message: MessageLog,
     emotes: Dict[str, Emote],
     raw_members: List[int],
     *,
     all_emojis: bool,
-) -> int:
-    count = 0
-    for message in channel.messages:
-        # If author is included in the selection (empty list is all)
-        if not message.bot and (len(raw_members) == 0 or message.author in raw_members):
-            count += 1
-            # Find all emotes un the current message in the form "<:emoji:123456789>"
-            # Filter for known emotes
-            found = emojis.regex.findall(message.content)
-            # For each emote, update its usage
-            for name in found:
-                if name not in emotes:
-                    if not all_emojis or name not in emojis.unicode_list:
-                        continue
-                emotes[name].usages += 1
-                emotes[name].update_use(message.created_at, [message.author])
-        # For each reaction of this message, test if known emote and update when it's the case
-        for name in message.reactions:
+) -> bool:
+    impacted = False
+    # If author is included in the selection (empty list is all)
+    if not message.bot and (len(raw_members) == 0 or message.author in raw_members):
+        impacted = True
+        # Find all emotes un the current message in the form "<:emoji:123456789>"
+        # Filter for known emotes
+        found = emojis.regex.findall(message.content)
+        # For each emote, update its usage
+        for name in found:
             if name not in emotes:
                 if not all_emojis or name not in emojis.unicode_list:
                     continue
-            if len(raw_members) == 0:
-                emotes[name].reactions += len(message.reactions[name])
-                emotes[name].update_use(message.created_at, message.reactions[name])
-            else:
-                for member in raw_members:
-                    if member in message.reactions[name]:
-                        emotes[name].reactions += 1
-                        emotes[name].update_use(message.created_at, [member])
-    return count
+            emotes[name].usages += 1
+            emotes[name].update_use(message.created_at, [message.author])
+    # For each reaction of this message, test if known emote and update when it's the case
+    for name in message.reactions:
+        if name not in emotes:
+            if not all_emojis or name not in emojis.unicode_list:
+                continue
+        if len(raw_members) == 0:
+            emotes[name].reactions += len(message.reactions[name])
+            emotes[name].update_use(message.created_at, message.reactions[name])
+        else:
+            for member in raw_members:
+                if member in message.reactions[name]:
+                    emotes[name].reactions += 1
+                    emotes[name].update_use(message.created_at, [member])
+    return impacted
 
 
 # RESULTS

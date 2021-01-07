@@ -59,7 +59,7 @@ def aggregate(names: List[str]) -> str:
 
 
 def plural(count: int, word: str) -> str:
-    return str(count) + " " + word + "s" if count == 1 else ""
+    return str(count) + " " + word + ("s" if count != 1 else "")
 
 
 def day_interval(interval: int) -> str:

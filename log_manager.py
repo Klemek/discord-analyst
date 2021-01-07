@@ -46,7 +46,7 @@ class MessageLog:
             self.role_mentions = message.raw_role_mentions
             self.channel_mentions = message.raw_channel_mentions
             self.image = False
-            for attachment in message.attachment:
+            for attachment in message.attachments:
                 if is_extension(attachment.filename, IMAGE_FORMAT):
                     self.image = True
                     break
