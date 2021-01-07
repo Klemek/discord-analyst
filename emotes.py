@@ -26,6 +26,8 @@ HELP = (
     + "* #channel : filter for one or more channel\n"
     + "* reactions : add reaction analysis for members (long)\n"
     + "* all : list all common emojis in addition to this guild's\n"
+    + "* <n> : top <n> emojis, default is 20\n"
+    + "Example: %emotes 10 all #mychannel1 #mychannel2 @user\n"
     + "```"
 )
 

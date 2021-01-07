@@ -12,7 +12,7 @@ emojis.load_emojis()
 
 bot = Bot(
     "Discord Analyst",  # name
-    "1.4",  # version
+    "1.5",  # version
     alias="%",  # respond to '|command' messages
 )
 bot.log_calls = True
