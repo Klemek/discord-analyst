@@ -9,6 +9,10 @@ def debug(message: discord.Message, txt: str):
     logging.info(f"{message.guild} > #{message.channel}: {txt}")
 
 
+async def code_message(message: discord.Message, content: str):
+    await message.edit(content=f"```\n{content}\n```")
+
+
 # LISTS
 
 

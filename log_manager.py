@@ -6,6 +6,8 @@ import gzip
 from datetime import datetime
 import logging
 
+from utils import code_message
+
 LOG_DIR = "logs"
 
 if not os.path.exists(LOG_DIR):
@@ -154,12 +156,11 @@ class GuildLogs:
     async def load(
         self, progress: discord.Message, target_channels: List[discord.TextChannel] = []
     ) -> Tuple[int, int]:
+        global current_analysis
         if self.log_file in current_analysis:
             return -1, -1
         current_analysis += [self.log_file]
-        await progress.edit(
-            content=f"```Reading history...\n(this might take a while)```"
-        )
+        await code_message(progress, "Reading history...\n(this might take a while)")
         # read logs
         t0 = datetime.now()
         if os.path.exists(self.log_file):
@@ -205,15 +206,16 @@ class GuildLogs:
                             "(some channels are new, this might take a long while)"
                         )
                     dt = (datetime.now() - t0).total_seconds()
-                    await progress.edit(
-                        content=f"```Reading history...\n{tmp_msg} messages in {total_chan + 1}/{max_chan} channels ({round(tmp_msg/dt)}m/s)\n{warning_msg}```"
+                    await code_message(
+                        progress,
+                        f"Reading history...\n{tmp_msg} messages in {total_chan + 1}/{max_chan} channels ({round(tmp_msg/dt)}m/s)\n{warning_msg}",
                     )
                     if done:
                         total_chan += 1
             total_msg += len(self.channels[channel.id].messages)
         dt = (datetime.now() - t0).total_seconds()
-        await progress.edit(
-            content=f"```Saving...\n{total_msg} messages in {total_chan} channels```"
+        await code_message(
+            progress, f"Saving...\n{total_msg} messages in {total_chan} channels"
         )
         logging.info(f"log {self.guild.id} > queried in {dt} s -> {total_msg / dt} m/s")
         # write logs
@@ -222,8 +224,8 @@ class GuildLogs:
             f.write(gzip.compress(bytes(json.dumps(self.dict()), "utf-8")))
         dt = (datetime.now() - t0).total_seconds()
         logging.info(f"log {self.guild.id} > written in {dt} s")
-        await progress.edit(
-            content=f"```Analysing...\n{total_msg} messages in {total_chan} channels```"
+        await code_message(
+            progress, f"Analysing...\n{total_msg} messages in {total_chan} channels"
         )
         current_analysis.remove(self.log_file)
         return total_msg, total_chan
