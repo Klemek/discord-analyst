@@ -24,7 +24,6 @@ HELP = (
     + "arguments:\n"
     + "* @member : filter for one or more member\n"
     + "* #channel : filter for one or more channel\n"
-    + "* reactions : add reaction analysis for members (long)\n"
     + "* all : list all common emojis in addition to this guild's\n"
     + "* <n> : top <n> emojis, default is 20\n"
     + "Example: %emotes 10 all #mychannel1 #mychannel2 @user\n"
@@ -44,6 +43,19 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
         await client.bot.help(client, message, "help", "emotes")
         return
 
+    # check args validity
+    str_channel_mentions = [channel.mention for channel in message.channel_mentions]
+    str_mentions = [member.mention for member in message.mentions]
+    for arg in args[1:]:
+        if (
+            arg not in ["all"]
+            and not arg.isdigit()
+            and arg not in str_channel_mentions
+            and arg not in str_mentions
+        ):
+            await message.channel.send(f"Unrecognized argument: `{arg}`")
+            return
+
     # Create emotes dict from custom emojis of the guild
     emotes = defaultdict(Emote)
     for emoji in guild.emojis:
@@ -55,15 +67,18 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
     if full:
         channels = guild.text_channels
 
+    # Get selected members
+    members = no_duplicate(message.mentions)
+    raw_members = no_duplicate(message.raw_mentions)
+
     # get max emotes to view
     top = 20
     for arg in args:
         if arg.isdigit():
             top = int(arg)
 
-    # Get selected members
-    members = no_duplicate(message.mentions)
-    raw_members = no_duplicate(message.raw_mentions)
+    # check other args
+    all_emojis = "all" in args
 
     # Start computing data
     async with message.channel.typing():
@@ -78,7 +93,7 @@ async def compute(client: discord.client, message: discord.Message, *args: str):
             chan_count = 0
             for id in logs.channels:
                 count = analyse_channel(
-                    logs.channels[id], emotes, raw_members, all_emojis="all" in args
+                    logs.channels[id], emotes, raw_members, all_emojis=all_emojis
                 )
                 msg_count += count
                 chan_count += 1 if count > 0 else 0
