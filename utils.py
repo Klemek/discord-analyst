@@ -1,4 +1,5 @@
 from typing import List, Dict
+import os
 import logging
 import discord
 
@@ -15,6 +16,14 @@ async def code_message(message: discord.Message, content: str):
 
 def mention(member_id: int) -> str:
     return f"<@{member_id}>"
+
+
+# FILE
+
+
+def is_extension(filepath: str, ext_list: List[str]) -> bool:
+    filename, file_extension = os.path.splitext(filepath.lower())
+    return file_extension in ext_list
 
 
 # LISTS
@@ -67,7 +76,7 @@ def day_interval(interval: int) -> str:
 
 def get_intro(
     subject: str,
-    emotes: Dict[str],
+    emotes: Dict[str, object],
     full: bool,
     channels: List[discord.TextChannel],
     members: List[discord.Member],

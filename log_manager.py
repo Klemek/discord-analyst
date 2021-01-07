@@ -6,7 +6,7 @@ import gzip
 from datetime import datetime
 import logging
 
-from utils import code_message
+from utils import code_message, is_extension
 
 LOG_DIR = "logs"
 
@@ -15,7 +15,9 @@ if not os.path.exists(LOG_DIR):
 
 
 CHUNK_SIZE = 1000
-FORMAT = 2
+FORMAT = 3
+IMAGE_FORMAT = ["gif", "gifv", "png", "jpg", "jpeg", "bmp"]
+EMBED_IMAGES = ["image", "gifv"]
 
 current_analysis = []
 
@@ -43,6 +45,16 @@ class MessageLog:
             self.mentions = message.raw_mentions
             self.role_mentions = message.raw_role_mentions
             self.channel_mentions = message.raw_channel_mentions
+            self.image = False
+            for attachment in message.attachment:
+                if is_extension(attachment.filename, IMAGE_FORMAT):
+                    self.image = True
+                    break
+            if not self.image:
+                for embed in message.embeds:
+                    if embed.type in EMBED_IMAGES:
+                        self.image = True
+                        break
             self.reactions = {}
         elif isinstance(message, dict):
             self.id = int(message["id"])
@@ -64,6 +76,7 @@ class MessageLog:
             self.mentions = [int(m) for m in message["mentions"]]
             self.role_mentions = [int(m) for m in message["role_mentions"]]
             self.channel_mentions = [int(m) for m in message["channel_mentions"]]
+            self.image = message["image"]
             self.reactions = message["reactions"]
 
     async def load(self, message: discord.Message):
