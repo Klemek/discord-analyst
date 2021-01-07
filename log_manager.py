@@ -207,7 +207,7 @@ class GuildLogs:
             total_msg += len(self.channels[channel.id].messages)
         dt = (datetime.now() - t0).total_seconds()
         await progress.edit(
-            content=f"```Saving...\n{tmp_msg} messages in {total_chan} channels```"
+            content=f"```Saving...\n{total_msg} messages in {total_chan} channels```"
         )
         logging.info(f"log {self.guild.id} > queried in {dt} s -> {total_msg / dt} m/s")
         # write logs
@@ -217,6 +217,6 @@ class GuildLogs:
         dt = (datetime.now() - t0).total_seconds()
         logging.info(f"log {self.guild.id} > written in {dt} s")
         await progress.edit(
-            content=f"```Analysing...\n{tmp_msg} messages in {total_chan} channels```"
+            content=f"```Analysing...\n{total_msg} messages in {total_chan} channels```"
         )
         return total_msg, total_chan
