@@ -10,10 +10,6 @@ from scanner import Scanner
 import emojis
 
 
-async def compute(self, *args):
-    EmotesScanner().compute(*args)
-
-
 class EmotesScanner(Scanner):
     @staticmethod
     def help() -> str:
