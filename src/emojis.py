@@ -1,6 +1,7 @@
 import re
 import json
 import logging
+from os import path
 
 EXTRA_EMOJI = {
     "thumbup": "1f44d",
@@ -67,7 +68,7 @@ regex = re.compile("(<a?:[\\w\\-\\~]+:\\d+>|:[\\w\\-\\~]+:)")
 def load_emojis():
     global global_list, unicode_list, regex
     emoji_list = []
-    with open("emoji.json", mode="r") as f:
+    with open(path.join(path.dirname(__file__), "emoji.json"), mode="r") as f:
         emoji_list = json.loads(f.readline().strip())
     for emoji in EXTRA_EMOJI:
         emoji_list += [{"short_name": emoji, "unified": EXTRA_EMOJI[emoji]}]
