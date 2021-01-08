@@ -1,1 +1,2 @@
-from .emotes_scanner import EmotesScanner, FrequencyScanner
+from .emotes_scanner import EmotesScanner
+from .frequency_scanner import FrequencyScanner
