@@ -5,7 +5,7 @@ import discord
 
 # Custom libs
 
-from utils import mention, plural, day_interval
+from utils import mention, plural, from_now
 
 
 class Emote:
@@ -73,7 +73,7 @@ class Emote:
         if show_life and not self.default:
             output += f"(in {plural(self.life_days(), 'day')}) "
         if self.used():
-            output += f"(last used {day_interval(self.use_days())})"
+            output += f"(last used {from_now(self.last_used)})"
             if show_members:
                 output += f" (mostly by {mention(self.get_top_member())}: {self.members[self.get_top_member()]})"
         return output

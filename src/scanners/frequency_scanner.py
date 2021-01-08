@@ -1,4 +1,5 @@
 from typing import List
+from datetime import datetime
 import discord
 
 
@@ -35,7 +36,7 @@ class FrequencyScanner(Scanner):
 
     def get_results(self, intro: str) -> List[str]:
         res = [intro]
-        # TODO
+        res += self.freq.to_string()
         return res
 
     @staticmethod
@@ -44,7 +45,20 @@ class FrequencyScanner(Scanner):
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
-        if not message.bot and (len(raw_members) == 0 or message.author in raw_members):
+        if len(raw_members) == 0 or message.author in raw_members:
             impacted = True
+            date = message.created_at
+            # order is latest to earliest
+            if freq.latest is None:
+                freq.earliest = date
+                freq.latest = date
+
+            delay = freq.earliest - date
+            if delay > freq.longest_break:
+                freq.longest_break = delay
+                freq.longest_break_start = date
+
             # TODO
+
+            freq.earliest = date
         return impacted

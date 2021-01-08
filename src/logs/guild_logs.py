@@ -72,7 +72,7 @@ class GuildLogs:
         max_chan = len(target_channels)
         await code_message(
             progress,
-            f"Reading history...\n0 messages in 0/{max_chan} channels\n(this might take a while)",
+            f"Reading new history...\n0 messages in 0/{max_chan} channels\n(this might take a while)",
         )
         for channel in target_channels:
             if channel.id not in self.channels:
@@ -95,7 +95,7 @@ class GuildLogs:
                     dt = (datetime.now() - t0).total_seconds()
                     await code_message(
                         progress,
-                        f"Reading history...\n{tmp_msg:,} messages in {total_chan + 1}/{max_chan} channels ({round(tmp_queried_msg/dt)}m/s)\n{warning_msg}",
+                        f"Reading new history...\n{tmp_msg:,} messages in {total_chan + 1}/{max_chan} channels ({round(tmp_queried_msg/dt)}m/s)\n{warning_msg}",
                     )
                     if done:
                         total_chan += 1
@@ -109,17 +109,17 @@ class GuildLogs:
         t0 = datetime.now()
         await code_message(
             progress,
-            f"Saving (1/3)...\n{total_msg:,} messages in {total_chan} channels",
+            f"Saving history (1/3)...\n{total_msg:,} messages in {total_chan} channels",
         )
         json_data = bytes(json.dumps(self.dict()), "utf-8")
         await code_message(
             progress,
-            f"Saving (2/3)...\n{total_msg:,} messages in {total_chan} channels",
+            f"Saving history (2/3)...\n{total_msg:,} messages in {total_chan} channels",
         )
         gziped_data = gzip.compress(json_data)
         await code_message(
             progress,
-            f"Saving (3/3)...\n{total_msg:,} messages in {total_chan} channels",
+            f"Saving history (3/3)...\n{total_msg:,} messages in {total_chan} channels",
         )
         with open(self.log_file, mode="wb") as f:
             f.write(gziped_data)

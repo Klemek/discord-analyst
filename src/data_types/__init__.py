@@ -1,2 +1,2 @@
 from .emote import Emote
-from .freq import Frequency
+from .frequency import Frequency

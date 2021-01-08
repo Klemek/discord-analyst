@@ -2,6 +2,7 @@ from typing import List
 import os
 import logging
 import discord
+from datetime import datetime
 
 # DISCORD API
 
@@ -73,13 +74,38 @@ def plural(count: int, word: str) -> str:
     return str(count) + " " + word + ("s" if count != 1 else "")
 
 
-def day_interval(interval: int) -> str:
-    if interval == 0:
-        return "today"
-    elif interval == 1:
+# DATE FORMATTING
+
+
+def str_date(date: datetime) -> str:
+    return date.strftime("%d %b. %Y")  # 12 Jun. 2018
+
+
+def str_datetime(date: datetime) -> str:
+    return date.strftime("%H:%M, %d %b. %Y")  # 12:05, 12 Jun. 2018
+
+
+def from_now(src: datetime) -> str:
+    delay = datetime.utcnow() - src
+    seconds = delay.seconds
+    minutes = seconds // 60
+    hours = minutes // 60
+    if delay.days < 1:
+        if hours < 1:
+            if minutes == 0:
+                return "now"
+            elif minutes == 1:
+                return "a minute ago"
+            else:
+                return f"{minutes} minutes ago"
+        elif hours == 1:
+            return "an hour ago"
+        else:
+            return f"{hours} hours ago"
+    elif delay.days == 1:
         return "yesterday"
     else:
-        return f"{interval} days ago"
+        return f"{delay.days:,} days ago"
 
 
 # APP SPECIFIC
