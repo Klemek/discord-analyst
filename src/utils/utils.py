@@ -26,6 +26,12 @@ def is_extension(filepath: str, ext_list: List[str]) -> bool:
     return file_extension in ext_list
 
 
+def get_resource_path(filename: str) -> str:
+    return os.path.realpath(
+        os.path.join(os.path.dirname(__file__), "..", "resources", filename)
+    )
+
+
 # LISTS
 
 
