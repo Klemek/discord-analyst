@@ -12,8 +12,8 @@ class Scanner(ABC):
     def __init__(
         self,
         *,
-        has_digit_args: bool,
-        valid_args: List[str],
+        has_digit_args: bool = False,
+        valid_args: List[str] = [],
         help: str,
         intro_context: str,
     ):
