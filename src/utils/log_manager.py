@@ -6,7 +6,7 @@ import gzip
 from datetime import datetime
 import logging
 
-from utils import code_message, is_extension
+from .utils import code_message, is_extension
 
 LOG_DIR = "logs"
 

@@ -3,9 +3,9 @@ from typing import List
 from collections import defaultdict
 import discord
 
-from utils import no_duplicate, get_intro
-from log_manager import GuildLogs, ChannelLogs, MessageLog
-from data_types import Emote
+from utils.utils import no_duplicate, get_intro
+from utils.log_manager import GuildLogs, ChannelLogs, MessageLog
+from utils.data_types import Emote
 
 
 class Scanner(ABC):

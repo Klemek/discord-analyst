@@ -5,7 +5,7 @@ import discord
 
 # Custom libs
 
-from utils import mention, plural, day_interval
+from .utils import mention, plural, day_interval
 
 
 class Emote:

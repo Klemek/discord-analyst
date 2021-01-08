@@ -1,8 +1,8 @@
 from miniscord import Bot
 import logging
 
-import emojis
-from emotes_scanner import EmotesScanner
+from utils import emojis
+from scanners import EmotesScanner
 
 logging.basicConfig(
     format="[%(asctime)s][%(levelname)s][%(module)s] %(message)s", level=logging.INFO

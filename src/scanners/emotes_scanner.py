@@ -4,10 +4,10 @@ import discord
 
 # Custom libs
 
-from log_manager import ChannelLogs, MessageLog
-from data_types import Emote
-from scanner import Scanner
-import emojis
+from utils.log_manager import ChannelLogs, MessageLog
+from utils.data_types import Emote
+from .scanner import Scanner
+from utils import emojis
 
 
 class EmotesScanner(Scanner):
