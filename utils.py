@@ -76,7 +76,6 @@ def day_interval(interval: int) -> str:
 
 def get_intro(
     subject: str,
-    emotes: Dict[str, object],
     full: bool,
     channels: List[discord.TextChannel],
     members: List[discord.Member],
