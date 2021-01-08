@@ -49,7 +49,7 @@ class EmotesScanner(Scanner):
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        return analyse_message(
+        return EmotesScanner.analyse_message(
             message, self.emotes, self.raw_members, all_emojis=self.all_emojis
         )
 
@@ -79,42 +79,39 @@ class EmotesScanner(Scanner):
             res[-1] += f" and {reaction_count:,} reactions"
         return res
 
-
-# ANALYSIS
-
-
-def analyse_message(
-    message: MessageLog,
-    emotes: Dict[str, Emote],
-    raw_members: List[int],
-    *,
-    all_emojis: bool,
-) -> bool:
-    impacted = False
-    # If author is included in the selection (empty list is all)
-    if not message.bot and (len(raw_members) == 0 or message.author in raw_members):
-        impacted = True
-        # Find all emotes un the current message in the form "<:emoji:123456789>"
-        # Filter for known emotes
-        found = emojis.regex.findall(message.content)
-        # For each emote, update its usage
-        for name in found:
+    @staticmethod
+    def analyse_message(
+        message: MessageLog,
+        emotes: Dict[str, Emote],
+        raw_members: List[int],
+        *,
+        all_emojis: bool,
+    ) -> bool:
+        impacted = False
+        # If author is included in the selection (empty list is all)
+        if not message.bot and (len(raw_members) == 0 or message.author in raw_members):
+            impacted = True
+            # Find all emotes un the current message in the form "<:emoji:123456789>"
+            # Filter for known emotes
+            found = emojis.regex.findall(message.content)
+            # For each emote, update its usage
+            for name in found:
+                if name not in emotes:
+                    if not all_emojis or name not in emojis.unicode_list:
+                        continue
+                emotes[name].usages += 1
+                emotes[name].update_use(message.created_at, [message.author])
+        # For each reaction of this message, test if known emote and update when it's the case
+        for name in message.reactions:
             if name not in emotes:
                 if not all_emojis or name not in emojis.unicode_list:
                     continue
-            emotes[name].usages += 1
-            emotes[name].update_use(message.created_at, [message.author])
-    # For each reaction of this message, test if known emote and update when it's the case
-    for name in message.reactions:
-        if name not in emotes:
-            if not all_emojis or name not in emojis.unicode_list:
-                continue
-        if len(raw_members) == 0:
-            emotes[name].reactions += len(message.reactions[name])
-            emotes[name].update_use(message.created_at, message.reactions[name])
-        else:
-            for member in raw_members:
-                if member in message.reactions[name]:
-                    emotes[name].reactions += 1
-                    emotes[name].update_use(message.created_at, [member])
-    return impacted
+            if len(raw_members) == 0:
+                emotes[name].reactions += len(message.reactions[name])
+                emotes[name].update_use(message.created_at, message.reactions[name])
+            else:
+                for member in raw_members:
+                    if member in message.reactions[name]:
+                        emotes[name].reactions += 1
+                        emotes[name].update_use(message.created_at, [member])
+        return impacted
