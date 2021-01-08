@@ -1,4 +1,5 @@
 from typing import Dict, List
+from collections import defaultdict
 import discord
 
 
@@ -35,7 +36,8 @@ class EmotesScanner(Scanner):
         self.all_emojis = False
         self.show_members = False
 
-    async def compute_args(self, message: discord.Message, *args: str) -> bool:
+    async def init(self, message: discord.Message, *args: str) -> bool:
+        guild = message.channel.guild
         # get max emotes to view
         self.top = 20
         for arg in args:
@@ -46,6 +48,10 @@ class EmotesScanner(Scanner):
         self.show_members = "members" in args and (
             len(self.members) == 0 or len(self.members) > 1
         )
+        # Create emotes dict from custom emojis of the guild
+        self.emotes = defaultdict(Emote)
+        for emoji in guild.emojis:
+            self.emotes[str(emoji)] = Emote(emoji)
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):

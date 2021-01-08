@@ -1,0 +1,2 @@
+class Frequency:
+    pass

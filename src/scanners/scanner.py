@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List
-from collections import defaultdict
 import discord
 
 from utils import no_duplicate, get_intro
 from logs import GuildLogs, ChannelLogs, MessageLog
-from data_types import Emote
 
 
 class Scanner(ABC):
@@ -56,11 +54,6 @@ class Scanner(ABC):
                 )
                 return
 
-        # Create emotes dict from custom emojis of the guild
-        self.emotes = defaultdict(Emote)
-        for emoji in guild.emojis:
-            self.emotes[str(emoji)] = Emote(emoji)
-
         # Get selected channels or all of them if no channel arguments
         self.channels = no_duplicate(message.channel_mentions)
         self.full = len(self.channels) == 0
@@ -71,7 +64,7 @@ class Scanner(ABC):
         self.members = no_duplicate(message.mentions)
         self.raw_members = no_duplicate(message.raw_mentions)
 
-        if not await self.compute_args(message, *args):
+        if not await self.init(message, *args):
             return
 
         # Start computing data
@@ -119,7 +112,7 @@ class Scanner(ABC):
             await progress.delete()
 
     @abstractmethod
-    async def compute_args(self, message: discord.Message, *args: str) -> bool:
+    async def init(self, message: discord.Message, *args: str) -> bool:
         pass
 
     @abstractmethod
