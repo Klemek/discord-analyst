@@ -4,7 +4,7 @@ import discord
 
 # Custom libs
 
-from utils.log_manager import ChannelLogs, MessageLog
+from logs import ChannelLogs, MessageLog
 from data_types import Emote
 from .scanner import Scanner
 from utils import emojis

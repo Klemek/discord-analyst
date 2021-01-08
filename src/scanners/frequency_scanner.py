@@ -5,7 +5,7 @@ import discord
 # Custom libs
 
 from .scanner import Scanner
-from utils.log_manager import ChannelLogs, MessageLog
+from logs import ChannelLogs, MessageLog
 
 
 class FrequencyScanner(Scanner):

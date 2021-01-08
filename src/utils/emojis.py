@@ -2,7 +2,7 @@ import re
 import json
 import logging
 
-from .utils import get_resource_path
+from . import get_resource_path
 
 EXTRA_EMOJI = {
     "thumbup": "1f44d",

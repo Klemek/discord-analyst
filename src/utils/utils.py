@@ -18,6 +18,11 @@ def mention(member_id: int) -> str:
     return f"<@{member_id}>"
 
 
+class FakeMessage:
+    def __init__(self, id: int):
+        self.id = id
+
+
 # FILE
 
 

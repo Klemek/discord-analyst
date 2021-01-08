@@ -4,7 +4,7 @@ from collections import defaultdict
 import discord
 
 from utils import no_duplicate, get_intro
-from utils.log_manager import GuildLogs, ChannelLogs, MessageLog
+from logs import GuildLogs, ChannelLogs, MessageLog
 from data_types import Emote
 
 
