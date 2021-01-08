@@ -41,13 +41,18 @@ You will need:
 **4. Launch bot**
 
 ```
-python3 bot.py
+python3 src/main.py
 ```
 
 ## Changelog
 
-* **v1.5**: bug fix and top <n> emotes
-* **v1.4**: insane speed with bot-side logging
+* **v1.5**:
+  * top <n> emotes
+  * bug fix
+* **v1.4**:
+  * integrate miniscord
+  * insane speed with bot-side logging
+  * bug fix
 * **v1.3**: revert to v1.1 and update requirements
 * **v1.2**: don't quit on occasional exception
 * **v1.1**:
