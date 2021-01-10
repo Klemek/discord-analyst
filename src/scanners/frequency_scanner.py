@@ -24,7 +24,7 @@ class FrequencyScanner(Scanner):
     def __init__(self):
         super().__init__(
             help=FrequencyScanner.help(),
-            intro_context="frequency",
+            intro_context="Frequency",
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
@@ -35,6 +35,7 @@ class FrequencyScanner(Scanner):
         return FrequencyScanner.analyse_message(message, self.freq, self.raw_members)
 
     def get_results(self, intro: str) -> List[str]:
+        FrequencyScanner.compute_results(self.freq)
         res = [intro]
         res += self.freq.to_string()
         return res
@@ -47,18 +48,16 @@ class FrequencyScanner(Scanner):
         # If author is included in the selection (empty list is all)
         if len(raw_members) == 0 or message.author in raw_members:
             impacted = True
-            date = message.created_at
-            # order is latest to earliest
-            if freq.latest is None:
-                freq.earliest = date
-                freq.latest = date
+            freq.dates += [message.created_at]
+        return impacted
 
-            delay = freq.earliest - date
+    @staticmethod
+    def compute_results(freq: Frequency):
+        freq.dates.sort()
+        latest = freq.dates[0]
+        for date in freq.dates:
+            delay = date - latest
             if delay > freq.longest_break:
                 freq.longest_break = delay
-                freq.longest_break_start = date
-
-            # TODO
-
-            freq.earliest = date
-        return impacted
+                freq.longest_break_start = latest
+            latest = date

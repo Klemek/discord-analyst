@@ -128,32 +128,36 @@ def get_intro(
         if full:
             return f"{subject} in this server ({nc} channels, {nmm:,} messages):"
         elif len(channels) < 5:
-            return f"{aggregate([c.mention for c in channels])} {subject} in {nmm:,} messages:"
+            return f"{aggregate([c.mention for c in channels])} {subject.lower()} in {nmm:,} messages:"
         else:
-            return f"These {len(channels)} channels {subject} in {nmm:,} messages:"
+            return (
+                f"These {len(channels)} channels {subject.lower()} in {nmm:,} messages:"
+            )
     elif len(members) < 5:
         if full:
-            return f"{aggregate([m.mention for m in members])} {subject} in {nmm:,} messages:"
+            return f"{aggregate([m.mention for m in members])} {subject.lower()} in {nmm:,} messages:"
         elif len(channels) < 5:
             return (
                 f"{aggregate([m.mention for m in members])} on {aggregate([c.mention for c in channels])} "
-                f"{subject} in {nmm:,} messages:"
+                f"{subject.lower()} in {nmm:,} messages:"
             )
         else:
             return (
                 f"{aggregate([m.mention for m in members])} on these {len(channels)} channels "
-                f"{subject} in {nmm:,} messages:"
+                f"{subject.lower()} in {nmm:,} messages:"
             )
     else:
         if full:
-            return f"These {len(members)} members {subject} in {nmm:,} messages:"
+            return (
+                f"These {len(members)} members {subject.lower()} in {nmm:,} messages:"
+            )
         elif len(channels) < 5:
             return (
                 f"These {len(members)} members on {aggregate([c.mention for c in channels])} "
-                f"{subject} in {nmm:,} messages:"
+                f"{subject.lower()} in {nmm:,} messages:"
             )
         else:
             return (
                 f"These {len(members)} members on these {len(channels)} channels "
-                f"{subject} in {nmm:,} messages:"
+                f"{subject.lower()} in {nmm:,} messages:"
             )

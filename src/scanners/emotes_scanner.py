@@ -30,7 +30,7 @@ class EmotesScanner(Scanner):
             has_digit_args=True,
             valid_args=["all", "members"],
             help=EmotesScanner.help(),
-            intro_context="emotes usage",
+            intro_context="Emotes usage",
         )
         self.top = 20
         self.all_emojis = False
