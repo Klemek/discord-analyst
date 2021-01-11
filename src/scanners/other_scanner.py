@@ -34,29 +34,40 @@ class OtherScanner(Scanner):
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        ret = OtherScanner.analyse_message(message, self.other, self.raw_members)
-        ret &= EmotesScanner.analyse_message(
+        EmotesScanner.analyse_message(
             message, self.emotes, self.raw_members, all_emojis=True
         )
-        return ret
+        return OtherScanner.analyse_message(
+            channel, message, self.other, self.raw_members
+        )
 
     def get_results(self, intro: str) -> List[str]:
         OtherScanner.compute_results(self.other, self.emotes)
         res = [intro]
-        res += self.other.to_string()
+        res += self.other.to_string(
+            show_top_channel=len(self.channels) > 1,
+            show_mentioned=(len(self.members) > 0),
+        )
         return res
 
     @staticmethod
     def analyse_message(
-        message: MessageLog, other: Other, raw_members: List[int]
+        channel: ChannelLogs, message: MessageLog, other: Other, raw_members: List[int]
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
-        if len(raw_members) == 0 or message.author in raw_members:
+        if not message.bot and (len(raw_members) == 0 or message.author in raw_members):
             impacted = True
-            pass  # TODO
+            other.channel_usage[channel.id] += 1
+        for mention in message.mentions:
+            if mention in raw_members:
+                other.mentions[mention] += 1
         return impacted
 
     @staticmethod
     def compute_results(other: Other, emotes: Dict[str, Emote]):
-        pass  # TODO
+        # calculate most used reaction
+        other.most_used_reaction = sorted(emotes, key=lambda k: emotes[k].reactions)[-1]
+        other.most_used_reaction_count = emotes[other.most_used_reaction].reactions
+        # calculate total reactions
+        other.used_reaction_total = sum([emote.reactions for emote in emotes.values()])

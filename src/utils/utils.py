@@ -30,6 +30,10 @@ def mention(member_id: int) -> str:
     return f"<@{member_id}>"
 
 
+def channel_mention(channel_id: int) -> str:
+    return f"<#{channel_id}>"
+
+
 class FakeMessage:
     def __init__(self, id: int):
         self.id = id

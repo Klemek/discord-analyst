@@ -39,13 +39,15 @@ class FullScanner(Scanner):
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        ret = FrequencyScanner.analyse_message(message, self.freq, self.raw_members)
-        ret &= CompositionScanner.analyse_message(message, self.comp, self.raw_members)
-        ret &= OtherScanner.analyse_message(message, self.other, self.raw_members)
-        ret &= EmotesScanner.analyse_message(
+        FrequencyScanner.analyse_message(message, self.freq, self.raw_members)
+        CompositionScanner.analyse_message(message, self.comp, self.raw_members)
+        OtherScanner.analyse_message(channel, message, self.other, self.raw_members)
+        EmotesScanner.analyse_message(
             message, self.emotes, self.raw_members, all_emojis=True
         )
-        return ret
+        return not message.bot and (
+            len(self.raw_members) == 0 or message.author in self.raw_members
+        )
 
     def get_results(self, intro: str) -> List[str]:
         FrequencyScanner.compute_results(self.freq)
@@ -57,5 +59,8 @@ class FullScanner(Scanner):
         res += ["__Composition__:"]
         res += self.comp.to_string()
         res += ["__Other__:"]
-        res += self.other.to_string()
+        res += self.other.to_string(
+            show_top_channel=len(self.channels) > 1,
+            show_mentioned=(len(self.members) != 1),
+        )
         return res
