@@ -52,7 +52,7 @@ class Scanner(ABC):
                 and arg not in str_mentions
             ):
                 await message.channel.send(
-                    f"{message.author.mention} unrecognized argument: `{arg}`"
+                    f"Unrecognized argument: `{arg}`", reference=message
                 )
                 return
 
@@ -81,13 +81,16 @@ class Scanner(ABC):
 
         # Start computing data
         async with message.channel.typing():
-            progress = await message.channel.send("```Starting analysis...```")
+            progress = await message.channel.send(
+                "```Starting analysis...```", reference=message
+            )
             total_msg, total_chan = await logs.load(
                 progress, self.channels, fast="fast" in args
             )
             if total_msg == -1:
                 await message.channel.send(
-                    f"{message.author.mention} An analysis is already running on this server, please be patient."
+                    f"An analysis is already running on this server, please be patient.",
+                    reference=message,
                 )
             else:
                 self.msg_count = 0
@@ -121,13 +124,23 @@ class Scanner(ABC):
                 )
                 logging.info(f"scan {guild.id} > results in {delta(t0):,}ms")
                 response = ""
+                first = True
                 for r in results:
                     if len(response + "\n" + r) > 2000:
-                        await message.channel.send(response)
+                        await message.channel.send(
+                            response,
+                            reference=message if first else None,
+                            mention_author=False,
+                        )
+                        first = False
                         response = ""
                     response += "\n" + r
                 if len(response) > 0:
-                    await message.channel.send(response)
+                    await message.channel.send(
+                        response,
+                        reference=message if first else None,
+                        mention_author=False,
+                    )
             # Delete custom progress message
             await progress.delete()
 
