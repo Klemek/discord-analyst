@@ -69,7 +69,7 @@ class Emote:
         else:
             output += f"{plural(self.usages, 'time')} "
         if self.reactions >= 1:
-            output += f"and {plural(self.usages, 'reaction')} "
+            output += f"and {plural(self.reactions, 'reaction')} "
         if show_life and not self.default:
             output += f"(in {plural(self.life_days(), 'day')}) "
         if self.used():
