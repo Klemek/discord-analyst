@@ -26,16 +26,16 @@ bot.log_calls = True
 bot.client.bot = bot  # TODO place in miniscord
 
 bot.register_command(
+    "emojis",
+    lambda *args: EmotesScanner().compute(*args),
+    "emojis: emojis analysis",
+    EmotesScanner.help(),
+)
+bot.register_command(
     "pres(ence)?",
     lambda *args: PresenceScanner().compute(*args),
     "pres: presence analysis",
     PresenceScanner.help(),
-)
-bot.register_command(
-    "emotes",
-    lambda *args: EmotesScanner().compute(*args),
-    "emotes: emotes analysis",
-    EmotesScanner.help(),
 )
 bot.register_command(
     "compo(sition)?",

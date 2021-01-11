@@ -16,13 +16,13 @@ class EmotesScanner(Scanner):
     def help() -> str:
         return (
             "```\n"
-            + "%emotes : Rank emotes by their usage\n"
+            + "%emojis : Rank emojis by their usage\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
             + "* <n> : top <n> emojis, default is 20\n"
             + "* all : list all common emojis in addition to this guild's\n"
-            + "* members : show top member for each emote\n"
-            + "Example: %emotes 10 all #mychannel1 #mychannel2 @user\n"
+            + "* members : show top member for each emojis\n"
+            + "Example: %emojis 10 all #mychannel1 #mychannel2 @user\n"
             + "```"
         )
 
@@ -31,7 +31,7 @@ class EmotesScanner(Scanner):
             has_digit_args=True,
             valid_args=["all", "members"],
             help=EmotesScanner.help(),
-            intro_context="Emotes usage",
+            intro_context="Emoji usage",
         )
         self.top = 20
         self.all_emojis = False
