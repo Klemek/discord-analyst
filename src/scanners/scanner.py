@@ -2,9 +2,10 @@ from abc import ABC, abstractmethod
 from typing import List
 from datetime import datetime
 import logging
+import re
 import discord
 
-from utils import no_duplicate, get_intro, delta, deltas
+from utils import no_duplicate, get_intro, delta, deltas, mention, channel_mention
 from logs import GuildLogs, ChannelLogs, MessageLog
 
 
@@ -33,6 +34,7 @@ class Scanner(ABC):
     async def compute(
         self, client: discord.client, message: discord.Message, *args: str
     ):
+        args = list(args)
         guild = message.guild
         logs = GuildLogs(guild)
 
@@ -44,7 +46,13 @@ class Scanner(ABC):
         # check args validity
         str_channel_mentions = [channel.mention for channel in message.channel_mentions]
         str_mentions = [member.mention for member in message.mentions]
-        for arg in args[1:]:
+        for i, arg in enumerate(args[1:]):
+            if re.match(r"^<@!\d+>$", arg):
+                arg = mention(arg[3:-1])
+                args[i + 1] = arg
+            if re.match(r"^<#!\d+>$", arg):
+                arg = channel_mention(arg[3:-1])
+                args[i + 1] = arg
             if (
                 arg not in self.valid_args + ["me", "here", "fast"]
                 and (not arg.isdigit() or not self.has_digit_args)
