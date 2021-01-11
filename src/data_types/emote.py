@@ -5,7 +5,7 @@ import discord
 
 # Custom libs
 
-from utils import mention, plural, from_now
+from utils import mention, plural, from_now, top_key
 
 
 class Emote:
@@ -50,7 +50,7 @@ class Emote:
             return (datetime.today() - self.last_used).days
 
     def get_top_member(self) -> int:
-        return sorted(self.members)[-1]
+        return top_key(self.members)
 
     def to_string(self, i: int, name: str, show_life: bool, show_members: bool) -> str:
         # place
