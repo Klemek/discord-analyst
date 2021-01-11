@@ -2,7 +2,7 @@ from typing import List
 from datetime import timedelta
 import calendar
 
-from utils import str_date, str_datetime, from_now
+from utils import str_date, str_datetime, from_now, plural
 
 
 class Frequency:
@@ -35,10 +35,10 @@ class Frequency:
             f"- **earliest message**: {str_datetime(self.dates[0])} ({from_now(self.dates[0])})",
             f"- **latest message**: {str_datetime(self.dates[-1])} ({from_now(self.dates[-1])})",
             f"- **messages/day**: {total_msg/delta.days:,.2f}",
-            f"- **busiest day of week**: {calendar.day_name[busiest_weekday]} (~{self.week[busiest_weekday]/n_weekdays:,.2f} msg) ({round(100*self.week[busiest_weekday]/total_msg)}%)",
+            f"- **busiest day of week**: {calendar.day_name[busiest_weekday]} (~{self.week[busiest_weekday]/n_weekdays:,.2f} msg, {round(100*self.week[busiest_weekday]/total_msg)}%)",
             f"- **busiest day ever**: {str_date(self.busiest_day)} ({from_now(self.busiest_day)}) ({self.busiest_day_count} msg)",
             f"- **messages/hour**: {total_msg*3600/delta.total_seconds():,.2f}",
-            f"- **busiest hour of day**: {busiest_hour:0>2}:00 (~{self.day[busiest_hour]/n_hours:,.2f} msg) ({round(100*self.day[busiest_hour]/total_msg)}%)",
+            f"- **busiest hour of day**: {busiest_hour:0>2}:00 (~{self.day[busiest_hour]/n_hours:,.2f} msg, {round(100*self.day[busiest_hour]/total_msg)}%)",
             f"- **busiest hour ever**: {str_datetime(self.busiest_hour)} ({from_now(self.busiest_hour)}) ({self.busiest_hour_count} msg)",
-            f"- **longest break**: {self.longest_break.total_seconds()//3600:,.0f} hours ({self.longest_break.days:,} days) from {str_datetime(self.longest_break_start)} ({from_now(self.longest_break_start)})",
+            f"- **longest break**: {plural(int(self.longest_break.total_seconds()/3600), 'hour')} ({plural(self.longest_break.days,'day')}) from {str_datetime(self.longest_break_start)} ({from_now(self.longest_break_start)})",
         ]

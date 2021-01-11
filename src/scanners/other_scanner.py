@@ -66,8 +66,11 @@ class OtherScanner(Scanner):
 
     @staticmethod
     def compute_results(other: Other, emotes: Dict[str, Emote]):
-        # calculate most used reaction
-        other.most_used_reaction = sorted(emotes, key=lambda k: emotes[k].reactions)[-1]
-        other.most_used_reaction_count = emotes[other.most_used_reaction].reactions
         # calculate total reactions
         other.used_reaction_total = sum([emote.reactions for emote in emotes.values()])
+        if other.used_reaction_total > 0:
+            # calculate most used reaction
+            other.most_used_reaction = sorted(
+                emotes, key=lambda k: emotes[k].reactions
+            )[-1]
+            other.most_used_reaction_count = emotes[other.most_used_reaction].reactions
