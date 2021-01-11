@@ -8,7 +8,7 @@ import discord
 from logs import ChannelLogs, MessageLog
 from data_types import Emote, get_emote_dict
 from .scanner import Scanner
-from utils import emojis
+from utils import emojis, COMMON_HELP_ARGS
 
 
 class EmotesScanner(Scanner):
@@ -17,8 +17,7 @@ class EmotesScanner(Scanner):
         return "```\n"
         +"%emotes : Rank emotes by their usage\n"
         +"arguments:\n"
-        +"* @member/me : filter for one or more member\n"
-        +"* #channel/here : filter for one or more channel\n"
+        +COMMON_HELP_ARGS
         +"* <n> : top <n> emojis, default is 20\n"
         +"* all : list all common emojis in addition to this guild's\n"
         +"* members : show top member for each emote\n"

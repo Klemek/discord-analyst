@@ -8,6 +8,7 @@ import discord
 from .scanner import Scanner
 from data_types import Frequency
 from logs import ChannelLogs, MessageLog
+from utils import COMMON_HELP_ARGS
 
 
 class FrequencyScanner(Scanner):
@@ -16,8 +17,7 @@ class FrequencyScanner(Scanner):
         return "```\n"
         +"%freq : Show frequency-related statistics\n"
         +"arguments:\n"
-        +"* @member/me : filter for one or more member\n"
-        +"* #channel/here : filter for one or more channel\n"
+        +COMMON_HELP_ARGS
         +"Example: %freq #mychannel1 @user\n"
         +"```"
 

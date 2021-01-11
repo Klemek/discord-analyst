@@ -9,6 +9,7 @@ from .scanner import Scanner
 from . import EmotesScanner
 from data_types import Composition, Emote, get_emote_dict
 from logs import ChannelLogs, MessageLog
+from utils import COMMON_HELP_ARGS
 
 
 class CompositionScanner(Scanner):
@@ -17,8 +18,7 @@ class CompositionScanner(Scanner):
         return "```\n"
         +"%comp : Show composition statistics\n"
         +"arguments:\n"
-        +"* @member/me : filter for one or more member\n"
-        +"* #channel/here : filter for one or more channel\n"
+        +COMMON_HELP_ARGS
         +"Example: %comp #mychannel1 @user\n"
         +"```"
 

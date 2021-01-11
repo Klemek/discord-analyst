@@ -7,8 +7,9 @@ import discord
 
 from .scanner import Scanner
 from . import FrequencyScanner, CompositionScanner, PresenceScanner, EmotesScanner
-from data_types import Frequency, Composition, Presence, Emote, get_emote_dict
+from data_types import Frequency, Composition, Presence, get_emote_dict
 from logs import ChannelLogs, MessageLog
+from utils import COMMON_HELP_ARGS
 
 
 class FullScanner(Scanner):
@@ -17,8 +18,7 @@ class FullScanner(Scanner):
         return "```\n"
         +"%full : Show full statistics\n"
         +"arguments:\n"
-        +"* @member/me : filter for one or more member\n"
-        +"* #channel/here : filter for one or more channel\n"
+        +COMMON_HELP_ARGS
         +"Example: %full #mychannel1 @user\n"
         +"```"
 

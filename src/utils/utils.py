@@ -6,6 +6,13 @@ from datetime import datetime
 
 # OTHER
 
+COMMON_HELP_ARGS = (
+    ""
+    + "* @member/me : filter for one or more member\n"
+    + "* #channel/here : filter for one or more channel\n"
+    + "* fast: only read cache\n"
+)
+
 
 def delta(t0: datetime):
     return round((datetime.now() - t0).total_seconds() * 1000)

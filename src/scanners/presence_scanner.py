@@ -8,6 +8,7 @@ from .scanner import Scanner
 from . import EmotesScanner
 from data_types import Presence, Emote, get_emote_dict
 from logs import ChannelLogs, MessageLog
+from utils import COMMON_HELP_ARGS
 
 
 class PresenceScanner(Scanner):
@@ -16,8 +17,7 @@ class PresenceScanner(Scanner):
         return "```\n"
         +"%pres : Show presence statistics\n"
         +"arguments:\n"
-        +"* @member/me : filter for one or more member\n"
-        +"* #channel/here : filter for one or more channel\n"
+        +COMMON_HELP_ARGS
         +"Example: %pres #mychannel1 @user\n"
         +"```"
 
