@@ -2,7 +2,7 @@ from typing import List
 from collections import defaultdict
 
 
-from utils import mention, channel_mention, plural
+from utils import mention, channel_mention, plural, percent
 
 
 class Presence:
@@ -23,7 +23,7 @@ class Presence:
         ret = []
         if member_specific:
             ret += [
-                f"- **messages**: {self.msg_count} ({100*self.msg_count/self.total_msg:.0f}% of server's)"
+                f"- **messages**: {self.msg_count} ({percent(self.msg_count/self.total_msg)} of server's)"
             ]
         if show_top_channel:
             top_channel = sorted(self.channel_usage)[-1]
@@ -33,16 +33,16 @@ class Presence:
                 key=lambda k: self.channel_usage[k] / self.channel_total[k],
             )[-1]
             ret += [
-                f"- **most visited channel**: {channel_mention(top_channel)} ({self.channel_usage[top_channel]:,} msg, {100*self.channel_usage[top_channel]//channel_sum:.0f}%)",
-                f"- **mostly found in**: {channel_mention(found_in)} ({self.channel_usage[found_in]:,} msg, {100*self.channel_usage[found_in]//self.channel_total[found_in]:.0f}% of channel's)",
+                f"- **most visited channel**: {channel_mention(top_channel)} ({self.channel_usage[top_channel]:,} msg, {percent(self.channel_usage[top_channel]/channel_sum)})",
+                f"- **mostly found in**: {channel_mention(found_in)} ({self.channel_usage[found_in]:,} msg, {percent(self.channel_usage[found_in]/self.channel_total[found_in])} of channel's)",
             ]
         if member_specific:
             if len(self.mentions) > 0:
                 top_mention = sorted(self.mentions)[-1]
                 mention_sum = sum(self.mentions.values())
                 ret += [
-                    f"- **was mentioned**: {plural(mention_sum, 'time')} ({100*mention_sum/self.mention_count:.0f}% of server's)",
-                    f"- **mostly mentioned by**: {mention(top_mention)} ({plural(self.mentions[top_mention], 'time')}, {100*self.mentions[top_mention]//mention_sum:.0f}%)",
+                    f"- **was mentioned**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of server's)",
+                    f"- **mostly mentioned by**: {mention(top_mention)} ({plural(self.mentions[top_mention], 'time')}, {percent(self.mentions[top_mention]/mention_sum)})",
                 ]
             else:
                 ret += ["- **was mentioned**: 0 times"]
@@ -50,8 +50,8 @@ class Presence:
                 top_mention = sorted(self.mention_others)[-1]
                 mention_sum = sum(self.mention_others.values())
                 ret += [
-                    f"- **mentioned others**: {plural(mention_sum, 'time')} ({100*mention_sum/self.mention_count:.0f}% of server's)",
-                    f"- **mostly mentioned**: {mention(top_mention)} ({plural(self.mention_others[top_mention], 'time')}, {100*self.mention_others[top_mention]//mention_sum:.0f}%)",
+                    f"- **mentioned others**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of server's)",
+                    f"- **mostly mentioned**: {mention(top_mention)} ({plural(self.mention_others[top_mention], 'time')}, {percent(self.mention_others[top_mention]/mention_sum)})",
                 ]
             else:
                 ret += ["- **was mentioned**: 0 times"]
@@ -59,12 +59,12 @@ class Presence:
             # ({self.used_reaction_total/self.used_reaction_all_total})
             ret += [
                 f"- **reactions**: {plural(self.used_reaction_total, 'time')}",
-                f"- **most used reaction**: {self.most_used_reaction} ({plural(self.most_used_reaction_count, 'time')}, {100*self.most_used_reaction_count/self.used_reaction_total:.0f}%)",
+                f"- **most used reaction**: {self.most_used_reaction} ({plural(self.most_used_reaction_count, 'time')}, {percent(self.most_used_reaction_count/self.used_reaction_total)})",
             ]
             if member_specific:
                 ret[
                     -2
-                ] += f" ({100*self.used_reaction_total/self.used_reaction_all_total:.0f}% of server's)"
+                ] += f" ({percent(self.used_reaction_total/self.used_reaction_all_total)} of server's)"
         else:
             ret += ["- **reactions**: 0 times"]
         return ret

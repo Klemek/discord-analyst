@@ -96,6 +96,15 @@ def plural(count: int, word: str) -> str:
     return f"{count:,} {word}{'s' if count != 1 else ''}"
 
 
+def percent(p: float) -> str:
+    if p < 0.01:
+        return f"{100*p:.2f}%"
+    elif p < 0.1:
+        return f"{100*p:.1f}%"
+    else:
+        return f"{100*p:.0f}%"
+
+
 # DATE FORMATTING
 
 
