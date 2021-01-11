@@ -6,16 +6,24 @@
 
 When you need statistics about your discord server
 
+
+
 * `%help (command)` - info about commands
 * `%info` - version and uptime
-* `%emotes` : Rank emotes by their usage
+* `%scan`: full analysis
+* `%freq`: frequency analysis
+* `%compo`: composition analysis
+* `%pres`: presence analysis
+* `%emojis` : rank emotes by their usage
   * arguments:
-    * @member/me : filter for one or more member
-    * #channel/here : filter for one or more channel
     * <n> : top <n> emojis, default is 20
     * all : list all common emojis in addition to this guild's
     * members : show top member for each emote
-  * Example: `%emotes 10 all #mychannel1 #mychannel2 @user`
+
+* Common arguments:
+    * @member/me : filter for one or more member
+    * #channel/here : filter for one or more channel
+    * fast : only read cache
 
 ## Running this bot
 
@@ -52,8 +60,8 @@ python3 src/main.py
 
 ## Changelog
 
-* **(WIP)v1.6**:
-  * more scans : `%full`, `%freq`, `%comp`, `%other`
+* **v1.6**:
+  * more scans : `%scan`, `%freq`, `%compo`, `%pres`
   * huge bug fix
 * **v1.5**:
   * top <n> emotes
