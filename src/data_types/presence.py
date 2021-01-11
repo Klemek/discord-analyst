@@ -15,15 +15,20 @@ class Presence:
         self.channel_total = defaultdict(int)
         self.mentions = defaultdict(int)
         self.mention_others = defaultdict(int)
-        self.msg_count = 0
-        self.total_msg = 0
         self.mention_count = 0
 
-    def to_string(self, *, show_top_channel: bool, member_specific: bool) -> List[str]:
+    def to_string(
+        self,
+        msg_count: int,
+        total_msg: int,
+        *,
+        show_top_channel: bool,
+        member_specific: bool,
+    ) -> List[str]:
         ret = []
         if member_specific:
             ret += [
-                f"- **messages**: {self.msg_count} ({percent(self.msg_count/self.total_msg)} of server's)"
+                f"- **messages**: {msg_count} ({percent(msg_count/total_msg)} of server's)"
             ]
         if show_top_channel:
             top_channel = sorted(self.channel_usage)[-1]

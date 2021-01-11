@@ -5,7 +5,7 @@ class Composition:
     def __init__(self):
         pass  # TODO
 
-    def to_string(self) -> List[str]:
+    def to_string(self, msg_count: int) -> List[str]:
         return [
             # f"- **avg characters / message**: n",
             # f"- **plain text messages**: n - %",

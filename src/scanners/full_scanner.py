@@ -38,6 +38,7 @@ class FullScanner(Scanner):
         self.member_specific = len(self.members) > 0
         # Create emotes dict from custom emojis of the guild
         self.emotes = get_emote_dict(message.channel.guild)
+        self.total_msg = 0
         if self.member_specific:
             self.emotes_all = get_emote_dict(message.channel.guild)
         else:
@@ -45,6 +46,7 @@ class FullScanner(Scanner):
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
+        self.total_msg += 1
         FrequencyScanner.analyse_message(message, self.freq, self.raw_members)
         CompositionScanner.analyse_message(message, self.comp, self.raw_members)
         PresenceScanner.analyse_message(channel, message, self.pres, self.raw_members)
@@ -65,9 +67,11 @@ class FullScanner(Scanner):
         res += ["__Frequency__:"]
         res += self.freq.to_string()
         res += ["__Composition__:"]
-        res += self.comp.to_string()
+        res += self.comp.to_string(self.msg_count)
         res += ["__Presence__:"]
         res += self.pres.to_string(
+            self.msg_count,
+            self.total_msg,
             show_top_channel=len(self.channels) > 1,
             member_specific=self.member_specific,
         )

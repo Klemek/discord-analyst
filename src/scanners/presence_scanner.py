@@ -31,6 +31,7 @@ class PresenceScanner(Scanner):
 
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.pres = Presence()
+        self.total_msg = 0
         self.member_specific = len(self.members) > 0
         # Create emotes dict from custom emojis of the guild
         self.emotes = get_emote_dict(message.channel.guild)
@@ -41,6 +42,7 @@ class PresenceScanner(Scanner):
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
+        self.total_msg += 1
         EmotesScanner.analyse_message(
             message, self.emotes, self.raw_members, all_emojis=True
         )
@@ -54,6 +56,8 @@ class PresenceScanner(Scanner):
         PresenceScanner.compute_results(self.pres, self.emotes, self.emotes_all)
         res = [intro]
         res += self.pres.to_string(
+            self.msg_count,
+            self.total_msg,
             show_top_channel=(len(self.channels) > 1),
             member_specific=self.member_specific,
         )
@@ -79,7 +83,6 @@ class PresenceScanner(Scanner):
             if mention in raw_members:
                 pres.mentions[message.author] += 1
             pres.mention_count += 1
-        pres.total_msg += 1
         return impacted
 
     @staticmethod
