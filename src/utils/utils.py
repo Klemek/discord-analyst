@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Union
 import os
 import logging
 import discord
@@ -73,6 +73,13 @@ def no_duplicate(seq: list) -> list:
     :rtype: list
     """
     return list(dict.fromkeys(seq))
+
+
+# DICTS
+
+
+def top_key(d: Dict[Union[str, int], int]) -> Union[str, int]:
+    return sorted(d, key=lambda k: d[k])[-1]
 
 
 # MESSAGE FORMATTING

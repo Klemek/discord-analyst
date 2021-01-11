@@ -33,41 +33,28 @@ class FullScanner(Scanner):
     async def init(self, message: discord.Message, *args: str) -> bool:
         guild = message.channel.guild
         self.freq = Frequency()
-        self.comp = Composition()
+        self.compo = Composition()
         self.pres = Presence()
         self.member_specific = len(self.members) > 0
-        # Create emotes dict from custom emojis of the guild
-        self.emotes = get_emote_dict(message.channel.guild)
         self.total_msg = 0
-        if self.member_specific:
-            self.emotes_all = get_emote_dict(message.channel.guild)
-        else:
-            self.emotes_all = {}
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
         self.total_msg += 1
         FrequencyScanner.analyse_message(message, self.freq, self.raw_members)
-        CompositionScanner.analyse_message(message, self.comp, self.raw_members)
+        CompositionScanner.analyse_message(message, self.compo, self.raw_members)
         PresenceScanner.analyse_message(channel, message, self.pres, self.raw_members)
-        EmotesScanner.analyse_message(
-            message, self.emotes, self.raw_members, all_emojis=True
-        )
-        if self.member_specific:
-            EmotesScanner.analyse_message(message, self.emotes_all, [], all_emojis=True)
         return not message.bot and (
             len(self.raw_members) == 0 or message.author in self.raw_members
         )
 
     def get_results(self, intro: str) -> List[str]:
         FrequencyScanner.compute_results(self.freq)
-        CompositionScanner.compute_results(self.comp, self.emotes)
-        PresenceScanner.compute_results(self.pres, self.emotes, self.emotes_all)
         res = [intro]
         res += ["__Frequency__:"]
         res += self.freq.to_string()
         res += ["__Composition__:"]
-        res += self.comp.to_string(self.msg_count)
+        res += self.compo.to_string(self.msg_count)
         res += ["__Presence__:"]
         res += self.pres.to_string(
             self.msg_count,

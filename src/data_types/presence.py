@@ -2,15 +2,13 @@ from typing import List
 from collections import defaultdict
 
 
-from utils import mention, channel_mention, plural, percent
+from utils import mention, channel_mention, plural, percent, top_key
 
 
 class Presence:
     def __init__(self):
-        self.most_used_reaction = ""
-        self.most_used_reaction_count = 0
-        self.used_reaction_total = 1
-        self.used_reaction_all_total = 1
+        self.reactions = defaultdict(int)
+        self.used_reaction_total = 0
         self.channel_usage = defaultdict(int)
         self.channel_total = defaultdict(int)
         self.mentions = defaultdict(int)
@@ -31,7 +29,7 @@ class Presence:
                 f"- **messages**: {msg_count} ({percent(msg_count/total_msg)} of server's)"
             ]
         if show_top_channel:
-            top_channel = sorted(self.channel_usage)[-1]
+            top_channel = top_key(self.channel_usage)
             channel_sum = sum(self.channel_usage.values())
             found_in = sorted(
                 self.channel_usage,
@@ -43,7 +41,7 @@ class Presence:
             ]
         if member_specific:
             if len(self.mentions) > 0:
-                top_mention = sorted(self.mentions)[-1]
+                top_mention = top_key(self.mentions)
                 mention_sum = sum(self.mentions.values())
                 ret += [
                     f"- **was mentioned**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of server's)",
@@ -52,7 +50,7 @@ class Presence:
             else:
                 ret += ["- **was mentioned**: 0 times"]
             if len(self.mention_others) > 0:
-                top_mention = sorted(self.mention_others)[-1]
+                top_mention = top_key(self.mention_others)
                 mention_sum = sum(self.mention_others.values())
                 ret += [
                     f"- **mentioned others**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of server's)",
@@ -60,16 +58,18 @@ class Presence:
                 ]
             else:
                 ret += ["- **was mentioned**: 0 times"]
-        if self.used_reaction_total > 0:
-            # ({self.used_reaction_total/self.used_reaction_all_total})
+
+        if len(self.reactions) > 0:
+            total_used = sum(self.reactions.values())
+            top_reaction = top_key(self.reactions)
             ret += [
-                f"- **reactions**: {plural(self.used_reaction_total, 'time')}",
-                f"- **most used reaction**: {self.most_used_reaction} ({plural(self.most_used_reaction_count, 'time')}, {percent(self.most_used_reaction_count/self.used_reaction_total)})",
+                f"- **reactions**: {plural(total_used, 'time')}",
+                f"- **most used reaction**: {top_reaction} ({plural(self.reactions[top_reaction], 'time')}, {percent(self.reactions[top_reaction]/total_used)})",
             ]
             if member_specific:
                 ret[
                     -2
-                ] += f" ({percent(self.used_reaction_total/self.used_reaction_all_total)} of server's)"
+                ] += f" ({percent(total_used/self.used_reaction_total)} of server's)"
         else:
             ret += ["- **reactions**: 0 times"]
         return ret
