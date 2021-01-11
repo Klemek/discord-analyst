@@ -20,8 +20,8 @@ class Frequency:
     def to_string(self) -> List[str]:
         delta = self.dates[-1] - self.dates[0]
         total_msg = len(self.dates)
-        busiest_weekday = sorted(self.week.keys(), key=lambda k: self.week[k])[-1]
-        busiest_hour = sorted(self.day.keys(), key=lambda k: self.day[k])[-1]
+        busiest_weekday = sorted(self.week)[-1]
+        busiest_hour = sorted(self.day)[-1]
         n_weekdays = delta.days // 7
         if (
             self.dates[0].weekday() <= busiest_weekday

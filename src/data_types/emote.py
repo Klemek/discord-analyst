@@ -50,7 +50,7 @@ class Emote:
             return (datetime.today() - self.last_used).days
 
     def get_top_member(self) -> int:
-        return sorted(self.members.keys(), key=lambda id: self.members[id])[-1]
+        return sorted(self.members)[-1]
 
     def to_string(self, i: int, name: str, show_life: bool, show_members: bool) -> str:
         # place
