@@ -37,8 +37,11 @@ class Presence:
             )[-1]
             ret += [
                 f"- **most visited channel**: {channel_mention(top_channel)} ({self.channel_usage[top_channel]:,} msg, {percent(self.channel_usage[top_channel]/channel_sum)})",
-                f"- **mostly found in**: {channel_mention(found_in)} ({self.channel_usage[found_in]:,} msg, {percent(self.channel_usage[found_in]/self.channel_total[found_in])} of channel's)",
             ]
+            if member_specific:
+                ret += [
+                    f"- **mostly found in**: {channel_mention(found_in)} ({self.channel_usage[found_in]:,} msg, {percent(self.channel_usage[found_in]/self.channel_total[found_in])} of channel's)"
+                ]
         if member_specific:
             if len(self.mentions) > 0:
                 top_mention = top_key(self.mentions)

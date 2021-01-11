@@ -8,7 +8,7 @@ import discord
 from logs import ChannelLogs, MessageLog
 from data_types import Emote, get_emote_dict
 from .scanner import Scanner
-from utils import emojis, COMMON_HELP_ARGS
+from utils import emojis, COMMON_HELP_ARGS, plural, precise
 
 
 class EmotesScanner(Scanner):
@@ -50,8 +50,7 @@ class EmotesScanner(Scanner):
             len(self.members) == 0 or len(self.members) > 1
         )
         # Create emotes dict from custom emojis of the guild
-        # Create emotes dict from custom emojis of the guild
-        self.emotes = get_emote_dict(message.channel.guild)
+        self.emotes = get_emote_dict(guild)
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
@@ -79,10 +78,10 @@ class EmotesScanner(Scanner):
             usage_count += self.emotes[name].usages
             reaction_count += self.emotes[name].reactions
         res += [
-            f"Total: {usage_count:,} times ({usage_count / self.msg_count:.4f} / message)"
+            f"Total: {plural(usage_count,'time')} ({precise(usage_count/self.msg_count)}/msg)"
         ]
         if reaction_count > 0:
-            res[-1] += f" and {reaction_count:,} reactions"
+            res[-1] += f" and {plural(reaction_count, 'reaction')}"
         return res
 
     @staticmethod
@@ -95,7 +94,7 @@ class EmotesScanner(Scanner):
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
-        if not message.bot and (len(raw_members) == 0 or message.author in raw_members):
+        if not message.bot and len(raw_members) == 0 or message.author in raw_members:
             impacted = True
             # Find all emotes un the current message in the form "<:emoji:123456789>"
             # Filter for known emotes

@@ -57,7 +57,7 @@ class PresenceScanner(Scanner):
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
-        if not message.bot and (len(raw_members) == 0 or message.author in raw_members):
+        if not message.bot and len(raw_members) == 0 or message.author in raw_members:
             impacted = True
             pres.channel_usage[channel.id] += 1
             for mention in message.mentions:

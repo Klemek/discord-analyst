@@ -108,8 +108,10 @@ def percent(p: float) -> str:
     return f"{precise(100*p)}%"
 
 
-def precise(p: float) -> str:
-    precision = abs(min(0, math.ceil(math.log10(p)) - 2))
+def precise(p: float, *, precision: int = 2) -> str:
+    if p == 0:
+        return "0"
+    precision = abs(min(0, math.ceil(math.log10(p)) - precision))
     s = "{:." + str(precision) + "f}"
     return s.format(p)
 

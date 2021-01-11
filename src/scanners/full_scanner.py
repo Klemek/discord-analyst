@@ -1,13 +1,12 @@
 from typing import List
-from collections import defaultdict
 import discord
 
 
 # Custom libs
 
 from .scanner import Scanner
-from . import FrequencyScanner, CompositionScanner, PresenceScanner, EmotesScanner
-from data_types import Frequency, Composition, Presence, get_emote_dict
+from . import FrequencyScanner, CompositionScanner, PresenceScanner
+from data_types import Frequency, Composition, Presence
 from logs import ChannelLogs, MessageLog
 from utils import COMMON_HELP_ARGS
 
@@ -31,7 +30,6 @@ class FullScanner(Scanner):
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
-        guild = message.channel.guild
         self.freq = Frequency()
         self.compo = Composition()
         self.pres = Presence()
@@ -42,8 +40,10 @@ class FullScanner(Scanner):
         FrequencyScanner.analyse_message(message, self.freq, self.raw_members)
         CompositionScanner.analyse_message(message, self.compo, self.raw_members)
         PresenceScanner.analyse_message(channel, message, self.pres, self.raw_members)
-        return not message.bot and (
-            len(self.raw_members) == 0 or message.author in self.raw_members
+        return (
+            not message.bot
+            and len(self.raw_members) == 0
+            or message.author in self.raw_members
         )
 
     def get_results(self, intro: str) -> List[str]:

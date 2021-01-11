@@ -2,7 +2,7 @@ from typing import List
 from datetime import timedelta
 import calendar
 
-from utils import str_date, str_datetime, from_now, plural, percent
+from utils import str_date, str_datetime, from_now, plural, percent, precise, top_key
 
 
 class Frequency:
@@ -20,8 +20,8 @@ class Frequency:
     def to_string(self) -> List[str]:
         delta = self.dates[-1] - self.dates[0]
         total_msg = len(self.dates)
-        busiest_weekday = sorted(self.week)[-1]
-        busiest_hour = sorted(self.day)[-1]
+        busiest_weekday = top_key(self.week)
+        busiest_hour = top_key(self.day)
         n_weekdays = delta.days // 7
         if (
             self.dates[0].weekday() <= busiest_weekday
@@ -34,11 +34,11 @@ class Frequency:
         return [
             f"- **earliest message**: {str_datetime(self.dates[0])} ({from_now(self.dates[0])})",
             f"- **latest message**: {str_datetime(self.dates[-1])} ({from_now(self.dates[-1])})",
-            f"- **messages/day**: {total_msg/delta.days:,.2f}",
-            f"- **busiest day of week**: {calendar.day_name[busiest_weekday]} (~{self.week[busiest_weekday]/n_weekdays:,.2f} msg, {percent(self.week[busiest_weekday]/total_msg)})",
+            f"- **messages/day**: {precise(total_msg/delta.days, precision=3)}",
+            f"- **busiest day of week**: {calendar.day_name[busiest_weekday]} (~{precise(self.week[busiest_weekday]/n_weekdays, precision=3)} msg, {percent(self.week[busiest_weekday]/total_msg)})",
             f"- **busiest day ever**: {str_date(self.busiest_day)} ({from_now(self.busiest_day)}) ({self.busiest_day_count} msg)",
-            f"- **messages/hour**: {total_msg*3600/delta.total_seconds():,.2f}",
-            f"- **busiest hour of day**: {busiest_hour:0>2}:00 (~{self.day[busiest_hour]/n_hours:,.2f} msg, {percent(self.day[busiest_hour]/total_msg)})",
+            f"- **messages/hour**: {precise(total_msg*3600/delta.total_seconds(), precision=3)}",
+            f"- **busiest hour of day**: {busiest_hour:0>2}:00 (~{precise(self.day[busiest_hour]/n_hours, precision=3)} msg, {percent(self.day[busiest_hour]/total_msg)})",
             f"- **busiest hour ever**: {str_datetime(self.busiest_hour)} ({from_now(self.busiest_hour)}) ({self.busiest_hour_count} msg)",
-            f"- **longest break**: {plural(int(self.longest_break.total_seconds()/3600), 'hour')} ({plural(self.longest_break.days,'day')}) from {str_datetime(self.longest_break_start)} ({from_now(self.longest_break_start)})",
+            f"- **longest break**: {plural(round(self.longest_break.total_seconds()/3600), 'hour')} ({plural(self.longest_break.days,'day')}) from {str_datetime(self.longest_break_start)} ({from_now(self.longest_break_start)})",
         ]
