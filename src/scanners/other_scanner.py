@@ -1,11 +1,12 @@
-from typing import List
+from typing import List, Dict
 import discord
 
 
 # Custom libs
 
 from .scanner import Scanner
-from data_types import Other
+from . import EmotesScanner
+from data_types import Other, Emote, get_emote_dict
 from logs import ChannelLogs, MessageLog
 
 
@@ -28,13 +29,19 @@ class OtherScanner(Scanner):
 
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.other = Other()
+        # Create emotes dict from custom emojis of the guild
+        self.emotes = get_emote_dict(message.channel.guild)
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        return OtherScanner.analyse_message(message, self.other, self.raw_members)
+        ret = OtherScanner.analyse_message(message, self.other, self.raw_members)
+        ret &= EmotesScanner.analyse_message(
+            message, self.emotes, self.raw_members, all_emojis=True
+        )
+        return ret
 
     def get_results(self, intro: str) -> List[str]:
-        OtherScanner.compute_results(self.other)
+        OtherScanner.compute_results(self.other, self.emotes)
         res = [intro]
         res += self.other.to_string()
         return res
@@ -51,5 +58,5 @@ class OtherScanner(Scanner):
         return impacted
 
     @staticmethod
-    def compute_results(other: Other):
+    def compute_results(other: Other, emotes: Dict[str, Emote]):
         pass  # TODO

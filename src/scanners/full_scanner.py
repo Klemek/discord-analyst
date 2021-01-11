@@ -49,8 +49,8 @@ class FullScanner(Scanner):
 
     def get_results(self, intro: str) -> List[str]:
         FrequencyScanner.compute_results(self.freq)
-        CompositionScanner.compute_results(self.comp)
-        OtherScanner.compute_results(self.other)
+        CompositionScanner.compute_results(self.comp, self.emotes)
+        OtherScanner.compute_results(self.other, self.emotes)
         res = [intro]
         res += ["__Frequency__:"]
         res += self.freq.to_string()

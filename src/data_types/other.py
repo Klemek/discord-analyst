@@ -6,4 +6,9 @@ class Other:
         pass  # TODO
 
     def to_string(self) -> List[str]:
-        return []  # TODO
+        return [
+            # f"- **most visited channel**: #c",
+            # f"- **mostly mentioned by**: @x",
+            # f"- **reactions**: n %",
+            # f"- **most used reaction**: xx (see more with %emotes)",
+        ]  # TODO

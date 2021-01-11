@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from collections import defaultdict
 import discord
 
@@ -43,7 +43,7 @@ class CompositionScanner(Scanner):
         return ret
 
     def get_results(self, intro: str) -> List[str]:
-        CompositionScanner.compute_results(self.comp)
+        CompositionScanner.compute_results(self.comp, self.emotes)
         res = [intro]
         res += self.comp.to_string()
         return res
@@ -60,5 +60,5 @@ class CompositionScanner(Scanner):
         return impacted
 
     @staticmethod
-    def compute_results(comp: Composition):
+    def compute_results(comp: Composition, emotes: Dict[str, Emote]):
         pass  # TODO
