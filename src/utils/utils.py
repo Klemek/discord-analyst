@@ -2,6 +2,7 @@ from typing import List, Dict, Union
 import os
 import logging
 import discord
+import math
 from datetime import datetime
 
 # OTHER
@@ -104,12 +105,13 @@ def plural(count: int, word: str) -> str:
 
 
 def percent(p: float) -> str:
-    if p < 0.01:
-        return f"{100*p:.2f}%"
-    elif p < 0.1:
-        return f"{100*p:.1f}%"
-    else:
-        return f"{100*p:.0f}%"
+    return f"{precise(100*p)}%"
+
+
+def precise(p: float) -> str:
+    precision = abs(min(0, math.ceil(math.log10(p)) - 2))
+    s = "{:." + str(precision) + "f}"
+    return s.format(p)
 
 
 # DATE FORMATTING

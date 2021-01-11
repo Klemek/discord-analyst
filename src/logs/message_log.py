@@ -27,6 +27,8 @@ class MessageLog:
             self.role_mentions = message.raw_role_mentions
             self.channel_mentions = message.raw_channel_mentions
             self.image = False
+            self.attachment = len(message.attachments) > 0
+            self.embed = len(message.embeds) > 0
             for attachment in message.attachments:
                 if is_extension(attachment.filename, IMAGE_FORMAT):
                     self.image = True
@@ -58,6 +60,8 @@ class MessageLog:
             self.role_mentions = [int(m) for m in message["role_mentions"]]
             self.channel_mentions = [int(m) for m in message["channel_mentions"]]
             self.image = message["image"]
+            self.embed = message["embed"]
+            self.attachment = message["attachment"]
             self.reactions = message["reactions"]
 
     async def load(self, message: discord.Message):
