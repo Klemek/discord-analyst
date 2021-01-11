@@ -7,7 +7,7 @@ from scanners import (
     FullScanner,
     FrequencyScanner,
     CompositionScanner,
-    OtherScanner,
+    PresenceScanner,
 )
 
 logging.basicConfig(
@@ -26,10 +26,10 @@ bot.log_calls = True
 bot.client.bot = bot  # TODO place in miniscord
 
 bot.register_command(
-    "other",
-    lambda *args: OtherScanner().compute(*args),
-    "other: other data analysis",
-    OtherScanner.help(),
+    "pres(ence)?",
+    lambda *args: PresenceScanner().compute(*args),
+    "pres: presence analysis",
+    PresenceScanner.help(),
 )
 bot.register_command(
     "emotes",

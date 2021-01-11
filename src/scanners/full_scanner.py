@@ -6,8 +6,8 @@ import discord
 # Custom libs
 
 from .scanner import Scanner
-from . import FrequencyScanner, CompositionScanner, OtherScanner, EmotesScanner
-from data_types import Frequency, Composition, Other, Emote, get_emote_dict
+from . import FrequencyScanner, CompositionScanner, PresenceScanner, EmotesScanner
+from data_types import Frequency, Composition, Presence, Emote, get_emote_dict
 from logs import ChannelLogs, MessageLog
 
 
@@ -32,7 +32,7 @@ class FullScanner(Scanner):
         guild = message.channel.guild
         self.freq = Frequency()
         self.comp = Composition()
-        self.other = Other()
+        self.pres = Presence()
         # Create emotes dict from custom emojis of the guild
         # Create emotes dict from custom emojis of the guild
         self.emotes = get_emote_dict(message.channel.guild)
@@ -41,7 +41,7 @@ class FullScanner(Scanner):
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
         FrequencyScanner.analyse_message(message, self.freq, self.raw_members)
         CompositionScanner.analyse_message(message, self.comp, self.raw_members)
-        OtherScanner.analyse_message(channel, message, self.other, self.raw_members)
+        PresenceScanner.analyse_message(channel, message, self.pres, self.raw_members)
         EmotesScanner.analyse_message(
             message, self.emotes, self.raw_members, all_emojis=True
         )
@@ -52,14 +52,14 @@ class FullScanner(Scanner):
     def get_results(self, intro: str) -> List[str]:
         FrequencyScanner.compute_results(self.freq)
         CompositionScanner.compute_results(self.comp, self.emotes)
-        OtherScanner.compute_results(self.other, self.emotes)
+        PresenceScanner.compute_results(self.pres, self.emotes)
         res = [intro]
         res += ["__Frequency__:"]
         res += self.freq.to_string()
         res += ["__Composition__:"]
         res += self.comp.to_string()
-        res += ["__Other__:"]
-        res += self.other.to_string(
+        res += ["__Presence__:"]
+        res += self.pres.to_string(
             show_top_channel=len(self.channels) > 1,
             show_mentioned=(len(self.members) > 0),
         )

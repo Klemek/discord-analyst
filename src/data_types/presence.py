@@ -5,7 +5,7 @@ from collections import defaultdict
 from utils import mention, channel_mention, plural
 
 
-class Other:
+class Presence:
     def __init__(self):
         self.most_used_reaction = ""
         self.most_used_reaction_count = 0
