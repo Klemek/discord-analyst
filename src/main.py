@@ -18,12 +18,11 @@ emojis.load_emojis()
 
 bot = Bot(
     "Discord Analyst",
-    "1.6(wip)",
+    "1.6",
     alias="%",
 )
 
 bot.log_calls = True
-bot.client.bot = bot  # TODO place in miniscord
 
 bot.register_command(
     "emojis",
