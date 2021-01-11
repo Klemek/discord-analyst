@@ -55,12 +55,12 @@ class CompositionScanner(Scanner):
             emotes_found = emojis.regex.findall(message.content)
             without_emote = message.content
             for name in emotes_found:
-                if name not in compo.emotes:
-                    if name not in emojis.unicode_list:
-                        continue
-                compo.emotes[name] += 1
-                i = without_emote.index(name)
-                without_emote = without_emote[:i] + without_emote[i + len(name) :]
+                if name in emojis.unicode_list or re.match(
+                    r"(<a?:[\w\-\~]+:\d+>|:[\w\\-\~]+:)", name
+                ):
+                    compo.emotes[name] += 1
+                    i = without_emote.index(name)
+                    without_emote = without_emote[:i] + without_emote[i + len(name) :]
             if len(message.content.strip()) > 0 and len(without_emote.strip()) == 0:
                 compo.emote_only += 1
             if len(emotes_found) > 0:
