@@ -17,10 +17,10 @@ class FullScanner(Scanner):
     def help() -> str:
         return (
             "```\n"
-            + "%full : Show full statistics\n"
+            + "%scan : Show full statistics\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
-            + "Example: %full #mychannel1 @user\n"
+            + "Example: %scan #mychannel1 @user\n"
             + "```"
         )
 

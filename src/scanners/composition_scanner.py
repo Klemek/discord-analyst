@@ -17,10 +17,10 @@ class CompositionScanner(Scanner):
     def help() -> str:
         return (
             "```\n"
-            + "%comp : Show composition statistics\n"
+            + "%compo : Show composition statistics\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
-            + "Example: %comp #mychannel1 @user\n"
+            + "Example: %compo #mychannel1 @user\n"
             + "```"
         )
 

@@ -38,9 +38,9 @@ bot.register_command(
     EmotesScanner.help(),
 )
 bot.register_command(
-    "comp(osition)?",
+    "compo(sition)?",
     lambda *args: CompositionScanner().compute(*args),
-    "comp: composition analysis",
+    "compo: composition analysis",
     CompositionScanner.help(),
 )
 bot.register_command(
@@ -50,9 +50,9 @@ bot.register_command(
     FrequencyScanner.help(),
 )
 bot.register_command(
-    "full",
+    "(full|scan)",
     lambda *args: FullScanner().compute(*args),
-    "full: full analysis",
+    "scan: full analysis",
     FullScanner.help(),
 )
 
