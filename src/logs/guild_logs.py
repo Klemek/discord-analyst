@@ -8,7 +8,7 @@ import logging
 
 
 from . import ChannelLogs
-from utils import code_message
+from utils import code_message, delta, deltas
 
 
 LOG_DIR = "logs"
@@ -32,8 +32,8 @@ class GuildLogs:
         if self.log_file in current_analysis:
             return -1, -1
         current_analysis += [self.log_file]
+        t00 = datetime.now()
         # read logs
-        t0 = datetime.now()
         if not os.path.exists(LOG_DIR):
             os.mkdir(LOG_DIR)
         if os.path.exists(self.log_file):
@@ -41,13 +41,22 @@ class GuildLogs:
             try:
                 gziped_data = None
                 await code_message(progress, "Reading saved history (1/4)...")
+                t0 = datetime.now()
                 with open(self.log_file, mode="rb") as f:
                     gziped_data = f.read()
+                logging.info(f"log {self.guild.id} > read in {delta(t0):,}ms")
                 await code_message(progress, "Reading saved history (2/4)...")
+                t0 = datetime.now()
                 json_data = gzip.decompress(gziped_data)
+                logging.info(
+                    f"log {self.guild.id} > gzip decompress in {delta(t0):,}ms"
+                )
                 await code_message(progress, "Reading saved history (3/4)...")
+                t0 = datetime.now()
                 channels = json.loads(json_data)
+                logging.info(f"log {self.guild.id} > json parse in {delta(t0):,}ms")
                 await code_message(progress, "Reading saved history (4/4)...")
+                t0 = datetime.now()
                 self.channels = {int(id): ChannelLogs(channels[id]) for id in channels}
                 # remove invalid format
                 self.channels = {
@@ -55,8 +64,7 @@ class GuildLogs:
                     for id in self.channels
                     if self.channels[id].is_format()
                 }
-                dt = (datetime.now() - t0).total_seconds()
-                logging.info(f"log {self.guild.id} > loaded in {dt} s")
+                logging.info(f"log {self.guild.id} > loaded in {delta(t0):,}ms")
             except json.decoder.JSONDecodeError:
                 logging.error(f"log {self.guild.id} > invalid JSON")
             except IOError:
@@ -72,7 +80,7 @@ class GuildLogs:
         max_chan = len(target_channels)
         await code_message(
             progress,
-            f"Reading new history...\n0 messages in 0/{max_chan} channels\n(this might take a while)",
+            f"Reading new history...\n0 messages in 0/{max_chan:,} channels\n(this might take a while)",
         )
         for channel in target_channels:
             if channel.id not in self.channels:
@@ -92,41 +100,53 @@ class GuildLogs:
                         warning_msg = (
                             "(some channels are new, this might take a long while)"
                         )
-                    dt = (datetime.now() - t0).total_seconds()
                     await code_message(
                         progress,
-                        f"Reading new history...\n{tmp_msg:,} messages in {total_chan + 1}/{max_chan} channels ({round(tmp_queried_msg/dt)}m/s)\n{warning_msg}",
+                        f"Reading new history...\n{tmp_msg:,} messages in {total_chan + 1:,}/{max_chan:,} channels ({round(tmp_queried_msg/deltas(t0)):,}m/s)\n{warning_msg}",
                     )
                     if done:
                         total_chan += 1
             total_msg += len(self.channels[channel.id].messages)
             queried_msg += count - start_msg
-        dt = (datetime.now() - t0).total_seconds()
         logging.info(
-            f"log {self.guild.id} > queried in {dt} s -> {queried_msg / dt} m/s"
+            f"log {self.guild.id} > queried in {delta(t0):,}ms -> {queried_msg / deltas(t0):,.3f} m/s"
         )
         # write logs
+        real_total_msg = sum(
+            [len(channel.messages) for channel in self.channels.values()]
+        )
+        real_total_chan = len(self.channels)
+        await code_message(
+            progress,
+            f"Saving history (1/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
+        )
         t0 = datetime.now()
-        await code_message(
-            progress,
-            f"Saving history (1/3)...\n{total_msg:,} messages in {total_chan} channels",
-        )
         json_data = bytes(json.dumps(self.dict()), "utf-8")
+        logging.info(
+            f"log {self.guild.id} > json dump in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
+        )
         await code_message(
             progress,
-            f"Saving history (2/3)...\n{total_msg:,} messages in {total_chan} channels",
+            f"Saving history (2/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
         )
+        t0 = datetime.now()
         gziped_data = gzip.compress(json_data)
+        logging.info(
+            f"log {self.guild.id} > gzip in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
+        )
         await code_message(
             progress,
-            f"Saving history (3/3)...\n{total_msg:,} messages in {total_chan} channels",
+            f"Saving history (3/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
         )
+        t0 = datetime.now()
         with open(self.log_file, mode="wb") as f:
             f.write(gziped_data)
-        dt = (datetime.now() - t0).total_seconds()
-        logging.info(f"log {self.guild.id} > written in {dt} s")
-        await code_message(
-            progress, f"Analysing...\n{total_msg:,} messages in {total_chan} channels"
+        logging.info(
+            f"log {self.guild.id} > saved in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
         )
+        await code_message(
+            progress, f"Analysing...\n{total_msg:,} messages in {total_chan:,} channels"
+        )
+        logging.info(f"log {self.guild.id} > TOTAL TIME: {delta(t00):,}ms")
         current_analysis.remove(self.log_file)
         return total_msg, total_chan

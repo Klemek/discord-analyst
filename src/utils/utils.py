@@ -4,6 +4,17 @@ import logging
 import discord
 from datetime import datetime
 
+# OTHER
+
+
+def delta(t0: datetime):
+    return round((datetime.now() - t0).total_seconds() * 1000)
+
+
+def deltas(t0: datetime):
+    return (datetime.now() - t0).total_seconds()
+
+
 # DISCORD API
 
 
