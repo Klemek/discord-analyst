@@ -40,7 +40,7 @@ class Presence:
             ]
             if member_specific:
                 ret += [
-                    f"- **mostly found in**: {channel_mention(found_in)} ({self.channel_usage[found_in]:,} msg, {percent(self.channel_usage[found_in]/self.channel_total[found_in])} of channel's)"
+                    f"- **most contributed channel**: {channel_mention(found_in)} ({self.channel_usage[found_in]:,} msg, {percent(self.channel_usage[found_in]/self.channel_total[found_in])} of channel's)"
                 ]
         if member_specific:
             if len(self.mentions) > 0:
