@@ -26,7 +26,11 @@ class GuildLogs:
         return {id: self.channels[id].dict() for id in self.channels}
 
     async def load(
-        self, progress: discord.Message, target_channels: List[discord.TextChannel] = []
+        self,
+        progress: discord.Message,
+        target_channels: List[discord.TextChannel] = [],
+        *,
+        fast: bool,
     ) -> Tuple[int, int]:
         global current_analysis
         if self.log_file in current_analysis:
@@ -69,83 +73,101 @@ class GuildLogs:
                 logging.error(f"log {self.guild.id} > invalid JSON")
             except IOError:
                 logging.error(f"log {self.guild.id} > cannot read")
-        # load channels
-        t0 = datetime.now()
-        if len(target_channels) == 0:
-            target_channels = self.guild.text_channels
-        loading_new = 0
+
         total_msg = 0
-        queried_msg = 0
         total_chan = 0
-        max_chan = len(target_channels)
-        await code_message(
-            progress,
-            f"Reading new history...\n0 messages in 0/{max_chan:,} channels\n(this might take a while)",
-        )
-        for channel in target_channels:
-            if channel.id not in self.channels:
-                loading_new += 1
-                self.channels[channel.id] = ChannelLogs(channel)
-            start_msg = len(self.channels[channel.id].messages)
-            async for count, done in self.channels[channel.id].load(channel):
-                if count > 0:
-                    tmp_queried_msg = queried_msg + count - start_msg
-                    tmp_msg = total_msg + count
-                    warning_msg = "(this might take a while)"
-                    if len(target_channels) > 5 and loading_new > 5:
-                        warning_msg = (
-                            "(most channels are new, this might take a looong while)"
+        if fast:
+            if len(target_channels) == 0:
+                total_msg = sum(
+                    [len(channel.messages) for channel in self.channels.values()]
+                )
+                total_chan = len(self.channels)
+            else:
+                target_channels_id = [channel.id for channel in target_channels]
+                total_msg = sum(
+                    [
+                        len(channel.messages)
+                        for channel in self.channels.values()
+                        if channel.id in target_channels_id
+                    ]
+                )
+                total_chan = len(target_channels)
+        else:
+            # load channels
+            t0 = datetime.now()
+            if len(target_channels) == 0:
+                target_channels = self.guild.text_channels
+            loading_new = 0
+            queried_msg = 0
+            total_chan = 0
+            max_chan = len(target_channels)
+            await code_message(
+                progress,
+                f"Reading new history...\n0 messages in 0/{max_chan:,} channels\n(this might take a while)",
+            )
+            for channel in target_channels:
+                if channel.id not in self.channels:
+                    loading_new += 1
+                    self.channels[channel.id] = ChannelLogs(channel)
+                start_msg = len(self.channels[channel.id].messages)
+                async for count, done in self.channels[channel.id].load(channel):
+                    if count > 0:
+                        tmp_queried_msg = queried_msg + count - start_msg
+                        tmp_msg = total_msg + count
+                        warning_msg = "(this might take a while)"
+                        if len(target_channels) > 5 and loading_new > 5:
+                            warning_msg = "(most channels are new, this might take a looong while)"
+                        elif loading_new > 0:
+                            warning_msg = (
+                                "(some channels are new, this might take a long while)"
+                            )
+                        await code_message(
+                            progress,
+                            f"Reading new history...\n{tmp_msg:,} messages in {total_chan + 1:,}/{max_chan:,} channels ({round(tmp_queried_msg/deltas(t0)):,}m/s)\n{warning_msg}",
                         )
-                    elif loading_new > 0:
-                        warning_msg = (
-                            "(some channels are new, this might take a long while)"
-                        )
-                    await code_message(
-                        progress,
-                        f"Reading new history...\n{tmp_msg:,} messages in {total_chan + 1:,}/{max_chan:,} channels ({round(tmp_queried_msg/deltas(t0)):,}m/s)\n{warning_msg}",
-                    )
-                    if done:
-                        total_chan += 1
-            total_msg += len(self.channels[channel.id].messages)
-            queried_msg += count - start_msg
-        logging.info(
-            f"log {self.guild.id} > queried in {delta(t0):,}ms -> {queried_msg / deltas(t0):,.3f} m/s"
-        )
-        # write logs
-        real_total_msg = sum(
-            [len(channel.messages) for channel in self.channels.values()]
-        )
-        real_total_chan = len(self.channels)
+                        if done:
+                            total_chan += 1
+                total_msg += len(self.channels[channel.id].messages)
+                queried_msg += count - start_msg
+            logging.info(
+                f"log {self.guild.id} > queried in {delta(t0):,}ms -> {queried_msg / deltas(t0):,.3f} m/s"
+            )
+            # write logs
+            real_total_msg = sum(
+                [len(channel.messages) for channel in self.channels.values()]
+            )
+            real_total_chan = len(self.channels)
+            await code_message(
+                progress,
+                f"Saving history (1/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
+            )
+            t0 = datetime.now()
+            json_data = bytes(json.dumps(self.dict()), "utf-8")
+            logging.info(
+                f"log {self.guild.id} > json dump in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
+            )
+            await code_message(
+                progress,
+                f"Saving history (2/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
+            )
+            t0 = datetime.now()
+            gziped_data = gzip.compress(json_data)
+            logging.info(
+                f"log {self.guild.id} > gzip in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
+            )
+            await code_message(
+                progress,
+                f"Saving history (3/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
+            )
+            t0 = datetime.now()
+            with open(self.log_file, mode="wb") as f:
+                f.write(gziped_data)
+            logging.info(
+                f"log {self.guild.id} > saved in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
+            )
         await code_message(
             progress,
-            f"Saving history (1/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
-        )
-        t0 = datetime.now()
-        json_data = bytes(json.dumps(self.dict()), "utf-8")
-        logging.info(
-            f"log {self.guild.id} > json dump in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
-        )
-        await code_message(
-            progress,
-            f"Saving history (2/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
-        )
-        t0 = datetime.now()
-        gziped_data = gzip.compress(json_data)
-        logging.info(
-            f"log {self.guild.id} > gzip in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
-        )
-        await code_message(
-            progress,
-            f"Saving history (3/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
-        )
-        t0 = datetime.now()
-        with open(self.log_file, mode="wb") as f:
-            f.write(gziped_data)
-        logging.info(
-            f"log {self.guild.id} > saved in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
-        )
-        await code_message(
-            progress, f"Analysing...\n{total_msg:,} messages in {total_chan:,} channels"
+            f"Analysing...\n{total_msg:,} messages in {total_chan:,} channels",
         )
         logging.info(f"log {self.guild.id} > TOTAL TIME: {delta(t00):,}ms")
         current_analysis.remove(self.log_file)

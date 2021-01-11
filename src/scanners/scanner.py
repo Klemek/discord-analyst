@@ -44,7 +44,7 @@ class Scanner(ABC):
         str_mentions = [member.mention for member in message.mentions]
         for arg in args[1:]:
             if (
-                arg not in self.valid_args + ["me", "here"]
+                arg not in self.valid_args + ["me", "here", "fast"]
                 and (not arg.isdigit() or not self.has_digit_args)
                 and arg not in str_channel_mentions
                 and arg not in str_mentions
@@ -80,7 +80,9 @@ class Scanner(ABC):
         # Start computing data
         async with message.channel.typing():
             progress = await message.channel.send("```Starting analysis...```")
-            total_msg, total_chan = await logs.load(progress, self.channels)
+            total_msg, total_chan = await logs.load(
+                progress, self.channels, fast="fast" in args
+            )
             if total_msg == -1:
                 await message.channel.send(
                     f"{message.author.mention} An analysis is already running on this server, please be patient."
