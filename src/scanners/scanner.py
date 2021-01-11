@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List
+from datetime import datetime
+import logging
 import discord
 
-from utils import no_duplicate, get_intro
+from utils import no_duplicate, get_intro, delta, deltas
 from logs import GuildLogs, ChannelLogs, MessageLog
 
 
@@ -89,7 +91,9 @@ class Scanner(ABC):
                 )
             else:
                 self.msg_count = 0
+                self.total_msg = 0
                 self.chan_count = 0
+                t0 = datetime.now()
                 for channel in self.channels:
                     channel_logs = logs.channels[channel.id]
                     count = sum(
@@ -98,10 +102,13 @@ class Scanner(ABC):
                             for message_log in channel_logs.messages
                         ]
                     )
+                    self.total_msg += len(channel_logs.messages)
                     self.msg_count += count
                     self.chan_count += 1 if count > 0 else 0
+                logging.info(f"scan {guild.id} > scanned in {delta(t0):,}ms")
                 await progress.edit(content="```Computing results...```")
                 # Display results
+                t0 = datetime.now()
                 results = self.get_results(
                     get_intro(
                         self.intro_context,
@@ -112,6 +119,7 @@ class Scanner(ABC):
                         self.chan_count,
                     )
                 )
+                logging.info(f"scan {guild.id} > results in {delta(t0):,}ms")
                 response = ""
                 for r in results:
                     if len(response + "\n" + r) > 2000:

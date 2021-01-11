@@ -30,12 +30,10 @@ class PresenceScanner(Scanner):
 
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.pres = Presence()
-        self.total_msg = 0
         self.member_specific = len(self.members) > 0
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        self.total_msg += 1
         return PresenceScanner.analyse_message(
             channel, message, self.pres, self.raw_members
         )

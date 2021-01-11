@@ -36,11 +36,9 @@ class FullScanner(Scanner):
         self.compo = Composition()
         self.pres = Presence()
         self.member_specific = len(self.members) > 0
-        self.total_msg = 0
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        self.total_msg += 1
         FrequencyScanner.analyse_message(message, self.freq, self.raw_members)
         CompositionScanner.analyse_message(message, self.compo, self.raw_members)
         PresenceScanner.analyse_message(channel, message, self.pres, self.raw_members)
