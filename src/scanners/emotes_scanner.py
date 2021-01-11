@@ -6,7 +6,7 @@ import discord
 # Custom libs
 
 from logs import ChannelLogs, MessageLog
-from data_types import Emote
+from data_types import Emote, get_emote_dict
 from .scanner import Scanner
 from utils import emojis
 
@@ -49,9 +49,8 @@ class EmotesScanner(Scanner):
             len(self.members) == 0 or len(self.members) > 1
         )
         # Create emotes dict from custom emojis of the guild
-        self.emotes = defaultdict(Emote)
-        for emoji in guild.emojis:
-            self.emotes[str(emoji)] = Emote(emoji)
+        # Create emotes dict from custom emojis of the guild
+        self.emotes = get_emote_dict(message.channel.guild)
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):

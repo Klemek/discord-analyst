@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import datetime
 from collections import defaultdict
 import discord
@@ -77,3 +77,10 @@ class Emote:
             if show_members:
                 output += f" (mostly by {mention(self.get_top_member())}: {self.members[self.get_top_member()]})"
         return output
+
+
+def get_emote_dict(guild: discord.Guild) -> Dict[str, Emote]:
+    emotes = defaultdict(Emote)
+    for emoji in guild.emojis:
+        emotes[str(emoji)] = Emote(emoji)
+    return emotes

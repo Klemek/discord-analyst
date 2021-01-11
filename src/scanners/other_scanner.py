@@ -46,6 +46,7 @@ class OtherScanner(Scanner):
         impacted = False
         # If author is included in the selection (empty list is all)
         if len(raw_members) == 0 or message.author in raw_members:
+            impacted = True
             pass  # TODO
         return impacted
 

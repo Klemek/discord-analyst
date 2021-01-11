@@ -2,7 +2,13 @@ from miniscord import Bot
 import logging
 
 from utils import emojis
-from scanners import EmotesScanner, FrequencyScanner, CompositionScanner, OtherScanner
+from scanners import (
+    EmotesScanner,
+    FullScanner,
+    FrequencyScanner,
+    CompositionScanner,
+    OtherScanner,
+)
 
 logging.basicConfig(
     format="[%(asctime)s][%(levelname)s][%(module)s] %(message)s", level=logging.INFO
@@ -42,6 +48,12 @@ bot.register_command(
     lambda *args: FrequencyScanner().compute(*args),
     "freq: frequency analysis",
     FrequencyScanner.help(),
+)
+bot.register_command(
+    "full",
+    lambda *args: FullScanner().compute(*args),
+    "full: full analysis",
+    FullScanner.help(),
 )
 
 bot.start()
