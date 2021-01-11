@@ -16,8 +16,8 @@ class FrequencyScanner(Scanner):
         return "```\n"
         +"%freq : Show frequency-related statistics\n"
         +"arguments:\n"
-        +"* @member : filter for one or more member\n"
-        +"* #channel : filter for one or more channel\n"
+        +"* @member/me : filter for one or more member\n"
+        +"* #channel/here : filter for one or more channel\n"
         +"Example: %freq #mychannel1 @user\n"
         +"```"
 

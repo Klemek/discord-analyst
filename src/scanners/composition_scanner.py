@@ -17,8 +17,8 @@ class CompositionScanner(Scanner):
         return "```\n"
         +"%comp : Show composition statistics\n"
         +"arguments:\n"
-        +"* @member : filter for one or more member\n"
-        +"* #channel : filter for one or more channel\n"
+        +"* @member/me : filter for one or more member\n"
+        +"* #channel/here : filter for one or more channel\n"
         +"Example: %comp #mychannel1 @user\n"
         +"```"
 

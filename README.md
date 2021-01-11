@@ -10,8 +10,8 @@ When you need statistics about your discord server
 * `%info` - version and uptime
 * `%emotes` : Rank emotes by their usage
   * arguments:
-    * @member : filter for one or more member
-    * #channel : filter for one or more channel
+    * @member/me : filter for one or more member
+    * #channel/here : filter for one or more channel
     * <n> : top <n> emojis, default is 20
     * all : list all common emojis in addition to this guild's
     * members : show top member for each emote

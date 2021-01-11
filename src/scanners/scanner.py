@@ -44,7 +44,7 @@ class Scanner(ABC):
         str_mentions = [member.mention for member in message.mentions]
         for arg in args[1:]:
             if (
-                arg not in self.valid_args
+                arg not in self.valid_args + ["me", "here"]
                 and (not arg.isdigit() or not self.has_digit_args)
                 and arg not in str_channel_mentions
                 and arg not in str_mentions
@@ -56,6 +56,11 @@ class Scanner(ABC):
 
         # Get selected channels or all of them if no channel arguments
         self.channels = no_duplicate(message.channel_mentions)
+
+        # transform the "here" arg
+        if "here" in args:
+            self.channels += [message.channel]
+
         self.full = len(self.channels) == 0
         if self.full:
             self.channels = guild.text_channels
@@ -63,6 +68,11 @@ class Scanner(ABC):
         # Get selected members
         self.members = no_duplicate(message.mentions)
         self.raw_members = no_duplicate(message.raw_mentions)
+
+        # transform the "me" arg
+        if "me" in args:
+            self.members += [message.author]
+            self.raw_members += [message.author.id]
 
         if not await self.init(message, *args):
             return

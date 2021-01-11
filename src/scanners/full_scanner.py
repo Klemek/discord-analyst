@@ -17,8 +17,8 @@ class FullScanner(Scanner):
         return "```\n"
         +"%full : Show full statistics\n"
         +"arguments:\n"
-        +"* @member : filter for one or more member\n"
-        +"* #channel : filter for one or more channel\n"
+        +"* @member/me : filter for one or more member\n"
+        +"* #channel/here : filter for one or more channel\n"
         +"Example: %full #mychannel1 @user\n"
         +"```"
 
@@ -61,6 +61,6 @@ class FullScanner(Scanner):
         res += ["__Other__:"]
         res += self.other.to_string(
             show_top_channel=len(self.channels) > 1,
-            show_mentioned=(len(self.members) != 1),
+            show_mentioned=(len(self.members) > 0),
         )
         return res

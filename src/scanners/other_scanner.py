@@ -16,8 +16,8 @@ class OtherScanner(Scanner):
         return "```\n"
         +"%other : Show other statistics\n"
         +"arguments:\n"
-        +"* @member : filter for one or more member\n"
-        +"* #channel : filter for one or more channel\n"
+        +"* @member/me : filter for one or more member\n"
+        +"* #channel/here : filter for one or more channel\n"
         +"Example: %other #mychannel1 @user\n"
         +"```"
 
