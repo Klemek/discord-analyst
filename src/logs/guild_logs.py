@@ -73,6 +73,8 @@ class GuildLogs:
                 logging.error(f"log {self.guild.id} > invalid JSON")
             except IOError:
                 logging.error(f"log {self.guild.id} > cannot read")
+        else:
+            fast = False
 
         total_msg = 0
         total_chan = 0
