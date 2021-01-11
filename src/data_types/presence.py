@@ -50,17 +50,19 @@ class Presence:
                     f"- **was mentioned**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of server's)",
                     f"- **mostly mentioned by**: {mention(top_mention)} ({plural(self.mentions[top_mention], 'time')}, {percent(self.mentions[top_mention]/mention_sum)})",
                 ]
-            else:
-                ret += ["- **was mentioned**: 0 times"]
-            if len(self.mention_others) > 0:
-                top_mention = top_key(self.mention_others)
-                mention_sum = sum(self.mention_others.values())
+        if len(self.mention_others) > 0:
+            top_mention = top_key(self.mention_others)
+            mention_sum = sum(self.mention_others.values())
+            if member_specific:
                 ret += [
                     f"- **mentioned others**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of server's)",
                     f"- **mostly mentioned**: {mention(top_mention)} ({plural(self.mention_others[top_mention], 'time')}, {percent(self.mention_others[top_mention]/mention_sum)})",
                 ]
             else:
-                ret += ["- **was mentioned**: 0 times"]
+                ret += [
+                    f"- **mentioned**: {plural(mention_sum, 'time')}",
+                    f"- **most mentioned**: {mention(top_mention)} ({plural(self.mention_others[top_mention], 'time')}, {percent(self.mention_others[top_mention]/mention_sum)})",
+                ]
 
         if len(self.reactions) > 0:
             total_used = sum(self.reactions.values())
@@ -73,6 +75,4 @@ class Presence:
                 ret[
                     -2
                 ] += f" ({percent(total_used/self.used_reaction_total)} of server's)"
-        else:
-            ret += ["- **reactions**: 0 times"]
         return ret
