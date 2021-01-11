@@ -35,9 +35,13 @@ class FullScanner(Scanner):
         self.freq = Frequency()
         self.comp = Composition()
         self.pres = Presence()
-        # Create emotes dict from custom emojis of the guild
+        self.member_specific = len(self.members) > 0
         # Create emotes dict from custom emojis of the guild
         self.emotes = get_emote_dict(message.channel.guild)
+        if self.member_specific:
+            self.emotes_all = get_emote_dict(message.channel.guild)
+        else:
+            self.emotes_all = {}
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
@@ -47,6 +51,8 @@ class FullScanner(Scanner):
         EmotesScanner.analyse_message(
             message, self.emotes, self.raw_members, all_emojis=True
         )
+        if self.member_specific:
+            EmotesScanner.analyse_message(message, self.emotes_all, [], all_emojis=True)
         return not message.bot and (
             len(self.raw_members) == 0 or message.author in self.raw_members
         )
@@ -54,7 +60,7 @@ class FullScanner(Scanner):
     def get_results(self, intro: str) -> List[str]:
         FrequencyScanner.compute_results(self.freq)
         CompositionScanner.compute_results(self.comp, self.emotes)
-        PresenceScanner.compute_results(self.pres, self.emotes)
+        PresenceScanner.compute_results(self.pres, self.emotes, self.emotes_all)
         res = [intro]
         res += ["__Frequency__:"]
         res += self.freq.to_string()
@@ -63,6 +69,6 @@ class FullScanner(Scanner):
         res += ["__Presence__:"]
         res += self.pres.to_string(
             show_top_channel=len(self.channels) > 1,
-            show_mentioned=(len(self.members) > 0),
+            member_specific=self.member_specific,
         )
         return res
