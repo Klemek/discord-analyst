@@ -25,7 +25,7 @@ bot = Bot(
 bot.log_calls = True
 
 bot.register_command(
-    "emojis",
+    "(emojis?|emotes?)",
     lambda *args: EmotesScanner().compute(*args),
     "emojis: emojis analysis",
     EmotesScanner.help(),
