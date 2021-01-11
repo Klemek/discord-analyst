@@ -26,7 +26,7 @@ class Presence:
         ret = []
         if member_specific:
             ret += [
-                f"- **messages**: {msg_count} ({percent(msg_count/total_msg)} of server's)"
+                f"- **messages**: {msg_count:,} ({percent(msg_count/total_msg)} of server's)"
             ]
         if show_top_channel:
             top_channel = top_key(self.channel_usage)

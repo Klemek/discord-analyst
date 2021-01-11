@@ -33,11 +33,11 @@ class Composition:
             ]
         if self.edited > 0:
             ret += [
-                f"- **edited messages**: {self.edited} ({percent(self.edited/msg_count)})"
+                f"- **edited messages**: {self.edited:,} ({percent(self.edited/msg_count)})"
             ]
         if self.everyone > 0:
             ret += [
-                f"- **everyone**: {self.everyone} ({percent(self.everyone/msg_count)})"
+                f"- **everyone**: {self.everyone:,} ({percent(self.everyone/msg_count)})"
             ]
         if self.mentions > 0:
             ret += [
@@ -45,7 +45,7 @@ class Composition:
             ]
         if self.answers > 0:
             ret += [
-                f"- **answers**: {self.answers} ({percent(self.answers/msg_count)})"
+                f"- **answers**: {self.answers:,} ({percent(self.answers/msg_count)})"
             ]
         total_emotes = sum(self.emotes.values())
         if total_emotes > 0:
@@ -59,15 +59,13 @@ class Composition:
                     f"- **emoji-only messages**: {self.emote_only:,} ({percent(self.emote_only/msg_count)})"
                 ]
         if self.images > 0:
-            ret += [f"- **images**: {self.images} ({percent(self.images/msg_count)})"]
+            ret += [f"- **images**: {self.images:,} ({percent(self.images/msg_count)})"]
         if self.links > 0:
-            ret += [
-                f"- **links**: {self.links} (in {percent(self.link_msg/msg_count)} of msg, avg. {precise(self.links/msg_count)}/msg)"
-            ]
+            ret += [f"- **links**: {self.links:,} ({percent(self.link_msg/msg_count)})"]
         if self.spoilers > 0:
             ret += [
-                f"- **spoilers**: {self.spoilers} ({percent(self.spoilers/msg_count)})"
+                f"- **spoilers**: {self.spoilers:,} ({percent(self.spoilers/msg_count)})"
             ]
         if self.tts > 0:
-            ret += [f"- **tts messages**: {self.tts} ({percent(self.tts/msg_count)})"]
+            ret += [f"- **tts messages**: {self.tts:,} ({percent(self.tts/msg_count)})"]
         return ret
