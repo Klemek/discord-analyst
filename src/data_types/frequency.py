@@ -1,5 +1,6 @@
 from typing import List
 from datetime import timedelta
+import calendar
 
 from utils import str_date, str_datetime, from_now
 
@@ -9,16 +10,35 @@ class Frequency:
         self.dates = []
         self.longest_break = timedelta(seconds=0)
         self.longest_break_start = None
+        self.week = {i: 0 for i in range(7)}
+        self.day = {i: 0 for i in range(24)}
+        self.busiest_day = None
+        self.busiest_day_count = 0
+        self.busiest_hour = None
+        self.busiest_hour_count = 0
 
     def to_string(self) -> List[str]:
+        delta = self.dates[-1] - self.dates[0]
+        total_msg = len(self.dates)
+        busiest_weekday = sorted(self.week.keys(), key=lambda k: self.week[k])[-1]
+        busiest_hour = sorted(self.day.keys(), key=lambda k: self.day[k])[-1]
+        n_weekdays = delta.days // 7
+        if (
+            self.dates[0].weekday() <= busiest_weekday
+            and self.dates[-1].weekday() >= busiest_weekday
+        ):
+            n_weekdays += 1
+        n_hours = delta.days
+        if self.dates[0].hour <= busiest_hour and self.dates[-1].hour >= busiest_hour:
+            n_hours += 1
         return [
-            f"**earliest message:** {str_datetime(self.dates[0])} ({from_now(self.dates[0])})",
-            f"**latest message:** {str_datetime(self.dates[-1])} ({from_now(self.dates[-1])})",
-            # "**msg/day:** n",
-            # "**busiest day of week:** dd (avg. n msg)",
-            # "**busiest day ever:** jj/mm/yyyy (n days ago) (n msg)",
-            # "**msg/hour:** n",
-            # "**busiest hour of day:** hh (avg. n msg)",
-            # "**busiest hour ever:** hh jj/mm/yyyy (n days ago) (n msg)",
-            f"**longest break:** {int(self.longest_break.total_seconds() / 3600):,} hours ({int(self.longest_break.days):,} days) from {str_datetime(self.longest_break_start)} ({from_now(self.longest_break_start)})",
+            f"- **earliest message**: {str_datetime(self.dates[0])} ({from_now(self.dates[0])})",
+            f"- **latest message**: {str_datetime(self.dates[-1])} ({from_now(self.dates[-1])})",
+            f"- **messages/day**: {total_msg/delta.days:,.2f}",
+            f"- **busiest day of week**: {calendar.day_name[busiest_weekday]} (~{self.week[busiest_weekday]/n_weekdays:,.2f} msg) ({round(100*self.week[busiest_weekday]/total_msg)}%)",
+            f"- **busiest day ever**: {str_date(self.busiest_day)} ({from_now(self.busiest_day)}) ({self.busiest_day_count} msg)",
+            f"- **messages/hour**: {total_msg*3600/delta.total_seconds():,.2f}",
+            f"- **busiest hour of day**: {busiest_hour:0>2}:00 (~{self.day[busiest_hour]/n_hours:,.2f} msg) ({round(100*self.day[busiest_hour]/total_msg)}%)",
+            f"- **busiest hour ever**: {str_datetime(self.busiest_hour)} ({from_now(self.busiest_hour)}) ({self.busiest_hour_count} msg)",
+            f"- **longest break**: {self.longest_break.total_seconds()//3600:,.0f} hours ({self.longest_break.days:,} days) from {str_datetime(self.longest_break_start)} ({from_now(self.longest_break_start)})",
         ]

@@ -55,9 +55,38 @@ class FrequencyScanner(Scanner):
     def compute_results(freq: Frequency):
         freq.dates.sort()
         latest = freq.dates[0]
+        current_day = 0
+        current_day_date = freq.dates[0]
+        current_day_count = 0
+        current_hour_buffer = []
         for date in freq.dates:
+            # calculate longest break
             delay = date - latest
             if delay > freq.longest_break:
                 freq.longest_break = delay
                 freq.longest_break_start = latest
             latest = date
+            # calculate busiest weekday / hours
+            freq.week[date.weekday()] += 1
+            freq.day[date.hour] += 1
+            # calculate busiest day ever
+            start_delta = date - freq.dates[0]
+            if start_delta.days > current_day:
+                if current_day_count > freq.busiest_day_count:
+                    freq.busiest_day_count = current_day_count
+                    freq.busiest_day = current_day_date
+                current_day = start_delta.days
+                current_day_date = date
+                current_day_count = 0
+            else:
+                current_day_count += 1
+            # calculate busiest hour ever
+            while (
+                len(current_hour_buffer) > 0
+                and (date - current_hour_buffer[0]).total_seconds() > 3600
+            ):
+                current_hour_buffer.pop(0)
+            current_hour_buffer += [date]
+            if len(current_hour_buffer) > freq.busiest_hour_count:
+                freq.busiest_hour = current_hour_buffer[0]
+                freq.busiest_hour_count = len(current_hour_buffer)
