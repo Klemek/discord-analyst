@@ -44,15 +44,13 @@ class Scanner(ABC):
             return
 
         # check args validity
-        str_channel_mentions = [channel.mention for channel in message.channel_mentions]
-        str_mentions = [member.mention for member in message.mentions]
+        str_channel_mentions = [channel.id for channel in message.channel_mentions]
+        str_mentions = [member.id for member in message.mentions]
         for i, arg in enumerate(args[1:]):
-            if re.match(r"^<@!\d+>$", arg):
-                arg = mention(arg[3:-1])
-                args[i + 1] = arg
-            if re.match(r"^<#!\d+>$", arg):
-                arg = channel_mention(arg[3:-1])
-                args[i + 1] = arg
+            if re.match(r"^<@!?\d+>$", arg):
+                arg = arg[3:-1] if "!" in arg else arg[2:-1]
+            if re.match(r"^<#!?\d+>$", arg):
+                arg = arg[3:-1] if "!" in arg else arg[2:-1]
             if (
                 arg not in self.valid_args + ["me", "here", "fast"]
                 and (not arg.isdigit() or not self.has_digit_args)
