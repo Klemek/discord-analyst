@@ -18,12 +18,18 @@ class MessageLog:
             self.pinned = message.pinned
             self.mention_everyone = message.mention_everyone
             self.tts = message.tts
-            self.reference = (
-                message.reference.message_id if message.reference is not None else None
-            )
             self.bot = message.author.bot or message.author.system
             self.content = message.content
             self.mentions = message.raw_mentions
+            if message.reference is not None:
+                self.reference = message.reference.message_id
+                if message.reference.resolved is not None:
+                    try:
+                        self.mentions += [message.reference.resolved.author.id]
+                    except AttributeError:
+                        pass
+            else:
+                self.reference = None
             self.role_mentions = message.raw_role_mentions
             self.channel_mentions = message.raw_channel_mentions
             self.image = False
