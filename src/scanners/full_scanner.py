@@ -15,12 +15,14 @@ from utils import COMMON_HELP_ARGS
 class FullScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return "```\n"
-        +"%full : Show full statistics\n"
-        +"arguments:\n"
-        +COMMON_HELP_ARGS
-        +"Example: %full #mychannel1 @user\n"
-        +"```"
+        return (
+            "```\n"
+            + "%full : Show full statistics\n"
+            + "arguments:\n"
+            + COMMON_HELP_ARGS
+            + "Example: %full #mychannel1 @user\n"
+            + "```"
+        )
 
     def __init__(self):
         super().__init__(

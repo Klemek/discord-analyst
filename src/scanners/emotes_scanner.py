@@ -14,15 +14,17 @@ from utils import emojis, COMMON_HELP_ARGS
 class EmotesScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return "```\n"
-        +"%emotes : Rank emotes by their usage\n"
-        +"arguments:\n"
-        +COMMON_HELP_ARGS
-        +"* <n> : top <n> emojis, default is 20\n"
-        +"* all : list all common emojis in addition to this guild's\n"
-        +"* members : show top member for each emote\n"
-        +"Example: %emotes 10 all #mychannel1 #mychannel2 @user\n"
-        +"```"
+        return (
+            "```\n"
+            + "%emotes : Rank emotes by their usage\n"
+            + "arguments:\n"
+            + COMMON_HELP_ARGS
+            + "* <n> : top <n> emojis, default is 20\n"
+            + "* all : list all common emojis in addition to this guild's\n"
+            + "* members : show top member for each emote\n"
+            + "Example: %emotes 10 all #mychannel1 #mychannel2 @user\n"
+            + "```"
+        )
 
     def __init__(self):
         super().__init__(

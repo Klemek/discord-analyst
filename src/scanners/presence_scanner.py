@@ -14,12 +14,14 @@ from utils import COMMON_HELP_ARGS
 class PresenceScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return "```\n"
-        +"%pres : Show presence statistics\n"
-        +"arguments:\n"
-        +COMMON_HELP_ARGS
-        +"Example: %pres #mychannel1 @user\n"
-        +"```"
+        return (
+            "```\n"
+            + "%pres : Show presence statistics\n"
+            + "arguments:\n"
+            + COMMON_HELP_ARGS
+            + "Example: %pres #mychannel1 @user\n"
+            + "```"
+        )
 
     def __init__(self):
         super().__init__(

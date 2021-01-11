@@ -14,12 +14,14 @@ from utils import COMMON_HELP_ARGS
 class FrequencyScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return "```\n"
-        +"%freq : Show frequency-related statistics\n"
-        +"arguments:\n"
-        +COMMON_HELP_ARGS
-        +"Example: %freq #mychannel1 @user\n"
-        +"```"
+        return (
+            "```\n"
+            + "%freq : Show frequency-related statistics\n"
+            + "arguments:\n"
+            + COMMON_HELP_ARGS
+            + "Example: %freq #mychannel1 @user\n"
+            + "```"
+        )
 
     def __init__(self):
         super().__init__(

@@ -15,12 +15,14 @@ from utils import COMMON_HELP_ARGS
 class CompositionScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return "```\n"
-        +"%comp : Show composition statistics\n"
-        +"arguments:\n"
-        +COMMON_HELP_ARGS
-        +"Example: %comp #mychannel1 @user\n"
-        +"```"
+        return (
+            "```\n"
+            + "%comp : Show composition statistics\n"
+            + "arguments:\n"
+            + COMMON_HELP_ARGS
+            + "Example: %comp #mychannel1 @user\n"
+            + "```"
+        )
 
     def __init__(self):
         super().__init__(
