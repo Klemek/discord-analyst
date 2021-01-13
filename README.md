@@ -27,7 +27,7 @@ When you need statistics about your discord server
 * `%mentioned` - rank specific user mentions by their usage
   * arguments:
     * `<n>` - top <n> mentions, default is 10
-    * `all` - show role/channel/everyone/here mentions
+    * `all` - include bots mentions
 * `%cancel` - cancel current analysis
 
 * Common arguments:
