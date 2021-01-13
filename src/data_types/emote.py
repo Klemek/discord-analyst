@@ -5,7 +5,7 @@ import discord
 
 # Custom libs
 
-from utils import mention, plural, from_now, top_key
+from utils import mention, plural, from_now, top_key, percent
 
 
 class Emote:
@@ -32,12 +32,16 @@ class Emote:
     def used(self) -> bool:
         return self.usages > 0 or self.reactions > 0
 
-    def score(self) -> float:
+    def score(self, *, usage_weight: int = 1, react_weight: int = 1) -> float:
         # Score is compose of usages + reactions
         # When 2 emotes have the same score,
         # the days since last use is stored in the digits
         # (more recent first)
-        return self.usages + self.reactions + 1 / (100000 * (self.use_days() + 1))
+        return (
+            self.usages * usage_weight
+            + self.reactions * react_weight
+            + 1 / (100000 * (self.use_days() + 1))
+        )
 
     def life_days(self) -> int:
         return (datetime.today() - self.emoji.created_at).days
@@ -52,7 +56,16 @@ class Emote:
     def get_top_member(self) -> int:
         return top_key(self.members)
 
-    def to_string(self, i: int, name: str, show_life: bool, show_members: bool) -> str:
+    def to_string(
+        self,
+        i: int,
+        name: str,
+        *,
+        total_usage: int,
+        total_react: int,
+        show_life: bool,
+        show_members: bool,
+    ) -> str:
         # place
         output = ""
         if i == 0:
@@ -65,17 +78,19 @@ class Emote:
             output += f"**#{i + 1}**"
         output += f" {name} - "
         if not self.used():
-            output += "never used "
+            output += "never used"
         else:
-            output += f"{plural(self.usages, 'time')} "
-        if self.reactions >= 1:
-            output += f"and {plural(self.reactions, 'reaction')} "
-        if show_life and not self.default:
-            output += f"(in {plural(self.life_days(), 'day')}) "
-        if self.used():
-            output += f"(last used {from_now(self.last_used)})"
+            if self.usages > 0:
+                output += f"{plural(self.usages, 'time')} ({percent(self.usages/total_usage)})"
+            if self.usages > 0 and self.reactions > 0:
+                output += " and "
+            if self.reactions >= 1:
+                output += f"{plural(self.reactions, 'reaction')} ({percent(self.reactions/total_react)})"
+            output += f" (last used {from_now(self.last_used)})"
             if show_members:
                 output += f" (mostly by {mention(self.get_top_member())}: {self.members[self.get_top_member()]})"
+        if show_life and not self.default:
+            output += f" (in {plural(self.life_days(), 'day')})"
         return output
 
 

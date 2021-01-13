@@ -22,6 +22,7 @@ class EmotesScanner(Scanner):
             + "* <n> : top <n> emojis, default is 20\n"
             + "* all : list all common emojis in addition to this guild's\n"
             + "* members : show top member for each emojis\n"
+            + "* sort:usage/reaction : other sorting methods\n"
             + "Example: %emojis 10 all #mychannel1 #mychannel2 @user\n"
             + "```"
         )
@@ -29,7 +30,7 @@ class EmotesScanner(Scanner):
     def __init__(self):
         super().__init__(
             has_digit_args=True,
-            valid_args=["all", "members"],
+            valid_args=["all", "members", "sort:usage", "sort:reaction"],
             help=EmotesScanner.help(),
             intro_context="Emoji usage",
         )
@@ -51,6 +52,11 @@ class EmotesScanner(Scanner):
         )
         # Create emotes dict from custom emojis of the guild
         self.emotes = get_emote_dict(guild)
+        self.sort = None
+        if "sort:usage" in args:
+            self.sort = "usage"
+        elif "sort:reaction" in args:
+            self.sort = "reaction"
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
@@ -60,23 +66,36 @@ class EmotesScanner(Scanner):
 
     def get_results(self, intro: str) -> List[str]:
         names = [name for name in self.emotes]
-        names.sort(key=lambda name: self.emotes[name].score(), reverse=True)
+        names.sort(
+            key=lambda name: self.emotes[name].score(
+                usage_weight=(0 if self.sort == "reaction" else 1),
+                react_weight=(0 if self.sort == "usage" else 1),
+            ),
+            reverse=True,
+        )
         names = names[: self.top]
-        res = [intro]
-        allow_unused = self.full and len(self.members) == 0
-        res += [
-            self.emotes[name].to_string(
-                names.index(name), name, False, self.show_members
-            )
-            for name in names
-            if allow_unused or self.emotes[name].used()
-        ]
         # Get the total of all emotes used
         usage_count = 0
         reaction_count = 0
         for name in self.emotes:
             usage_count += self.emotes[name].usages
             reaction_count += self.emotes[name].reactions
+        res = [intro]
+        allow_unused = self.full and len(self.members) == 0
+        if self.sort is not None:
+            res += [f"(Sorted by {self.sort})"]
+        res += [
+            self.emotes[name].to_string(
+                names.index(name),
+                name,
+                total_usage=usage_count,
+                total_react=reaction_count,
+                show_life=False,
+                show_members=self.show_members,
+            )
+            for name in names
+            if allow_unused or self.emotes[name].used()
+        ]
         res += [
             f"Total: {plural(usage_count,'time')} ({precise(usage_count/self.msg_count)}/msg)"
         ]
