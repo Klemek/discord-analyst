@@ -37,7 +37,7 @@ class Composition:
             ]
         if self.everyone > 0:
             ret += [
-                f"- **everyone**: {self.everyone:,} ({percent(self.everyone/msg_count)})"
+                f"- **@\u200beveryone**: {self.everyone:,} ({percent(self.everyone/msg_count)})"
             ]
         if self.mentions > 0:
             ret += [
