@@ -8,6 +8,7 @@ from scanners import (
     FrequencyScanner,
     CompositionScanner,
     PresenceScanner,
+    MentionsScanner,
 )
 from logs import GuildLogs
 
@@ -29,12 +30,18 @@ bot.register_command(
     "(cancel|stop)",
     GuildLogs.cancel,
     "cancel: stop current analysis",
-    "",
+    "```\n" + "%cancel : Stop current analysis\n" + "```",
+)
+bot.register_command(
+    "(mentions?)",
+    lambda *args: MentionsScanner().compute(*args),
+    "mentions: rank mentions by their usage",
+    MentionsScanner.help(),
 )
 bot.register_command(
     "(emojis?|emotes?)",
     lambda *args: EmotesScanner().compute(*args),
-    "emojis: emojis analysis",
+    "emojis: rank emojis by their usage",
     EmotesScanner.help(),
 )
 bot.register_command(

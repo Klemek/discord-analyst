@@ -38,6 +38,14 @@ def mention(member_id: int) -> str:
     return f"<@{member_id}>"
 
 
+def alt_mention(member_id: int) -> str:
+    return f"<@!{member_id}>"
+
+
+def role_mention(role_id: int) -> str:
+    return f"<@&{role_id}>"
+
+
 def channel_mention(channel_id: int) -> str:
     return f"<#{channel_id}>"
 

@@ -46,7 +46,6 @@ class Scanner(ABC):
         # check args validity
         str_channel_mentions = [str(channel.id) for channel in message.channel_mentions]
         str_mentions = [str(member.id) for member in message.mentions]
-        print(str_mentions)
         for i, arg in enumerate(args[1:]):
             if re.match(r"^<@!?\d+>$", arg):
                 arg = arg[3:-1] if "!" in arg else arg[2:-1]

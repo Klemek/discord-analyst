@@ -19,6 +19,12 @@ When you need statistics about your discord server
     * <n> : top <n> emojis, default is 20
     * all : list all common emojis in addition to this guild's
     * members : show top member for each emote
+    * sort:usage/reaction : other sorting methods
+* `%mentions`: rank mentions by their usage
+  * arguments:
+    * <n> : top <n> mentions, default is 10
+    * all : show role/channel/everyone/here mentions
+* `%cancel` : cancel current analysis
 
 * Common arguments:
     * @member/me : filter for one or more member
@@ -64,6 +70,7 @@ python3 src/main.py
   * emojis percents
   * emojis other sorting
   * mentions ranking
+  * cancel
 * **v1.6**:
   * more scans : `%scan`, `%freq`, `%compo`, `%pres`
   * huge bug fix
