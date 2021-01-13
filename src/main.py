@@ -9,6 +9,7 @@ from scanners import (
     CompositionScanner,
     PresenceScanner,
 )
+from logs import GuildLogs
 
 logging.basicConfig(
     format="[%(asctime)s][%(levelname)s][%(module)s] %(message)s", level=logging.INFO
@@ -24,6 +25,12 @@ bot = Bot(
 
 bot.log_calls = True
 
+bot.register_command(
+    "(cancel|stop)",
+    GuildLogs.cancel,
+    "cancel: stop current analysis",
+    "",
+)
 bot.register_command(
     "(emojis?|emotes?)",
     lambda *args: EmotesScanner().compute(*args),

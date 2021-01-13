@@ -6,7 +6,7 @@ import re
 import discord
 
 from utils import no_duplicate, get_intro, delta, deltas, mention, channel_mention
-from logs import GuildLogs, ChannelLogs, MessageLog
+from logs import GuildLogs, ChannelLogs, MessageLog, ALREADY_RUNNING, CANCELLED
 
 
 class Scanner(ABC):
@@ -94,9 +94,14 @@ class Scanner(ABC):
             total_msg, total_chan = await logs.load(
                 progress, self.channels, fast="fast" in args
             )
-            if total_msg == -1:
+            if total_msg == CANCELLED:
                 await message.channel.send(
-                    f"An analysis is already running on this server, please be patient.",
+                    "Operation cancelled by user",
+                    reference=message,
+                )
+            elif total_msg == ALREADY_RUNNING:
+                await message.channel.send(
+                    "An analysis is already running on this server, please be patient.",
                     reference=message,
                 )
             else:
