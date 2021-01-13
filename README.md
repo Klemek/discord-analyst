@@ -70,10 +70,10 @@ python3 src/main.py
 
 ## Changelog
 
-* **v1.7(wip)**:
+* **v1.7**:
   * emojis percents
   * emojis other sorting
-  * mentions ranking
+  * mentions/mentioned ranking
   * cancel
 * **v1.6**:
   * more scans : `%scan`, `%freq`, `%compo`, `%pres`
