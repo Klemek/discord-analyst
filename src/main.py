@@ -9,6 +9,7 @@ from scanners import (
     CompositionScanner,
     PresenceScanner,
     MentionsScanner,
+    MentionedScanner,
 )
 from logs import GuildLogs
 
@@ -31,6 +32,12 @@ bot.register_command(
     GuildLogs.cancel,
     "cancel: stop current analysis",
     "```\n" + "%cancel : Stop current analysis\n" + "```",
+)
+bot.register_command(
+    "(mentioned)",
+    lambda *args: MentionedScanner().compute(*args),
+    "mentioned: rank specific user mentions by their usage",
+    MentionedScanner.help(),
 )
 bot.register_command(
     "(mentions?)",

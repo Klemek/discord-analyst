@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 import os
 import logging
 import discord
@@ -135,7 +135,9 @@ def str_datetime(date: datetime) -> str:
     return date.strftime("%H:%M, %d %b. %Y")  # 12:05, 12 Jun. 2018
 
 
-def from_now(src: datetime) -> str:
+def from_now(src: Optional[datetime]) -> str:
+    if src is None:
+        return "never"
     delay = datetime.utcnow() - src
     seconds = delay.seconds
     minutes = seconds // 60
