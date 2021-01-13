@@ -16,13 +16,13 @@ class EmotesScanner(Scanner):
     def help() -> str:
         return (
             "```\n"
-            + "%emojis : Rank emojis by their usage\n"
+            + "%emojis: Rank emojis by their usage\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
-            + "* <n> : top <n> emojis, default is 20\n"
-            + "* all : list all common emojis in addition to this guild's\n"
-            + "* members : show top member for each emojis\n"
-            + "* sort:usage/reaction : other sorting methods\n"
+            + "* <n> - top <n> emojis, default is 20\n"
+            + "* all - list all common emojis in addition to this guild's\n"
+            + "* members - show top member for each emojis\n"
+            + "* sort:usage/reaction - other sorting methods\n"
             + "Example: %emojis 10 all #mychannel1 #mychannel2 @user\n"
             + "```"
         )

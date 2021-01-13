@@ -15,7 +15,7 @@ class PresenceScanner(Scanner):
     def help() -> str:
         return (
             "```\n"
-            + "%pres : Show presence statistics\n"
+            + "%pres: Show presence statistics\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
             + "Example: %pres #mychannel1 @user\n"

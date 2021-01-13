@@ -9,9 +9,9 @@ from datetime import datetime
 
 COMMON_HELP_ARGS = (
     ""
-    + "* @member/me : filter for one or more member\n"
-    + "* #channel/here : filter for one or more channel\n"
-    + "* fast: only read cache\n"
+    + "* @member/me - filter for one or more member\n"
+    + "* #channel/here - filter for one or more channel\n"
+    + "* fast - only read cache\n"
 )
 
 

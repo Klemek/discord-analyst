@@ -24,11 +24,11 @@ class MentionsScanner(Scanner):
     def help() -> str:
         return (
             "```\n"
-            + "%mentions : Rank mentions by their usage\n"
+            + "%mentions: Rank mentions by their usage\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
-            + "* <n> : top <n> mentions, default is 10\n"
-            + "* all : show role/channel/everyone/here mentions\n"
+            + "* <n> - top <n> mentions, default is 10\n"
+            + "* all - show role/channel/everyone/here mentions\n"
             + "Example: %mentions 10 #mychannel1 #mychannel2 @user\n"
             + "```"
         )

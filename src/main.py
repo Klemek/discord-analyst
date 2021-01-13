@@ -31,10 +31,10 @@ bot.register_command(
     "(cancel|stop)",
     GuildLogs.cancel,
     "cancel: stop current analysis",
-    "```\n" + "%cancel : Stop current analysis\n" + "```",
+    "```\n" + "%cancel: Stop current analysis\n" + "```",
 )
 bot.register_command(
-    "(mentioned)",
+    "mentioned",
     lambda *args: MentionedScanner().compute(*args),
     "mentioned: rank specific user mentions by their usage",
     MentionedScanner.help(),

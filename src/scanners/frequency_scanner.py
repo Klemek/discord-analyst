@@ -16,7 +16,7 @@ class FrequencyScanner(Scanner):
     def help() -> str:
         return (
             "```\n"
-            + "%freq : Show frequency-related statistics\n"
+            + "%freq: Show frequency-related statistics\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
             + "Example: %freq #mychannel1 @user\n"

@@ -10,21 +10,25 @@ When you need statistics about your discord server
 
 * `%help (command)` - info about commands
 * `%info` - version and uptime
-* `%scan`: full analysis
-* `%freq`: frequency analysis
-* `%compo`: composition analysis
-* `%pres`: presence analysis
-* `%emojis` : rank emotes by their usage
+* `%scan` - full analysis
+* `%freq` - frequency analysis
+* `%compo` - composition analysis
+* `%pres` - presence analysis
+* `%emojis` - rank emotes by their usage
   * arguments:
-    * <n> : top <n> emojis, default is 20
-    * all : list all common emojis in addition to this guild's
-    * members : show top member for each emote
-    * sort:usage/reaction : other sorting methods
-* `%mentions`: rank mentions by their usage
+    * `<n>` - top <n> emojis, default is 20
+    * `all` - list all common emojis in addition to this guild's
+    * `members` - show top member for each emote
+    * `sort:usage/reaction` - other sorting methods
+* `%mentions` - rank mentions by their usage
   * arguments:
-    * <n> : top <n> mentions, default is 10
-    * all : show role/channel/everyone/here mentions
-* `%cancel` : cancel current analysis
+    * `<n>` - top <n> mentions, default is 10
+    * `all` - show role/channel/everyone/here mentions
+* `%mentioned` - rank specific user mentions by their usage
+  * arguments:
+    * `<n>` - top <n> mentions, default is 10
+    * `all` - show role/channel/everyone/here mentions
+* `%cancel` - cancel current analysis
 
 * Common arguments:
     * @member/me : filter for one or more member

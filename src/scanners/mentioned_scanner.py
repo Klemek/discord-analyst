@@ -24,12 +24,12 @@ class MentionedScanner(Scanner):
     def help() -> str:
         return (
             "```\n"
-            + "%mentioned : Rank specific user's mentions by their usage\n"
+            + "%mentioned: Rank specific user's mentions by their usage\n"
             + "arguments:\n"
-            + "* @member/me : (required) one or more member\n"
+            + "* @member/me - (required) one or more member\n"
             + "\n".join(COMMON_HELP_ARGS.split("\n")[1:])
-            + "* <n>: top <n> mentions, default is 10\n"
-            + "* all: include bots mentions\n"
+            + "* <n> - top <n> mentions, default is 10\n"
+            + "* all - include bots mentions\n"
             + "Example: %mentioned 10 @user\n"
             + "```"
         )
