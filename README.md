@@ -60,6 +60,10 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.7(wip)**:
+  * emojis percents
+  * emojis other sorting
+  * mentions ranking
 * **v1.6**:
   * more scans : `%scan`, `%freq`, `%compo`, `%pres`
   * huge bug fix
