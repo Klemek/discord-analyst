@@ -12,6 +12,7 @@ from scanners import (
     MentionedScanner,
     MessagesScanner,
     ChannelsScanner,
+    ReactionsScanner,
 )
 from logs import GuildLogs
 
@@ -52,6 +53,12 @@ bot.register_command(
     lambda *args: EmotesScanner().compute(*args),
     "emojis: rank emojis by their usage",
     EmotesScanner.help(),
+)
+bot.register_command(
+    "(react(ions?)?)",
+    lambda *args: ReactionsScanner().compute(*args),
+    "react: rank users by their reactions",
+    ReactionsScanner.help(),
 )
 bot.register_command(
     "(channels?|chan)",

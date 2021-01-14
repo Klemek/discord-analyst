@@ -35,6 +35,9 @@ When you need statistics about your discord server
   * arguments:
     * <n> - top <n> channels, default is 10
     * all - include bots messages
+* %react - rank users by their reactions
+  * arguments:
+    * <n> - top <n> messages, default is 10
 * %cancel - cancel current analysis
 
 * Common arguments:
