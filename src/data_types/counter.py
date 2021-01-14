@@ -5,7 +5,7 @@ from datetime import datetime
 from utils import plural, from_now, percent
 
 
-class Mention:
+class Counter:
     def __init__(self):
         self.usages = 0
         self.last_used = None
@@ -25,11 +25,7 @@ class Mention:
         )
 
     def to_string(
-        self,
-        i: int,
-        name: str,
-        *,
-        total_usage: int,
+        self, i: int, name: str, *, total_usage: int, counted: str = "time"
     ) -> str:
         # place
         output = ""
@@ -41,5 +37,5 @@ class Mention:
             output += ":third_place:"
         else:
             output += f"**#{i + 1}**"
-        output += f" {name} - {plural(self.usages, 'time')} ({percent(self.usages/total_usage)}) (last {from_now(self.last_used)})"
+        output += f" {name} - {plural(self.usages, counted)} ({percent(self.usages/total_usage)}) (last {from_now(self.last_used)})"
         return output

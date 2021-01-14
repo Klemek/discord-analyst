@@ -7,16 +7,8 @@ import discord
 
 from logs import ChannelLogs, MessageLog
 from .scanner import Scanner
-from data_types import Mention
-from utils import (
-    COMMON_HELP_ARGS,
-    plural,
-    precise,
-    mention,
-    alt_mention,
-    role_mention,
-    channel_mention,
-)
+from data_types import Counter
+from utils import COMMON_HELP_ARGS, plural, precise, mention, alt_mention
 
 
 class MentionedScanner(Scanner):
@@ -55,7 +47,7 @@ class MentionedScanner(Scanner):
             return False
         self.all_mentions = "all" in args
         # Create mentions dict
-        self.mentions = defaultdict(Mention)
+        self.mentions = defaultdict(Counter)
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
@@ -86,7 +78,7 @@ class MentionedScanner(Scanner):
     @staticmethod
     def analyse_message(
         message: MessageLog,
-        mentions: Dict[str, Mention],
+        mentions: Dict[str, Counter],
         raw_members: List[int],
         *,
         all_mentions: bool,
