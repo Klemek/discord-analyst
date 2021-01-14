@@ -1,7 +1,7 @@
 from typing import List
 from collections import defaultdict
 
-from utils import percent, top_key, plural, precise
+from utils import percent, top_key, plural, precise, val_sum
 
 
 class Composition:
@@ -47,7 +47,7 @@ class Composition:
             ret += [
                 f"- **answers**: {self.answers:,} ({percent(self.answers/msg_count)})"
             ]
-        total_emotes = sum(self.emotes.values())
+        total_emotes = val_sum(self.emotes)
         if total_emotes > 0:
             top_emote = top_key(self.emotes)
             ret += [

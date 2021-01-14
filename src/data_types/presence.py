@@ -2,7 +2,7 @@ from typing import List, Optional
 from collections import defaultdict
 
 
-from utils import mention, channel_mention, plural, percent, top_key
+from utils import mention, channel_mention, plural, percent, top_key, val_sum
 
 
 class Presence:
@@ -37,7 +37,7 @@ class Presence:
             ]
         if show_top_channel:
             top_channel = top_key(self.channel_usage)
-            channel_sum = sum(self.channel_usage.values())
+            channel_sum = val_sum(self.channel_usage)
             found_in = sorted(
                 self.channel_usage,
                 key=lambda k: self.channel_usage[k] / self.channel_total[k],
@@ -52,14 +52,14 @@ class Presence:
         if member_specific:
             if len(self.mentions) > 0:
                 top_mention = top_key(self.mentions)
-                mention_sum = sum(self.mentions.values())
+                mention_sum = val_sum(self.mentions)
                 ret += [
                     f"- **was mentioned**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of {type})",
                     f"- **mostly mentioned by**: {mention(top_mention)} ({plural(self.mentions[top_mention], 'time')}, {percent(self.mentions[top_mention]/mention_sum)})",
                 ]
         if len(self.mention_others) > 0:
             top_mention = top_key(self.mention_others)
-            mention_sum = sum(self.mention_others.values())
+            mention_sum = val_sum(self.mention_others)
             if member_specific:
                 ret += [
                     f"- **mentioned others**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of {type})",
@@ -72,7 +72,7 @@ class Presence:
                 ]
 
         if len(self.reactions) > 0:
-            total_used = sum(self.reactions.values())
+            total_used = val_sum(self.reactions)
             top_reaction = top_key(self.reactions)
             ret += [
                 f"- **reactions**: {plural(total_used, 'time')}",

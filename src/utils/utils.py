@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Union, Optional, Any
 import os
 import logging
 import discord
@@ -89,6 +89,10 @@ def no_duplicate(seq: list) -> list:
 
 def top_key(d: Dict[Union[str, int], int]) -> Union[str, int]:
     return sorted(d, key=lambda k: d[k])[-1]
+
+
+def val_sum(d: Dict[Any, int]) -> int:
+    return sum(d.value())
 
 
 # MESSAGE FORMATTING
