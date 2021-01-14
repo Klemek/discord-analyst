@@ -55,7 +55,7 @@ class Counter:
             if self.usages[top_item] == sum:
                 output += f" (all{transform(top_item)})"
             else:
-                output += f" ({self.usages[top_item]}{transform(top_item)}, {percent(self.usages[top_item]/sum)})"
+                output += f" ({self.usages[top_item]:,}{transform(top_item)}, {percent(self.usages[top_item]/sum)})"
         return output
 
     @staticmethod

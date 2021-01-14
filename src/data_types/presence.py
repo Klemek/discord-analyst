@@ -39,7 +39,7 @@ class Presence:
         else:
             top_member = top_key(self.messages)
             ret += [
-                f"- **top messages**:  {mention(top_member)} ({self.messages[top_member]} msg, {percent(self.messages[top_member]/val_sum(self.messages))})"
+                f"- **top messages**:  {mention(top_member)} ({self.messages[top_member]:,} msg, {percent(self.messages[top_member]/val_sum(self.messages))})"
             ]
         if show_top_channel:
             top_channel = top_key(self.channel_usage)
