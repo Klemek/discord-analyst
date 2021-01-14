@@ -28,11 +28,11 @@ class MentionedScanner(Scanner):
 
     def __init__(self):
         super().__init__(
+            has_digit_args=True,
             valid_args=["all"],
             help=MentionedScanner.help(),
             intro_context="Mentioned by members",
         )
-        self.top = 10
 
     async def init(self, message: discord.Message, *args: str) -> bool:
         # get max emotes to view

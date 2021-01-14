@@ -40,7 +40,6 @@ class MentionsScanner(Scanner):
             help=MentionsScanner.help(),
             intro_context="Mention usage",
         )
-        self.top = 10
 
     async def init(self, message: discord.Message, *args: str) -> bool:
         # get max emotes to view

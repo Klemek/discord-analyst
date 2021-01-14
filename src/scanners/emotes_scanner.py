@@ -34,9 +34,6 @@ class EmotesScanner(Scanner):
             help=EmotesScanner.help(),
             intro_context="Emoji usage",
         )
-        self.top = 20
-        self.all_emojis = False
-        self.show_members = False
 
     async def init(self, message: discord.Message, *args: str) -> bool:
         guild = message.channel.guild
