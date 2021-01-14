@@ -70,13 +70,16 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.8(wip)**:
+  * more scans: `%messages`, `%channels`, `%members`
+  * bug fix
 * **v1.7**:
   * emojis percents
   * emojis other sorting
   * mentions/mentioned ranking
-  * cancel
+  * `%cancel`
 * **v1.6**:
-  * more scans : `%scan`, `%freq`, `%compo`, `%pres`
+  * more scans: `%scan`, `%freq`, `%compo`, `%pres`
   * huge bug fix
 * **v1.5**:
   * top <n> emotes
