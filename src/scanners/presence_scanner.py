@@ -43,6 +43,7 @@ class PresenceScanner(Scanner):
         res += self.pres.to_string(
             self.msg_count,
             self.total_msg,
+            chan_count=len(self.channels) if not self.full else None,
             show_top_channel=(len(self.channels) > 1),
             member_specific=self.member_specific,
         )

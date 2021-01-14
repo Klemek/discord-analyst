@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from collections import defaultdict
 
 
@@ -20,13 +20,20 @@ class Presence:
         msg_count: int,
         total_msg: int,
         *,
+        chan_count: Optional[int],
         show_top_channel: bool,
         member_specific: bool,
     ) -> List[str]:
         ret = []
+        if chan_count is None:
+            type = "server's"
+        elif chan_count == 1:
+            type = "channel's"
+        else:
+            type = "channels'"
         if member_specific:
             ret += [
-                f"- **messages**: {msg_count:,} ({percent(msg_count/total_msg)} of server's)"
+                f"- **messages**: {msg_count:,} ({percent(msg_count/total_msg)} of {type})"
             ]
         if show_top_channel:
             top_channel = top_key(self.channel_usage)
@@ -40,14 +47,14 @@ class Presence:
             ]
             if member_specific:
                 ret += [
-                    f"- **most contributed channel**: {channel_mention(found_in)} ({self.channel_usage[found_in]:,} msg, {percent(self.channel_usage[found_in]/self.channel_total[found_in])} of channel's)"
+                    f"- **most contributed channel**: {channel_mention(found_in)} ({self.channel_usage[found_in]:,} msg, {percent(self.channel_usage[found_in]/self.channel_total[found_in])} of {type})"
                 ]
         if member_specific:
             if len(self.mentions) > 0:
                 top_mention = top_key(self.mentions)
                 mention_sum = sum(self.mentions.values())
                 ret += [
-                    f"- **was mentioned**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of server's)",
+                    f"- **was mentioned**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of {type})",
                     f"- **mostly mentioned by**: {mention(top_mention)} ({plural(self.mentions[top_mention], 'time')}, {percent(self.mentions[top_mention]/mention_sum)})",
                 ]
         if len(self.mention_others) > 0:
@@ -55,7 +62,7 @@ class Presence:
             mention_sum = sum(self.mention_others.values())
             if member_specific:
                 ret += [
-                    f"- **mentioned others**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of server's)",
+                    f"- **mentioned others**: {plural(mention_sum, 'time')} ({percent(mention_sum/self.mention_count)} of {type})",
                     f"- **mostly mentioned**: {mention(top_mention)} ({plural(self.mention_others[top_mention], 'time')}, {percent(self.mention_others[top_mention]/mention_sum)})",
                 ]
             else:
@@ -74,5 +81,5 @@ class Presence:
             if member_specific:
                 ret[
                     -2
-                ] += f" ({percent(total_used/self.used_reaction_total)} of server's)"
+                ] += f" ({percent(total_used/self.used_reaction_total)} of {type})"
         return ret
