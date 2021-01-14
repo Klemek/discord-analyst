@@ -11,6 +11,7 @@ from scanners import (
     MentionsScanner,
     MentionedScanner,
     MessagesScanner,
+    ChannelsScanner,
 )
 from logs import GuildLogs
 
@@ -53,9 +54,15 @@ bot.register_command(
     EmotesScanner.help(),
 )
 bot.register_command(
+    "(channels?|chan)",
+    lambda *args: ChannelsScanner().compute(*args),
+    "chan: rank channels by their messages",
+    ChannelsScanner.help(),
+)
+bot.register_command(
     "(messages?|msg)",
     lambda *args: MessagesScanner().compute(*args),
-    "msg: rank users mentions by their messages",
+    "msg: rank users by their messages",
     MessagesScanner.help(),
 )
 bot.register_command(

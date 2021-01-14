@@ -11,17 +11,17 @@ from data_types import Counter
 from utils import COMMON_HELP_ARGS, mention, channel_mention
 
 
-class MessagesScanner(Scanner):
+class ChannelsScanner(Scanner):
     @staticmethod
     def help() -> str:
         return (
             "```\n"
-            + "%msg: Rank users by their messages\n"
+            + "%chan: Rank channels by their messages\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
             + "* <n> - top <n>, default is 10\n"
             + "* all - include bots\n"
-            + "Example: %msg 10 #channel\n"
+            + "Example: %chan 10 @user\n"
             + "```"
         )
 
@@ -29,8 +29,8 @@ class MessagesScanner(Scanner):
         super().__init__(
             has_digit_args=True,
             valid_args=["all"],
-            help=MessagesScanner.help(),
-            intro_context="Messages",
+            help=ChannelsScanner.help(),
+            intro_context="Channels",
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
@@ -45,7 +45,7 @@ class MessagesScanner(Scanner):
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        return MessagesScanner.analyse_message(
+        return ChannelsScanner.analyse_message(
             channel.id,
             message,
             self.messages,
@@ -62,10 +62,10 @@ class MessagesScanner(Scanner):
         res += [
             self.messages[name].to_string(
                 names.index(name),
-                mention(name),
+                channel_mention(name),
                 total_usage=usage_count,
                 counted="message",
-                transform=lambda id: f" in {channel_mention(id)}",
+                transform=lambda id: f" by {mention(id)}",
             )
             for name in names
         ]
@@ -83,5 +83,5 @@ class MessagesScanner(Scanner):
         impacted = False
         if not message.bot or all_messages:
             impacted = True
-            messages[message.author].update_use(1, message.created_at, channel_id)
+            messages[channel_id].update_use(1, message.created_at, message.author)
         return impacted

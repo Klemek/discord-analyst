@@ -60,7 +60,7 @@ class MentionedScanner(Scanner):
         names.sort(key=lambda name: self.mentions[name].score(), reverse=True)
         names = names[: self.top]
         # Get the total of all emotes used
-        usage_count = sum([mention.usages for mention in self.mentions.values()])
+        usage_count = Counter.total(self.mentions)
         res = [intro]
         res += [
             self.mentions[name].to_string(
