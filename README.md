@@ -78,7 +78,7 @@ python3 src/main.py
 
 ## Changelog
 
-* **v1.8(wip)**:
+* **v1.8**:
   * more scans: `%msg`, `%chan`
   * bug fix
 * **v1.7**:
