@@ -5,3 +5,4 @@ from .presence_scanner import PresenceScanner
 from .full_scanner import FullScanner
 from .mentions_scanner import MentionsScanner
 from .mentioned_scanner import MentionedScanner
+from .messages_scanner import MessagesScanner

@@ -10,6 +10,7 @@ from scanners import (
     PresenceScanner,
     MentionsScanner,
     MentionedScanner,
+    MessagesScanner,
 )
 from logs import GuildLogs
 
@@ -50,6 +51,12 @@ bot.register_command(
     lambda *args: EmotesScanner().compute(*args),
     "emojis: rank emojis by their usage",
     EmotesScanner.help(),
+)
+bot.register_command(
+    "(messages?|msg)",
+    lambda *args: MessagesScanner().compute(*args),
+    "msg: rank users mentions by their messages",
+    MessagesScanner.help(),
 )
 bot.register_command(
     "pres(ence)?",
