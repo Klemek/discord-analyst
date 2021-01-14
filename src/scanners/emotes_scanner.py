@@ -91,7 +91,7 @@ class EmotesScanner(Scanner):
                 total_usage=usage_count,
                 total_react=reaction_count,
                 show_life=False,
-                show_members=self.show_members,
+                show_members=self.show_members or len(self.raw_members) == 0,
             )
             for name in names
             if allow_unused or self.emotes[name].used()
