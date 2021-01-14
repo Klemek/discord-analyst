@@ -59,5 +59,6 @@ class FullScanner(Scanner):
             self.total_msg,
             show_top_channel=len(self.channels) > 1,
             member_specific=self.member_specific,
+            chan_count=len(self.channels) if not self.full else None,
         )
         return res
