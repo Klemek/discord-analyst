@@ -88,7 +88,12 @@ class Emote:
                 output += f"{plural(self.reactions, 'reaction')} ({percent(self.reactions/total_react)})"
             output += f" (last used {from_now(self.last_used)})"
             if show_members:
-                output += f" (mostly by {mention(self.get_top_member())}: {self.members[self.get_top_member()]})"
+                top_member = self.get_top_member()
+                total = self.usages + self.reactions
+                if total == self.members[top_member]:
+                    output += f" (all by {mention(top_member)})"
+                else:
+                    output += f" ({self.members[top_member]} by {mention(top_member)}, {percent(self.members[top_member]/total)})"
         if show_life and not self.default:
             output += f" (in {plural(self.life_days(), 'day')})"
         return output
