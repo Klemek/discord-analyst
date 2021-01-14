@@ -127,6 +127,7 @@ class GuildLogs:
                     loading_new += 1
                     self.channels[channel.id] = ChannelLogs(channel)
                 start_msg = len(self.channels[channel.id].messages)
+                count = 0
                 async for count, done in self.channels[channel.id].load(channel):
                     if count > 0:
                         tmp_queried_msg = queried_msg + count - start_msg
