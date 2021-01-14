@@ -92,7 +92,7 @@ def top_key(d: Dict[Union[str, int], int]) -> Union[str, int]:
 
 
 def val_sum(d: Dict[Any, int]) -> int:
-    return sum(d.value())
+    return sum(d.values())
 
 
 # MESSAGE FORMATTING

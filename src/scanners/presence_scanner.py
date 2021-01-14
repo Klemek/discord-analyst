@@ -63,20 +63,21 @@ class PresenceScanner(Scanner):
             pres.channel_usage[channel.id] += 1
             for mention in message.mentions:
                 pres.mention_others[mention] += 1
+            pres.messages[message.author] += 1
         pres.channel_total[channel.id] += 1
+        pres.mention_count[message.author] += len(message.mentions)
         if len(raw_members) > 0:
             for mention in message.mentions:
                 if mention in raw_members:
                     pres.mentions[message.author] += 1
-                pres.mention_count += 1
             for reaction in message.reactions:
-                pres.used_reaction_total += len(message.reactions[reaction])
                 for member_id in message.reactions[reaction]:
+                    pres.used_reaction[member_id] += 1
                     if member_id in raw_members:
                         pres.reactions[reaction] += 1
         else:
-            pres.mention_count += len(message.mentions)
             for reaction in message.reactions:
-                pres.used_reaction_total += len(message.reactions[reaction])
                 pres.reactions[reaction] += len(message.reactions[reaction])
+                for member_id in message.reactions[reaction]:
+                    pres.used_reaction[member_id] += 1
         return impacted
