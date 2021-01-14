@@ -81,7 +81,11 @@ class ChannelsScanner(Scanner):
         all_messages: bool,
     ) -> bool:
         impacted = False
-        if not message.bot or all_messages:
+        if (
+            len(raw_members) == 0
+            and (not message.bot or all_messages)
+            or message.author in raw_members
+        ):
             impacted = True
             messages[channel_id].update_use(1, message.created_at, message.author)
         return impacted
