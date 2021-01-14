@@ -60,7 +60,7 @@ class ReactionsScanner(Scanner):
                 names.index(name),
                 mention(name),
                 total_usage=usage_count,
-                counted="reactions",
+                counted="reaction",
                 transform=lambda id: f" in {channel_mention(id)}",
             )
             for name in names
