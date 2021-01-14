@@ -88,7 +88,9 @@ class Scanner(ABC):
         # Start computing data
         async with message.channel.typing():
             progress = await message.channel.send(
-                "```Starting analysis...```", reference=message
+                "```Starting analysis...```",
+                reference=message,
+                allowed_mentions=discord.AllowedMentions.none(),
             )
             total_msg, total_chan = await logs.load(
                 progress, self.channels, fast="fast" in args
@@ -141,7 +143,7 @@ class Scanner(ABC):
                         await message.channel.send(
                             response,
                             reference=message if first else None,
-                            mention_author=False,
+                            allowed_mentions=discord.AllowedMentions.none(),
                         )
                         first = False
                         response = ""
@@ -150,7 +152,7 @@ class Scanner(ABC):
                     await message.channel.send(
                         response,
                         reference=message if first else None,
-                        mention_author=False,
+                        allowed_mentions=discord.AllowedMentions.none(),
                     )
             # Delete custom progress message
             await progress.delete()
