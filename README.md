@@ -27,6 +27,14 @@ When you need statistics about your discord server
   * arguments:
     * <n> - top <n> mentions, default is 10
     * all - include bots mentions
+* %msg - rank users by their messages
+  * arguments:
+    * <n> - top <n> messages, default is 10
+    * all - include bots mentions
+* %chan - rank channels by their messages
+  * arguments:
+    * <n> - top <n> channels, default is 10
+    * all - include bots messages
 * %cancel - cancel current analysis
 
 * Common arguments:
@@ -71,7 +79,7 @@ python3 src/main.py
 ## Changelog
 
 * **v1.8(wip)**:
-  * more scans: `%messages`, `%channels`, `%members`
+  * more scans: `%msg`, `%chan`
   * bug fix
 * **v1.7**:
   * emojis percents
