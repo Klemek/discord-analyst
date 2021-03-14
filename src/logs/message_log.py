@@ -4,7 +4,7 @@ from datetime import datetime
 
 from utils import is_extension
 
-IMAGE_FORMAT = ["gif", "gifv", "png", "jpg", "jpeg", "bmp"]
+IMAGE_FORMAT = [".gif", ".gifv", ".png", ".jpg", ".jpeg", ".bmp"]
 EMBED_IMAGES = ["image", "gifv"]
 
 
@@ -39,7 +39,7 @@ class MessageLog:
                 if is_extension(attachment.filename, IMAGE_FORMAT):
                     self.image = True
                     break
-            if not self.image:
+            else:
                 for embed in message.embeds:
                     if embed.type in EMBED_IMAGES:
                         self.image = True
