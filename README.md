@@ -27,15 +27,12 @@ When you need statistics about your discord server
 * %mentioned - rank specific user mentions by their usage
   * arguments:
     * <n> - top <n> mentions, default is 10
-    * all - include bots mentions
 * %msg - rank users by their messages
   * arguments:
     * <n> - top <n> messages, default is 10
-    * all - include bots mentions
 * %chan - rank channels by their messages
   * arguments:
     * <n> - top <n> channels, default is 10
-    * all - include bots messages
 * %react - rank users by their reactions
   * arguments:
     * <n> - top <n> messages, default is 10
@@ -44,6 +41,7 @@ When you need statistics about your discord server
 * Common arguments:
     * @member/me : filter for one or more member
     * #channel/here : filter for one or more channel
+    * all/everyone - include bots messages
     * fast : only read cache
 ```
 
@@ -83,6 +81,7 @@ python3 src/main.py
 ## Already hosted bot
 
 [![Discord Bots](https://top.gg/api/widget/643808410495615006.svg)](https://top.gg/bot/643808410495615006)
+
 ## Changelog
 
 * **v1.8**:
