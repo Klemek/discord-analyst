@@ -1,6 +1,7 @@
 [![Scc Count Badge](https://sloc.xyz/github/klemek/discord-analyst/?category=code)](https://github.com/boyter/scc/#badges-beta)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Klemek/discord-analyst.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Klemek/discord-analyst/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/Klemek/discord-analyst.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Klemek/discord-analyst/alerts/)
+[![Discord Bots](https://top.gg/api/widget/status/643808410495615006.svg)](https://top.gg/bot/643808410495615006)
 
 # Discord Analyst
 
@@ -79,6 +80,9 @@ You will need:
 python3 src/main.py
 ```
 
+## Already hosted bot
+
+[![Discord Bots](https://top.gg/api/widget/643808410495615006.svg)](https://top.gg/bot/643808410495615006)
 ## Changelog
 
 * **v1.8**:
