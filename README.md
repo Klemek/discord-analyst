@@ -79,6 +79,10 @@ You will need:
 python3 src/main.py
 ```
 
+## Already hosted bot
+
+### [Invite from top.gg](https://top.gg/bot/643808410495615006)
+
 ## Changelog
 
 * **v1.8**:
