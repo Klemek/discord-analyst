@@ -81,8 +81,7 @@ python3 src/main.py
 
 ## Already hosted bot
 
-### [Invite from top.gg](https://top.gg/bot/643808410495615006)
-
+[![Discord Bots](https://top.gg/api/widget/643808410495615006.svg)](https://top.gg/bot/643808410495615006)
 ## Changelog
 
 * **v1.8**:
