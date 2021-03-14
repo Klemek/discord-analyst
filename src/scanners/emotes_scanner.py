@@ -23,6 +23,7 @@ class EmotesScanner(Scanner):
             + "* all - list all common emojis in addition to this guild's\n"
             + "* members - show top member for each emojis\n"
             + "* sort:usage/reaction - other sorting methods\n"
+            + "* everyone - include bots\n"
             + "Example: %emojis 10 all #mychannel1 #mychannel2 @user\n"
             + "```"
         )
@@ -30,7 +31,7 @@ class EmotesScanner(Scanner):
     def __init__(self):
         super().__init__(
             has_digit_args=True,
-            valid_args=["all", "members", "sort:usage", "sort:reaction"],
+            valid_args=["all", "members", "sort:usage", "sort:reaction", "everyone"],
             help=EmotesScanner.help(),
             intro_context="Emoji usage",
         )
@@ -54,11 +55,16 @@ class EmotesScanner(Scanner):
             self.sort = "usage"
         elif "sort:reaction" in args:
             self.sort = "reaction"
+        self.all_messages = "everyone" in args
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
         return EmotesScanner.analyse_message(
-            message, self.emotes, self.raw_members, all_emojis=self.all_emojis
+            message,
+            self.emotes,
+            self.raw_members,
+            all_emojis=self.all_emojis,
+            all_messages=self.all_messages,
         )
 
     def get_results(self, intro: str) -> List[str]:
@@ -107,10 +113,15 @@ class EmotesScanner(Scanner):
         raw_members: List[int],
         *,
         all_emojis: bool,
+        all_messages: bool,
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
-        if not message.bot and len(raw_members) == 0 or message.author in raw_members:
+        if (
+            (not message.bot or all_messages)
+            and len(raw_members) == 0
+            or message.author in raw_members
+        ):
             impacted = True
             # Find all emotes un the current message in the form "<:emoji:123456789>"
             # Filter for known emotes

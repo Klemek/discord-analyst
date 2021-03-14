@@ -19,12 +19,14 @@ class FullScanner(Scanner):
             + "%scan: Show full statistics\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
+            + "* all/everyone - include bots\n"
             + "Example: %scan #mychannel1 @user\n"
             + "```"
         )
 
     def __init__(self):
         super().__init__(
+            valid_args=["all", "everyone"],
             help=FullScanner.help(),
             intro_context="Full analysis",
         )
@@ -34,14 +36,25 @@ class FullScanner(Scanner):
         self.compo = Composition()
         self.pres = Presence()
         self.member_specific = len(self.members) > 0
+        self.all_messages = "all" in args or "everyone" in args
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        FrequencyScanner.analyse_message(message, self.freq, self.raw_members)
-        CompositionScanner.analyse_message(message, self.compo, self.raw_members)
-        PresenceScanner.analyse_message(channel, message, self.pres, self.raw_members)
+        FrequencyScanner.analyse_message(
+            message, self.freq, self.raw_members, all_messages=self.all_messages
+        )
+        CompositionScanner.analyse_message(
+            message, self.compo, self.raw_members, all_messages=self.all_messages
+        )
+        PresenceScanner.analyse_message(
+            channel,
+            message,
+            self.pres,
+            self.raw_members,
+            all_messages=self.all_messages,
+        )
         return (
-            not message.bot
+            (not message.bot or self.all_messages)
             and len(self.raw_members) == 0
             or message.author in self.raw_members
         )

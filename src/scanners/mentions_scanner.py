@@ -29,6 +29,7 @@ class MentionsScanner(Scanner):
             + COMMON_HELP_ARGS
             + "* <n> - top <n> mentions, default is 10\n"
             + "* all - show role/channel/everyone/here mentions\n"
+            + "* everyone - include bots mentions\n"
             + "Example: %mentions 10 #mychannel1 #mychannel2 @user\n"
             + "```"
         )
@@ -36,7 +37,7 @@ class MentionsScanner(Scanner):
     def __init__(self):
         super().__init__(
             has_digit_args=True,
-            valid_args=["all"],
+            valid_args=["all", "everyone"],
             help=MentionsScanner.help(),
             intro_context="Mention usage",
         )
@@ -51,11 +52,16 @@ class MentionsScanner(Scanner):
         self.all_mentions = "all" in args
         # Create mentions dict
         self.mentions = defaultdict(Counter)
+        self.all_messages = "everyone" in args
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
         return MentionsScanner.analyse_message(
-            message, self.mentions, self.raw_members, all_mentions=self.all_mentions
+            message,
+            self.mentions,
+            self.raw_members,
+            all_mentions=self.all_mentions,
+            all_messages=self.all_messages,
         )
 
     def get_results(self, intro: str) -> List[str]:
@@ -85,10 +91,15 @@ class MentionsScanner(Scanner):
         raw_members: List[int],
         *,
         all_mentions: bool,
+        all_messages: bool,
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
-        if not message.bot and len(raw_members) == 0 or message.author in raw_members:
+        if (
+            (not message.bot or all_messages)
+            and len(raw_members) == 0
+            or message.author in raw_members
+        ):
             impacted = True
             for member_id in message.mentions:
                 name = mention(member_id)

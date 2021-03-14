@@ -22,7 +22,11 @@ class ChannelLogs:
                 return
             self.id = int(channel["id"])
             self.name = channel["name"]
-            self.last_message_id = int(channel["last_message_id"]) if channel["last_message_id"] is not None else None
+            self.last_message_id = (
+                int(channel["last_message_id"])
+                if channel["last_message_id"] is not None
+                else None
+            )
             self.messages = [MessageLog(message) for message in channel["messages"]]
 
     def is_format(self):

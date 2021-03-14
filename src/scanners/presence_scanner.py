@@ -18,12 +18,14 @@ class PresenceScanner(Scanner):
             + "%pres: Show presence statistics\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
+            + "* all/everyone - include bots\n"
             + "Example: %pres #mychannel1 @user\n"
             + "```"
         )
 
     def __init__(self):
         super().__init__(
+            valid_args=["all", "everyone"],
             help=PresenceScanner.help(),
             intro_context="Presence",
         )
@@ -31,11 +33,16 @@ class PresenceScanner(Scanner):
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.pres = Presence()
         self.member_specific = len(self.members) > 0
+        self.all_messages = "all" in args or "everyone" in args
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
         return PresenceScanner.analyse_message(
-            channel, message, self.pres, self.raw_members
+            channel,
+            message,
+            self.pres,
+            self.raw_members,
+            all_messages=self.all_messages,
         )
 
     def get_results(self, intro: str) -> List[str]:
@@ -55,10 +62,16 @@ class PresenceScanner(Scanner):
         message: MessageLog,
         pres: Presence,
         raw_members: List[int],
+        *,
+        all_messages: bool,
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
-        if not message.bot and len(raw_members) == 0 or message.author in raw_members:
+        if (
+            (not message.bot or all_messages)
+            and len(raw_members) == 0
+            or message.author in raw_members
+        ):
             impacted = True
             pres.channel_usage[channel.id] += 1
             for mention in message.mentions:

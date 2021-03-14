@@ -19,22 +19,27 @@ class FrequencyScanner(Scanner):
             + "%freq: Show frequency-related statistics\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
+            + "* all/everyone - include bots\n"
             + "Example: %freq #mychannel1 @user\n"
             + "```"
         )
 
     def __init__(self):
         super().__init__(
+            valid_args=["all", "everyone"],
             help=FrequencyScanner.help(),
             intro_context="Frequency",
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.freq = Frequency()
+        self.all_messages = "all" in args or "everyone" in args
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        return FrequencyScanner.analyse_message(message, self.freq, self.raw_members)
+        return FrequencyScanner.analyse_message(
+            message, self.freq, self.raw_members, all_messages=self.all_messages
+        )
 
     def get_results(self, intro: str) -> List[str]:
         FrequencyScanner.compute_results(self.freq)
@@ -44,11 +49,19 @@ class FrequencyScanner(Scanner):
 
     @staticmethod
     def analyse_message(
-        message: MessageLog, freq: Frequency, raw_members: List[int]
+        message: MessageLog,
+        freq: Frequency,
+        raw_members: List[int],
+        *,
+        all_messages: bool
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
-        if len(raw_members) == 0 or message.author in raw_members:
+        if (
+            (not message.bot or all_messages)
+            and len(raw_members) == 0
+            or message.author in raw_members
+        ):
             impacted = True
             freq.dates += [message.created_at]
         return impacted

@@ -20,7 +20,7 @@ class ChannelsScanner(Scanner):
             + "arguments:\n"
             + COMMON_HELP_ARGS
             + "* <n> - top <n>, default is 10\n"
-            + "* all - include bots\n"
+            + "* all/everyone - include bots\n"
             + "Example: %chan 10 @user\n"
             + "```"
         )
@@ -28,7 +28,7 @@ class ChannelsScanner(Scanner):
     def __init__(self):
         super().__init__(
             has_digit_args=True,
-            valid_args=["all"],
+            valid_args=["all", "everyone"],
             help=ChannelsScanner.help(),
             intro_context="Channels",
         )
@@ -39,7 +39,7 @@ class ChannelsScanner(Scanner):
         for arg in args:
             if arg.isdigit():
                 self.top = int(arg)
-        self.all_messages = "all" in args
+        self.all_messages = "all" in args or "everyone" in args
         # Create mentions dict
         self.messages = defaultdict(Counter)
         return True

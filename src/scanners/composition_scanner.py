@@ -19,22 +19,27 @@ class CompositionScanner(Scanner):
             + "%compo: Show composition statistics\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
+            + "* all/everyone - include bots\n"
             + "Example: %compo #mychannel1 @user\n"
             + "```"
         )
 
     def __init__(self):
         super().__init__(
+            valid_args=["all", "everyone"],
             help=CompositionScanner.help(),
             intro_context="Composition",
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.compo = Composition()
+        self.all_messages = "all" in args or "everyone" in args
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        ret = CompositionScanner.analyse_message(message, self.compo, self.raw_members)
+        ret = CompositionScanner.analyse_message(
+            message, self.compo, self.raw_members, all_messages=self.all_messages
+        )
         return ret
 
     def get_results(self, intro: str) -> List[str]:
@@ -44,11 +49,19 @@ class CompositionScanner(Scanner):
 
     @staticmethod
     def analyse_message(
-        message: MessageLog, compo: Composition, raw_members: List[int]
+        message: MessageLog,
+        compo: Composition,
+        raw_members: List[int],
+        *,
+        all_messages: bool,
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
-        if not message.bot and len(raw_members) == 0 or message.author in raw_members:
+        if (
+            (not message.bot or all_messages)
+            and len(raw_members) == 0
+            or message.author in raw_members
+        ):
             impacted = True
             compo.total_characters += len(message.content)
 
