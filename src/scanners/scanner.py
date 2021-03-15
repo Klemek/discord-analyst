@@ -52,7 +52,7 @@ class Scanner(ABC):
             elif re.match(r"^<#!?\d+>$", arg):
                 arg = arg[3:-1] if "!" in arg else arg[2:-1]
             if (
-                arg not in self.valid_args + ["me", "here", "fast"]
+                arg not in self.valid_args + ["me", "here", "fast", "fresh"]
                 and (not arg.isdigit() or not self.has_digit_args)
                 and arg not in str_channel_mentions
                 and arg not in str_mentions
@@ -93,7 +93,7 @@ class Scanner(ABC):
                 allowed_mentions=discord.AllowedMentions.none(),
             )
             total_msg, total_chan = await logs.load(
-                progress, self.channels, fast="fast" in args
+                progress, self.channels, fast="fast" in args, fresh="fresh" in args
             )
             if total_msg == CANCELLED:
                 await message.channel.send(

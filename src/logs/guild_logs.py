@@ -38,6 +38,7 @@ class GuildLogs:
         target_channels: List[discord.TextChannel] = [],
         *,
         fast: bool,
+        fresh: bool,
     ) -> Tuple[int, int]:
         global current_analysis
         if self.log_file in current_analysis:
@@ -123,7 +124,7 @@ class GuildLogs:
                 f"Reading new history...\n0 messages in 0/{max_chan:,} channels\n(this might take a while)",
             )
             for channel in target_channels:
-                if channel.id not in self.channels:
+                if channel.id not in self.channels or fresh:
                     loading_new += 1
                     self.channels[channel.id] = ChannelLogs(channel)
                 start_msg = len(self.channels[channel.id].messages)
