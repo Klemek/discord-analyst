@@ -80,9 +80,9 @@ python3 src/main.py
 
 ## Recommanded permissions
 
-[x] View Channels
-[x] Read Message History
-[x] Send Messages 
+- [x] View Channels
+- [x] Read Message History
+- [x] Send Messages
 
 > On large servers, you should disable "Send Messages" and enable it on an read-only channel where only administrators can launch commands. The bot can't be triggered elsewhere if it can't answer.
 
