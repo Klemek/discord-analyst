@@ -78,12 +78,24 @@ You will need:
 python3 src/main.py
 ```
 
+## Recommanded permissions
+
+[x] View Channels
+[x] Read Message History
+[x] Send Messages 
+
+> On large servers, you should disable "Send Messages" and enable it on an read-only channel where only administrators can launch commands. The bot can't be triggered elsewhere if it can't answer.
+
 ## Already hosted bot
 
 [![Discord Bots](https://top.gg/api/widget/643808410495615006.svg)](https://top.gg/bot/643808410495615006)
 
 ## Changelog
 
+* **v1.9**:
+  * `all/everyone` to include bots in scans
+  * `fresh` to not use previously cached data
+  * bug fix
 * **v1.8**:
   * more scans: `%msg`, `%chan`
   * bug fix
