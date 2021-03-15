@@ -112,7 +112,9 @@ class GuildLogs:
             # load channels
             t0 = datetime.now()
             if len(target_channels) == 0:
-                target_channels = self.guild.text_channels
+                target_channels = (
+                    self.guild.text_channels if not fast else self.channels.keys()
+                )
             loading_new = 0
             queried_msg = 0
             total_chan = 0

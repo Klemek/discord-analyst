@@ -111,16 +111,17 @@ class Scanner(ABC):
                 self.chan_count = 0
                 t0 = datetime.now()
                 for channel in self.channels:
-                    channel_logs = logs.channels[channel.id]
-                    count = sum(
-                        [
-                            self.compute_message(channel_logs, message_log)
-                            for message_log in channel_logs.messages
-                        ]
-                    )
-                    self.total_msg += len(channel_logs.messages)
-                    self.msg_count += count
-                    self.chan_count += 1 if count > 0 else 0
+                    if channel.id in logs.channels:
+                        channel_logs = logs.channels[channel.id]
+                        count = sum(
+                            [
+                                self.compute_message(channel_logs, message_log)
+                                for message_log in channel_logs.messages
+                            ]
+                        )
+                        self.total_msg += len(channel_logs.messages)
+                        self.msg_count += count
+                        self.chan_count += 1 if count > 0 else 0
                 logging.info(f"scan {guild.id} > scanned in {delta(t0):,}ms")
                 await progress.edit(content="```Computing results...```")
                 # Display results
