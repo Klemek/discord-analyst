@@ -78,7 +78,7 @@ You will need:
 python3 src/main.py
 ```
 
-## Recommanded permissions
+## Recommended permissions
 
 - [x] View Channels
 - [x] Read Message History
