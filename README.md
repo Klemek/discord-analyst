@@ -92,6 +92,8 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.10**
+  * multithreading for queries
 * **v1.9**:
   * `all/everyone` to include bots in scans
   * `fresh` to not use previously cached data
