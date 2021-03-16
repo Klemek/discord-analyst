@@ -6,6 +6,7 @@ import gzip
 from datetime import datetime
 import logging
 import asyncio
+import threading
 
 
 from . import ChannelLogs
@@ -15,6 +16,7 @@ from utils import code_message, delta, deltas
 LOG_DIR = "logs"
 
 current_analysis = []
+current_analysis_lock = threading.Lock()
 
 
 ALREADY_RUNNING = -100
@@ -65,10 +67,12 @@ class GuildLogs:
         fast: bool,
         fresh: bool,
     ) -> Tuple[int, int]:
-        global current_analysis
+        current_analysis_lock.acquire()
         if self.log_file in current_analysis:
+            current_analysis_lock.release()
             return ALREADY_RUNNING, 0
-        current_analysis += [self.log_file]
+        current_analysis.append(self.log_file)
+        current_analysis_lock.release()
         t00 = datetime.now()
         # read logs
         if not os.path.exists(LOG_DIR):
@@ -240,15 +244,20 @@ class GuildLogs:
             f"Analysing...\n{total_msg:,} messages in {total_chan:,} channels",
         )
         logging.info(f"log {self.guild.id} > TOTAL TIME: {delta(t00):,}ms")
+        current_analysis_lock.acquire()
         current_analysis.remove(self.log_file)
+        current_analysis_lock.release()
         return total_msg, total_chan
 
     @staticmethod
     async def cancel(client: discord.client, message: discord.Message, *args: str):
         logs = GuildLogs(message.guild)
+        current_analysis_lock.acquire()
         if logs.log_file in current_analysis:
             current_analysis.remove(logs.log_file)
+            current_analysis_lock.release()
         else:
+            current_analysis_lock.release()
             await message.channel.send(
                 f"No analysis are currently running on this server", reference=message
             )
