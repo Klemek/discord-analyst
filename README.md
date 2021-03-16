@@ -5,8 +5,10 @@
 
 # Discord Analyst
 
-When you need statistics about your discord server
+#### 📈 Gives you precisions you never asked for.
 
+
+## All commands
 ```
 * %help (command) - info about commands
 * %info - version and uptime
