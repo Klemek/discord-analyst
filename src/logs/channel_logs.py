@@ -4,7 +4,7 @@ import discord
 from . import MessageLog
 from utils import FakeMessage
 
-CHUNK_SIZE = 1000
+CHUNK_SIZE = 2000
 FORMAT = 3
 
 

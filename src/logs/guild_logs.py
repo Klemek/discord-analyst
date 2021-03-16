@@ -172,16 +172,24 @@ class GuildLogs:
 
                 await asyncio.sleep(0.5)
 
-                total_chan = sum([worker.done for worker in workers])
+                remaining = [
+                    worker.channel.name for worker in workers if not worker.done
+                ]
+                total_chan = max_chan - len(remaining)
                 queried_msg = sum([worker.queried_msg for worker in workers])
                 total_msg = sum([worker.total_msg for worker in workers])
 
                 if total_chan == max_chan:
                     done = True
 
+                remaining_msg = ""
+
+                if len(remaining) <= 5:
+                    remaining_msg = "\nRemaining: " + ", ".join(remaining)
+
                 await code_message(
                     progress,
-                    f"Reading new history...\n{total_msg:,} messages in {total_chan:,}/{max_chan:,} channels ({round(queried_msg/deltas(t0)):,}m/s)\n{warning_msg}",
+                    f"Reading new history...\n{total_msg:,} messages in {total_chan:,}/{max_chan:,} channels ({round(queried_msg/deltas(t0)):,}m/s)\n{warning_msg}{remaining_msg}",
                 )
             logging.info(
                 f"log {self.guild.id} > queried in {delta(t0):,}ms -> {queried_msg / deltas(t0):,.3f} m/s"
