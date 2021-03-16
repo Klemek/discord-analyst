@@ -123,38 +123,44 @@ class Scanner(ABC):
                         self.msg_count += count
                         self.chan_count += 1 if count > 0 else 0
                 logging.info(f"scan {guild.id} > scanned in {delta(t0):,}ms")
-                await progress.edit(content="```Computing results...```")
-                # Display results
-                t0 = datetime.now()
-                results = self.get_results(
-                    get_intro(
-                        self.intro_context,
-                        self.full,
-                        self.channels,
-                        self.members,
-                        self.msg_count,
-                        self.chan_count,
+                if self.total_msg == 0:
+                    await message.channel.send(
+                        "There are no messages found matching the filters",
+                        reference=message,
                     )
-                )
-                logging.info(f"scan {guild.id} > results in {delta(t0):,}ms")
-                response = ""
-                first = True
-                for r in results:
-                    if len(response + "\n" + r) > 2000:
+                else:
+                    await progress.edit(content="```Computing results...```")
+                    # Display results
+                    t0 = datetime.now()
+                    results = self.get_results(
+                        get_intro(
+                            self.intro_context,
+                            self.full,
+                            self.channels,
+                            self.members,
+                            self.msg_count,
+                            self.chan_count,
+                        )
+                    )
+                    logging.info(f"scan {guild.id} > results in {delta(t0):,}ms")
+                    response = ""
+                    first = True
+                    for r in results:
+                        if len(response + "\n" + r) > 2000:
+                            await message.channel.send(
+                                response,
+                                reference=message if first else None,
+                                allowed_mentions=discord.AllowedMentions.none(),
+                            )
+                            first = False
+                            response = ""
+                        response += "\n" + r
+                    if len(response) > 0:
                         await message.channel.send(
                             response,
                             reference=message if first else None,
                             allowed_mentions=discord.AllowedMentions.none(),
                         )
-                        first = False
-                        response = ""
-                    response += "\n" + r
-                if len(response) > 0:
-                    await message.channel.send(
-                        response,
-                        reference=message if first else None,
-                        allowed_mentions=discord.AllowedMentions.none(),
-                    )
             # Delete custom progress message
             await progress.delete()
 

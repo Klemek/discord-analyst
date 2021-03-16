@@ -70,6 +70,7 @@ class ChannelLogs:
                         yield len(self.messages), False
                     self.last_message_id = channel.last_message_id
         except discord.errors.HTTPException:
+            yield -1, True
             return  # When an exception occurs (like Forbidden)
         yield len(self.messages), True
 

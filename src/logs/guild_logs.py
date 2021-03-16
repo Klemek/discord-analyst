@@ -154,7 +154,7 @@ class GuildLogs:
                 workers += [Worker(self.channels[channel.id], channel)]
             warning_msg = "(this might take a while)"
             if len(target_channels) > 5 and loading_new > 5:
-                warning_msg = "(most channels are new, this might take a looong while)"
+                warning_msg = "(most channels are new, this will take a long while)"
             elif loading_new > 0:
                 warning_msg = "(some channels are new, this might take a long while)"
             await code_message(
