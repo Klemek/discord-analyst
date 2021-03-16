@@ -7,6 +7,7 @@
 
 #### 📈 Gives you precisions you never asked for.
 
+![image](https://user-images.githubusercontent.com/12103162/111393649-6f575c00-86b9-11eb-988d-141bd95f0c2c.png)
 
 ## All commands
 ```
