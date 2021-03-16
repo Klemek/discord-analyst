@@ -39,10 +39,11 @@ When you need statistics about your discord server
 * %cancel - cancel current analysis
 
 * Common arguments:
-    * @member/me : filter for one or more member
-    * #channel/here : filter for one or more channel
+    * @member/me: filter for one or more member
+    * #channel/here: filter for one or more channel
     * all/everyone - include bots messages
-    * fast : only read cache
+    * fast: only read cache
+    * fresh: does not read cache
 ```
 
 ## Running this bot
@@ -94,6 +95,7 @@ python3 src/main.py
 
 * **v1.10**
   * multithreading for queries
+  * bug fix
 * **v1.9**:
   * `all/everyone` to include bots in scans
   * `fresh` to not use previously cached data
