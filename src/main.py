@@ -18,6 +18,9 @@ from scanners import (
     MessagesScanner,
     ChannelsScanner,
     ReactionsScanner,
+    FirstScanner,
+    RandomScanner,
+    LastScanner,
 )
 from logs import GuildLogs
 
@@ -40,6 +43,24 @@ bot.register_command(
     GuildLogs.cancel,
     "cancel: stop current analysis",
     "```\n" + "%cancel: Stop current analysis\n" + "```",
+)
+bot.register_command(
+    "last",
+    lambda *args: LastScanner().compute(*args),
+    "last: read last message",
+    LastScanner.help(),
+)
+bot.register_command(
+    "rand(om)?",
+    lambda *args: RandomScanner().compute(*args),
+    "rand: read a random message",
+    RandomScanner.help(),
+)
+bot.register_command(
+    "first",
+    lambda *args: FirstScanner().compute(*args),
+    "first: read first message",
+    FirstScanner.help(),
 )
 bot.register_command(
     "mentioned",

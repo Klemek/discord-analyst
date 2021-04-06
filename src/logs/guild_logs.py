@@ -49,6 +49,7 @@ class Worker:
 
 class GuildLogs:
     def __init__(self, guild: discord.Guild):
+        self.id = guild.id
         self.guild = guild
         self.log_file = os.path.join(LOG_DIR, f"{guild.id}.logz")
         self.channels = {}
@@ -104,7 +105,9 @@ class GuildLogs:
                     return CANCELLED, 0
                 await code_message(progress, "Reading saved history (4/4)...")
                 t0 = datetime.now()
-                self.channels = {int(id): ChannelLogs(channels[id]) for id in channels}
+                self.channels = {
+                    int(id): ChannelLogs(channels[id], self) for id in channels
+                }
                 # remove invalid format
                 self.channels = {
                     id: self.channels[id]
@@ -154,7 +157,7 @@ class GuildLogs:
             for channel in target_channels:
                 if channel.id not in self.channels or fresh:
                     loading_new += 1
-                    self.channels[channel.id] = ChannelLogs(channel)
+                    self.channels[channel.id] = ChannelLogs(channel, self)
                 workers += [Worker(self.channels[channel.id], channel)]
             warning_msg = "(this might take a while)"
             if len(target_channels) > 5 and loading_new > 5:

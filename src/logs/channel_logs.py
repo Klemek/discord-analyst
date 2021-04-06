@@ -1,4 +1,4 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Any
 import discord
 
 from . import MessageLog
@@ -9,7 +9,8 @@ FORMAT = 3
 
 
 class ChannelLogs:
-    def __init__(self, channel: Union[discord.TextChannel, dict]):
+    def __init__(self, channel: Union[discord.TextChannel, dict], guild: Any):
+        self.guild = guild
         if isinstance(channel, discord.TextChannel):
             self.id = channel.id
             self.name = channel.name
@@ -27,7 +28,7 @@ class ChannelLogs:
                 if channel["last_message_id"] is not None
                 else None
             )
-            self.messages = [MessageLog(message) for message in channel["messages"]]
+            self.messages = [MessageLog(message, self) for message in channel["messages"]]
 
     def is_format(self):
         return self.format == FORMAT
@@ -44,7 +45,7 @@ class ChannelLogs:
                         oldest_first=True,
                     ):
                         self.last_message_id = message.id
-                        m = MessageLog(message)
+                        m = MessageLog(message, self)
                         await m.load(message)
                         self.messages.insert(0, m)
                     yield len(self.messages), False
@@ -64,7 +65,7 @@ class ChannelLogs:
                         ):
                             done += 1
                             last_message_id = message.id
-                            m = MessageLog(message)
+                            m = MessageLog(message, self)
                             await m.load(message)
                             self.messages += [m]
                         yield len(self.messages), False

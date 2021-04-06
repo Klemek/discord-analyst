@@ -18,6 +18,9 @@
 * %freq - frequency analysis
 * %compo - composition analysis
 * %pres - presence analysis
+* %first - read first message
+* %rand - read a random message
+* %last - read last message
 * %emojis - rank emotes by their usage
   * arguments:
     * <n> - top <n> emojis, default is 20
@@ -98,6 +101,7 @@ python3 src/main.py
 ## Changelog
 
 * **v1.11**
+  * more scans `%first`, `%rand`, `%last`
   * streak computing in `%pres`
 * **v1.10**
   * multithreading for queries

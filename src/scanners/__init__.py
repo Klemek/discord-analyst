@@ -8,3 +8,6 @@ from .mentioned_scanner import MentionedScanner
 from .messages_scanner import MessagesScanner
 from .channels_scanner import ChannelsScanner
 from .reactions_scanner import ReactionsScanner
+from .first_scanner import FirstScanner
+from .last_scanner import LastScanner
+from .random_scanner import RandomScanner

@@ -5,7 +5,7 @@ import logging
 import re
 import discord
 
-from utils import no_duplicate, get_intro, delta, deltas, mention, channel_mention
+from utils import no_duplicate, get_intro, delta
 from logs import GuildLogs, ChannelLogs, MessageLog, ALREADY_RUNNING, CANCELLED
 
 
@@ -173,5 +173,5 @@ class Scanner(ABC):
         pass
 
     @abstractmethod
-    def get_results(self, intro: str):
+    def get_results(self, intro: str) -> List[str]:
         pass
