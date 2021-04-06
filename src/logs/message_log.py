@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Any
 import discord
 from datetime import datetime
 
@@ -9,7 +9,8 @@ EMBED_IMAGES = ["image", "gifv"]
 
 
 class MessageLog:
-    def __init__(self, message: Union[discord.Message, dict]):
+    def __init__(self, message: Union[discord.Message, dict], channel: Any):
+        self.channel = channel
         if isinstance(message, discord.Message):
             self.id = message.id
             self.created_at = message.created_at

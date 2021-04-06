@@ -63,7 +63,7 @@ class FullScanner(Scanner):
         FrequencyScanner.compute_results(self.freq)
         res = [intro]
         res += ["__Frequency__:"]
-        res += self.freq.to_string()
+        res += self.freq.to_string(member_specific=self.member_specific)
         res += ["__Composition__:"]
         res += self.compo.to_string(self.msg_count)
         res += ["__Presence__:"]

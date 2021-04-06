@@ -1,5 +1,10 @@
+import sys
 from miniscord import Bot
 import logging
+
+if sys.version_info < (3, 7):
+    print("Please upgrade your Python version to 3.7.0 or higher")
+    sys.exit(1)
 
 from utils import emojis
 from scanners import (
@@ -13,6 +18,9 @@ from scanners import (
     MessagesScanner,
     ChannelsScanner,
     ReactionsScanner,
+    FirstScanner,
+    RandomScanner,
+    LastScanner,
 )
 from logs import GuildLogs
 
@@ -24,7 +32,7 @@ emojis.load_emojis()
 
 bot = Bot(
     "Discord Analyst",
-    "1.10",
+    "1.11",
     alias="%",
 )
 
@@ -35,6 +43,24 @@ bot.register_command(
     GuildLogs.cancel,
     "cancel: stop current analysis",
     "```\n" + "%cancel: Stop current analysis\n" + "```",
+)
+bot.register_command(
+    "last",
+    lambda *args: LastScanner().compute(*args),
+    "last: read last message",
+    LastScanner.help(),
+)
+bot.register_command(
+    "rand(om)?",
+    lambda *args: RandomScanner().compute(*args),
+    "rand: read a random message",
+    RandomScanner.help(),
+)
+bot.register_command(
+    "first",
+    lambda *args: FirstScanner().compute(*args),
+    "first: read first message",
+    FirstScanner.help(),
 )
 bot.register_command(
     "mentioned",

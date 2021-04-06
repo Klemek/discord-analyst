@@ -51,6 +51,10 @@ def channel_mention(channel_id: int) -> str:
     return f"<#{channel_id}>"
 
 
+def message_link(message: discord.Message) -> str:
+    return f"https://discord.com/channels/{message.channel.guild.id}/{message.channel.id}/{message.id}"
+
+
 class FakeMessage:
     def __init__(self, id: int):
         self.id = id
