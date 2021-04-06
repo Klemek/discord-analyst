@@ -96,6 +96,8 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.11**
+  * streak computing in `%pres`
 * **v1.10**
   * multithreading for queries
   * bug fix
