@@ -44,7 +44,9 @@ class FrequencyScanner(Scanner):
     def get_results(self, intro: str) -> List[str]:
         FrequencyScanner.compute_results(self.freq)
         res = [intro]
-        res += self.freq.to_string()
+        res += self.freq.to_string(
+            member_specific=self.member_specific,
+        )
         return res
 
     @staticmethod
@@ -64,6 +66,20 @@ class FrequencyScanner(Scanner):
         ):
             impacted = True
             freq.dates += [message.created_at]
+            if message.author == freq.last_author:
+                freq.streaks[-1] += 1
+            else:
+                if len(freq.streaks) > 0 and (
+                    freq.longest_streak is None
+                    or freq.streaks[-1] > freq.longest_streak
+                ):
+                    freq.longest_streak = freq.streaks[-1]
+                    freq.longest_streak_start = freq.last_streak_start
+                    freq.longest_streak_author = freq.last_streak_author
+                freq.streaks += [1]
+                freq.last_streak_start = message.created_at
+                freq.last_streak_author = message.author
+        freq.last_author = message.author
         return impacted
 
     @staticmethod
