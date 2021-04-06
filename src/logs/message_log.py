@@ -79,6 +79,7 @@ class MessageLog:
 
     def dict(self) -> dict:
         message = dict(self.__dict__)
+        message.pop("channel", None)
         message["created_at"] = self.created_at.isoformat()
         message["edited_at"] = (
             self.edited_at.isoformat() if self.edited_at is not None else None
