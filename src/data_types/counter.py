@@ -49,7 +49,7 @@ class Counter:
         else:
             output += f"**#{i + 1}**"
         sum = val_sum(self.usages)
-        output += f" {name} - {plural(sum, counted)} ({percent(sum/total_usage)}) (last {from_now(self.last_used)})"
+        output += f" {name} - {plural(sum, counted)} ({percent(sum/total_usage)}, last {from_now(self.last_used)})"
         top_item = top_key(self.usages)
         if top_item != 0 and transform is not None:
             if self.usages[top_item] == sum:
