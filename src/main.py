@@ -1,5 +1,10 @@
+import sys
 from miniscord import Bot
 import logging
+
+if sys.version_info < (3, 7):
+    print("Please upgrade your Python version to 3.7.0 or higher")
+    sys.exit(1)
 
 from utils import emojis
 from scanners import (
