@@ -28,7 +28,9 @@ class ChannelLogs:
                 if channel["last_message_id"] is not None
                 else None
             )
-            self.messages = [MessageLog(message, self) for message in channel["messages"]]
+            self.messages = [
+                MessageLog(message, self) for message in channel["messages"]
+            ]
 
     def is_format(self):
         return self.format == FORMAT
@@ -78,5 +80,6 @@ class ChannelLogs:
     def dict(self) -> dict:
         channel = dict(self.__dict__)
         channel.pop("channel", None)
+        channel.pop("guild", None)
         channel["messages"] = [message.dict() for message in self.messages]
         return channel
