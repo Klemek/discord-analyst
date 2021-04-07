@@ -34,7 +34,7 @@ class WordsScanner(Scanner):
             has_digit_args=True,
             valid_args=["all", "everyone"],
             help=WordsScanner.help(),
-            intro_context="Mention usage",
+            intro_context="Words usage",
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
