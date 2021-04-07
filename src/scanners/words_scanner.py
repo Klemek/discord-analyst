@@ -23,9 +23,10 @@ class WordsScanner(Scanner):
             + "%words: Rank words by their usage\n"
             + "arguments:\n"
             + COMMON_HELP_ARGS
-            + "* <n> - top <n> words, default is 10\n"
+            + "* <n> - words containings <n> or more letters, default is 3\n"
+            + "* <n2> - top <n2> words, default is 10\n"
             + "* everyone - include bots\n"
-            + "Example: %words 10 #mychannel1 #mychannel2 @user\n"
+            + "Example: %words 5 10 #mychannel1 #mychannel2 @user\n"
             + "```"
         )
 
@@ -34,14 +35,22 @@ class WordsScanner(Scanner):
             has_digit_args=True,
             valid_args=["all", "everyone"],
             help=WordsScanner.help(),
-            intro_context="Words usage",
+            intro_context="Words ({}+ letters)",
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
-        self.top = 10
+        self.letters = None
+        self.top = None
         for arg in args:
             if arg.isdigit():
-                self.top = int(arg)
+                if self.letters is None:
+                    self.letters = int(arg)
+                elif self.top is None:
+                    self.top = int(arg)
+        if self.letters is None:
+            self.letters = 3
+        if self.top is None:
+            self.top = 10
         self.words = defaultdict(Counter)
         self.all_messages = "all" in args or "everyone" in args
         return True
@@ -52,6 +61,7 @@ class WordsScanner(Scanner):
             self.words,
             self.raw_members,
             all_messages=self.all_messages,
+            letters_threshold=self.letters,
         )
 
     def get_results(self, intro: str) -> List[str]:
@@ -61,7 +71,7 @@ class WordsScanner(Scanner):
         # Get the total of all emotes used
         usage_count = Counter.total(self.words)
         print(len(self.words))
-        res = [intro]
+        res = [intro.format(self.letters)]
         res += [
             self.words[word].to_string(
                 words.index(word),
@@ -84,6 +94,7 @@ class WordsScanner(Scanner):
         raw_members: List[int],
         *,
         all_messages: bool,
+        letters_threshold: int,
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
@@ -93,19 +104,29 @@ class WordsScanner(Scanner):
             or message.author in raw_members
         ):
             impacted = True
-            for word in re.split("[^\w\-']", message.content):
-                m = re.match("[^\w]*((?![\d_])\w.+(?![\d_])\w)[^\w]*", word)
+            content = " ".join(
+                [
+                    block
+                    for block in message.content.split()
+                    if not re.match(r"^\w+:\/\/", block)
+                ]
+            )
+            for word in re.split("[^\w\-']", content):
+                m = re.match(
+                    r"(?!^:\w+:$)^[^\w]*((?![\d_])\w.*(?![\d_])\w)[^\w]*$", word
+                )
                 if m:
                     word = m[1].lower()
-                    for case in WordsScanner.special_cases:
-                        if word.endswith(case) and word[: -len(case)] in words:
-                            word = word[: -len(case)]
-                            break
-                        if word + case in words:
-                            words[word] = words[word + case]
-                            del words[word + case]
-                            break
-                    words[word].update_use(
-                        message.content.count(word), message.created_at
-                    )
+                    if len(word) >= letters_threshold:
+                        for case in WordsScanner.special_cases:
+                            if word.endswith(case) and word[: -len(case)] in words:
+                                word = word[: -len(case)]
+                                break
+                            if word + case in words:
+                                words[word] = words[word + case]
+                                del words[word + case]
+                                break
+                        words[word].update_use(
+                            message.content.count(word), message.created_at
+                        )
         return impacted
