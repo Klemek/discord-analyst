@@ -111,7 +111,7 @@ class WordsScanner(Scanner):
                     if not re.match(r"^\w+:\/\/", block)
                 ]
             )
-            for word in re.split("[^\w\-']", content):
+            for word in re.split("[^\w\-':]", content):
                 m = re.match(
                     r"(?!^:\w+:$)^[^\w]*((?![\d_])\w.*(?![\d_])\w)[^\w]*$", word
                 )
