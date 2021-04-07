@@ -11,3 +11,4 @@ from .reactions_scanner import ReactionsScanner
 from .first_scanner import FirstScanner
 from .last_scanner import LastScanner
 from .random_scanner import RandomScanner
+from .words_scanner import WordsScanner
