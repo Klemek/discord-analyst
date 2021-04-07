@@ -58,6 +58,15 @@ class GuildLogs:
         self.channels = {}
         self.locked = False
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, tb):
+        del self.channels
+        del self.guild
+        if self.locked:
+            self.unlock()
+
     def dict(self) -> dict:
         return {id: self.channels[id].dict() for id in self.channels}
 
@@ -77,7 +86,8 @@ class GuildLogs:
     def unlock(self):
         self.locked = False
         current_analysis_lock.acquire()
-        current_analysis.remove(self.log_file)
+        if self.log_file in current_analysis:
+            current_analysis.remove(self.log_file)
         current_analysis_lock.release()
 
     async def load(
@@ -111,6 +121,7 @@ class GuildLogs:
                 await code_message(progress, "Reading saved history (2/4)...")
                 t0 = datetime.now()
                 json_data = gzip.decompress(gziped_data)
+                del gziped_data
                 logging.info(
                     f"log {self.guild.id} > gzip decompress in {delta(t0):,}ms"
                 )
@@ -119,6 +130,7 @@ class GuildLogs:
                 await code_message(progress, "Reading saved history (3/4)...")
                 t0 = datetime.now()
                 channels = json.loads(json_data)
+                del json_data
                 logging.info(f"log {self.guild.id} > json parse in {delta(t0):,}ms")
                 if self.check_cancelled():
                     return CANCELLED, 0
@@ -267,6 +279,7 @@ class GuildLogs:
             )
             t0 = datetime.now()
             gziped_data = gzip.compress(json_data)
+            del json_data
             logging.info(
                 f"log {self.guild.id} > gzip in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
             )
@@ -279,6 +292,7 @@ class GuildLogs:
             t0 = datetime.now()
             with open(self.log_file, mode="wb") as f:
                 f.write(gziped_data)
+            del gziped_data
             logging.info(
                 f"log {self.guild.id} > saved in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
             )

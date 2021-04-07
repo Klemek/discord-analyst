@@ -5,3 +5,4 @@ __pycache__
 error_*
 *.log
 /logs/
+.vscode
