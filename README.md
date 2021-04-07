@@ -45,7 +45,8 @@
     * <n> - top <n> messages, default is 10
 * %words - rank words by their usage
   * arguments:
-    * <n> - top <n> words, default is 10
+    * <n> - words containings <n> or more letters, default is 3
+    * <n2> - top <n2> words, default is 10
 * %cancel - cancel current analysis (not launched with fast)
 
 * Common arguments:
