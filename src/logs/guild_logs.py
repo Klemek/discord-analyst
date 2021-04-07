@@ -4,6 +4,7 @@ import discord
 import json
 import gzip
 from datetime import datetime
+import time
 import logging
 import asyncio
 import threading
@@ -21,6 +22,8 @@ current_analysis_lock = threading.Lock()
 
 ALREADY_RUNNING = -100
 CANCELLED = -200
+
+MIN_MODIFICATION_TIME = 5 * 60
 
 
 class Worker:
@@ -53,12 +56,29 @@ class GuildLogs:
         self.guild = guild
         self.log_file = os.path.join(LOG_DIR, f"{guild.id}.logz")
         self.channels = {}
+        self.locked = False
 
     def dict(self) -> dict:
         return {id: self.channels[id].dict() for id in self.channels}
 
     def check_cancelled(self) -> bool:
-        return self.log_file not in current_analysis
+        return self.locked and self.log_file not in current_analysis
+
+    def lock(self) -> bool:
+        self.locked = True
+        current_analysis_lock.acquire()
+        if self.log_file in current_analysis:
+            current_analysis_lock.release()
+            return False
+        current_analysis.append(self.log_file)
+        current_analysis_lock.release()
+        return True
+
+    def unlock(self):
+        self.locked = False
+        current_analysis_lock.acquire()
+        current_analysis.remove(self.log_file)
+        current_analysis_lock.release()
 
     async def load(
         self,
@@ -68,19 +88,18 @@ class GuildLogs:
         fast: bool,
         fresh: bool,
     ) -> Tuple[int, int]:
-        current_analysis_lock.acquire()
-        if self.log_file in current_analysis:
-            current_analysis_lock.release()
+        self.locked = False
+        if not fast and not self.lock():
             return ALREADY_RUNNING, 0
-        current_analysis.append(self.log_file)
-        current_analysis_lock.release()
         t00 = datetime.now()
         # read logs
         if not os.path.exists(LOG_DIR):
             os.mkdir(LOG_DIR)
+        last_time = None
         if os.path.exists(self.log_file):
             channels = {}
             try:
+                last_time = os.path.getmtime(self.log_file)
                 gziped_data = None
                 await code_message(progress, "Reading saved history (1/4)...")
                 t0 = datetime.now()
@@ -122,31 +141,54 @@ class GuildLogs:
         else:
             fast = False
 
+        if len(target_channels) == 0:
+            target_channels = (
+                self.channels.values() if fast else self.guild.text_channels
+            )
+        elif fast:
+            # select already loaded channels only
+            target_channels_tmp = [
+                channel for channel in target_channels if channel.id in self.channels
+            ]
+            if len(target_channels_tmp) == 0:
+                fast = False
+            else:
+                target_channels = target_channels_tmp
+
+        # assume fast if file is fresh
+        if (
+            not fast
+            and not fresh
+            and last_time is not None
+            and (time.time() - last_time) < MIN_MODIFICATION_TIME
+        ):
+            invalid_target_channels = [
+                channel
+                for channel in target_channels
+                if channel.id not in self.channels
+            ]
+            if len(invalid_target_channels) == 0:
+                fast = True
+                if self.locked:
+                    self.unlock()
+
         total_msg = 0
         total_chan = 0
         if fast:
-            if len(target_channels) == 0:
-                total_msg = sum(
-                    [len(channel.messages) for channel in self.channels.values()]
-                )
-                total_chan = len(self.channels)
-            else:
-                target_channels_id = [channel.id for channel in target_channels]
-                total_msg = sum(
-                    [
-                        len(channel.messages)
-                        for channel in self.channels.values()
-                        if channel.id in target_channels_id
-                    ]
-                )
-                total_chan = len(target_channels)
+            target_channels_id = [channel.id for channel in target_channels]
+            total_msg = sum(
+                [
+                    len(channel.messages)
+                    for channel in self.channels.values()
+                    if channel.id in target_channels_id
+                ]
+            )
+            total_chan = len(target_channels)
         else:
+            if not self.locked and not self.lock():
+                return ALREADY_RUNNING, 0
             # load channels
             t0 = datetime.now()
-            if len(target_channels) == 0:
-                target_channels = (
-                    self.guild.text_channels if not fast else self.channels.keys()
-                )
             loading_new = 0
             queried_msg = 0
             total_chan = 0
@@ -247,9 +289,10 @@ class GuildLogs:
             f"Analysing...\n{total_msg:,} messages in {total_chan:,} channels",
         )
         logging.info(f"log {self.guild.id} > TOTAL TIME: {delta(t00):,}ms")
-        current_analysis_lock.acquire()
-        current_analysis.remove(self.log_file)
-        current_analysis_lock.release()
+        if self.locked:
+            current_analysis_lock.acquire()
+            current_analysis.remove(self.log_file)
+            current_analysis_lock.release()
         return total_msg, total_chan
 
     @staticmethod
@@ -262,5 +305,6 @@ class GuildLogs:
         else:
             current_analysis_lock.release()
             await message.channel.send(
-                f"No analysis are currently running on this server", reference=message
+                f"No cancellable analysis are currently running on this server",
+                reference=message,
             )
