@@ -21,6 +21,7 @@ from scanners import (
     FirstScanner,
     RandomScanner,
     LastScanner,
+    WordsScanner,
 )
 from logs import GuildLogs
 
@@ -32,7 +33,7 @@ emojis.load_emojis()
 
 bot = Bot(
     "Discord Analyst",
-    "1.11",
+    "1.12",
     alias="%",
 )
 
@@ -61,6 +62,12 @@ bot.register_command(
     lambda *args: FirstScanner().compute(*args),
     "first: read first message",
     FirstScanner.help(),
+)
+bot.register_command(
+    "words",
+    lambda *args: WordsScanner().compute(*args),
+    "words: rank words by their usage",
+    WordsScanner.help(),
 )
 bot.register_command(
     "mentioned",
