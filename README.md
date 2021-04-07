@@ -107,6 +107,8 @@ python3 src/main.py
   * more scans: `%words`
   * concurrent `fast` analysis
   * assume `fast` if last analysis is fresh
+  * better memory handling
+  * bug fix
 * **v1.11**
   * more scans: `%first`, `%rand`, `%last`
   * streak computing in `%pres`
