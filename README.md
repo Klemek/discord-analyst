@@ -43,7 +43,10 @@
 * %react - rank users by their reactions
   * arguments:
     * <n> - top <n> messages, default is 10
-* %cancel - cancel current analysis
+* %words - rank words by their usage
+  * arguments:
+    * <n> - top <n> words, default is 10
+* %cancel - cancel current analysis (not launched with fast)
 
 * Common arguments:
     * @member/me: filter for one or more member
@@ -100,8 +103,12 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.12**
+  * more scans: `%words`
+  * concurrent `fast` analysis
+  * assume `fast` if last analysis is fresh
 * **v1.11**
-  * more scans `%first`, `%rand`, `%last`
+  * more scans: `%first`, `%rand`, `%last`
   * streak computing in `%pres`
 * **v1.10**
   * multithreading for queries
