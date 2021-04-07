@@ -40,7 +40,12 @@ class ChannelLogs:
         self.channel = channel
         try:
             if self.last_message_id is not None:  # append
-                while self.last_message_id != channel.last_message_id:
+                tmp_message_id = None
+                while (
+                    self.last_message_id != channel.last_message_id
+                    and self.last_message_id != tmp_message_id
+                ):
+                    tmp_message_id = self.last_message_id
                     async for message in channel.history(
                         limit=CHUNK_SIZE,
                         after=FakeMessage(self.last_message_id),
