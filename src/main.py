@@ -42,8 +42,8 @@ bot.log_calls = True
 bot.register_command(
     "(cancel|stop)",
     GuildLogs.cancel,
-    "cancel: stop current analysis",
-    "```\n" + "%cancel: Stop current analysis\n" + "```",
+    "cancel: stop current analysis (not launched with fast)",
+    "```\n" + "%cancel: Stop current analysis (not launched with fast)\n" + "```",
 )
 bot.register_command(
     "last",
