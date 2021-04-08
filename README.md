@@ -43,7 +43,7 @@
 * %react - rank users by their reactions
   * arguments:
     * <n> - top <n> messages, default is 10
-* %words - rank words by their usage
+* %words - (BETA) rank words by their usage
   * arguments:
     * <n> - words containings <n> or more letters, default is 3
     * <n2> - top <n2> words, default is 10
@@ -104,6 +104,8 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.13**
+  * improved scan `%words`
 * **v1.12**
   * more scans: `%words`
   * concurrent `fast` analysis

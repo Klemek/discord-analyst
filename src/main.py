@@ -46,6 +46,12 @@ bot.register_command(
     "```\n" + "%cancel: Stop current analysis (not launched with fast)\n" + "```",
 )
 bot.register_command(
+    "words",
+    lambda *args: WordsScanner().compute(*args),
+    "words: (BETA) rank words by their usage",
+    WordsScanner.help(),
+)
+bot.register_command(
     "last",
     lambda *args: LastScanner().compute(*args),
     "last: read last message",
@@ -62,12 +68,6 @@ bot.register_command(
     lambda *args: FirstScanner().compute(*args),
     "first: read first message",
     FirstScanner.help(),
-)
-bot.register_command(
-    "words",
-    lambda *args: WordsScanner().compute(*args),
-    "words: rank words by their usage",
-    WordsScanner.help(),
 )
 bot.register_command(
     "mentioned",
