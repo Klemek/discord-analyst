@@ -15,6 +15,7 @@ from utils import code_message, delta, deltas
 
 
 LOG_DIR = "logs"
+LOG_EXT = ".logz"
 
 current_analysis = []
 current_analysis_lock = threading.Lock()
@@ -23,7 +24,10 @@ current_analysis_lock = threading.Lock()
 ALREADY_RUNNING = -100
 CANCELLED = -200
 
+# 5 minutes, assume 'fast' arg
 MIN_MODIFICATION_TIME = 5 * 60
+# ~6 months, remove log file
+MAX_MODIFICATION_TIME = 6 * 30.5 * 24 * 60 * 60
 
 
 class Worker:
@@ -54,7 +58,7 @@ class GuildLogs:
     def __init__(self, guild: discord.Guild):
         self.id = guild.id
         self.guild = guild
-        self.log_file = os.path.join(LOG_DIR, f"{guild.id}.logz")
+        self.log_file = os.path.join(LOG_DIR, f"{guild.id}{LOG_EXT}")
         self.channels = {}
         self.locked = False
 
@@ -322,3 +326,21 @@ class GuildLogs:
                 f"No cancellable analysis are currently running on this server",
                 reference=message,
             )
+
+    @staticmethod
+    def check_logs(guilds: List[discord.Guild]):
+        logging.info(f"checking logs...")
+        guild_ids = [str(guild.id) for guild in guilds]
+        for item in os.listdir(LOG_DIR):
+            path = os.path.join(LOG_DIR, item)
+            name, ext = os.path.splitext(item)
+            if os.path.isfile(path) and ext == LOG_EXT:
+                if (
+                    name in guild_ids
+                    and (time.time() - os.path.getmtime(path)) > MAX_MODIFICATION_TIME
+                ):
+                    logging.info(f"> removing old log '{path}'")
+                    os.unlink(path)
+                elif name not in guild_ids:
+                    logging.info(f"> removing unused log '{path}'")
+                    os.unlink(path)

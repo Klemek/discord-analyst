@@ -39,6 +39,20 @@ bot = Bot(
 
 bot.log_calls = True
 
+
+async def on_ready():
+    GuildLogs.check_logs(bot.client.guilds)
+    return True
+
+
+async def on_guild_remove():
+    GuildLogs.check_logs(bot.client.guilds)
+    return True
+
+
+bot.register_event(on_ready)
+bot.register_event(on_guild_remove)
+
 bot.register_command(
     "(cancel|stop)",
     GuildLogs.cancel,

@@ -106,6 +106,7 @@ python3 src/main.py
 
 * **v1.13**
   * improved scan `%words`
+  * remove old and unused logs at start and guild leaving
 * **v1.12**
   * more scans: `%words`
   * concurrent `fast` analysis
