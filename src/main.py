@@ -6,7 +6,7 @@ if sys.version_info < (3, 7):
     print("Please upgrade your Python version to 3.7.0 or higher")
     sys.exit(1)
 
-from utils import emojis
+from utils import emojis, gdpr
 from scanners import (
     EmotesScanner,
     FullScanner,
@@ -57,7 +57,13 @@ bot.register_command(
     "(cancel|stop)",
     GuildLogs.cancel,
     "cancel: stop current analysis (not launched with fast)",
-    "```\n" + "%cancel: Stop current analysis (not launched with fast)\n" + "```",
+    "```\n%cancel: Stop current analysis (not launched with fast)\n```",
+)
+bot.register_command(
+    "gdpr",
+    gdpr.process,
+    "gdpr: displays GDPR information",
+    gdpr.HELP,
 )
 bot.register_command(
     "words",

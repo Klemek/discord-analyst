@@ -5,8 +5,15 @@ import logging
 import re
 import discord
 
-from utils import no_duplicate, get_intro, delta
-from logs import GuildLogs, ChannelLogs, MessageLog, ALREADY_RUNNING, CANCELLED
+from utils import no_duplicate, get_intro, delta, gdpr
+from logs import (
+    GuildLogs,
+    ChannelLogs,
+    MessageLog,
+    ALREADY_RUNNING,
+    CANCELLED,
+    NO_FILE,
+)
 
 
 class Scanner(ABC):
@@ -106,6 +113,8 @@ class Scanner(ABC):
                         "An analysis is already running on this server, please be patient.",
                         reference=message,
                     )
+                elif total_msg == NO_FILE:
+                    await message.channel.send(gdpr.TEXT)
                 else:
                     self.msg_count = 0
                     self.total_msg = 0

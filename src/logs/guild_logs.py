@@ -23,11 +23,12 @@ current_analysis_lock = threading.Lock()
 
 ALREADY_RUNNING = -100
 CANCELLED = -200
+NO_FILE = -300
 
 # 5 minutes, assume 'fast' arg
 MIN_MODIFICATION_TIME = 5 * 60
-# ~6 months, remove log file
-MAX_MODIFICATION_TIME = 6 * 30.5 * 24 * 60 * 60
+# ~1 year, remove log file
+MAX_MODIFICATION_TIME = 365 * 24 * 60 * 60
 
 
 class Worker:
@@ -110,52 +111,49 @@ class GuildLogs:
         if not os.path.exists(LOG_DIR):
             os.mkdir(LOG_DIR)
         last_time = None
-        if os.path.exists(self.log_file):
-            channels = {}
-            try:
-                last_time = os.path.getmtime(self.log_file)
-                gziped_data = None
-                await code_message(progress, "Reading saved history (1/4)...")
-                t0 = datetime.now()
-                with open(self.log_file, mode="rb") as f:
-                    gziped_data = f.read()
-                logging.info(f"log {self.guild.id} > read in {delta(t0):,}ms")
-                if self.check_cancelled():
-                    return CANCELLED, 0
-                await code_message(progress, "Reading saved history (2/4)...")
-                t0 = datetime.now()
-                json_data = gzip.decompress(gziped_data)
-                del gziped_data
-                logging.info(
-                    f"log {self.guild.id} > gzip decompress in {delta(t0):,}ms"
-                )
-                if self.check_cancelled():
-                    return CANCELLED, 0
-                await code_message(progress, "Reading saved history (3/4)...")
-                t0 = datetime.now()
-                channels = json.loads(json_data)
-                del json_data
-                logging.info(f"log {self.guild.id} > json parse in {delta(t0):,}ms")
-                if self.check_cancelled():
-                    return CANCELLED, 0
-                await code_message(progress, "Reading saved history (4/4)...")
-                t0 = datetime.now()
-                self.channels = {
-                    int(id): ChannelLogs(channels[id], self) for id in channels
-                }
-                # remove invalid format
-                self.channels = {
-                    id: self.channels[id]
-                    for id in self.channels
-                    if self.channels[id].is_format()
-                }
-                logging.info(f"log {self.guild.id} > loaded in {delta(t0):,}ms")
-            except json.decoder.JSONDecodeError:
-                logging.error(f"log {self.guild.id} > invalid JSON")
-            except IOError:
-                logging.error(f"log {self.guild.id} > cannot read")
-        else:
-            fast = False
+        if not os.path.exists(self.log_file):
+            return NO_FILE, 0
+        channels = {}
+        try:
+            last_time = os.path.getmtime(self.log_file)
+            gziped_data = None
+            await code_message(progress, "Reading saved history (1/4)...")
+            t0 = datetime.now()
+            with open(self.log_file, mode="rb") as f:
+                gziped_data = f.read()
+            logging.info(f"log {self.guild.id} > read in {delta(t0):,}ms")
+            if self.check_cancelled():
+                return CANCELLED, 0
+            await code_message(progress, "Reading saved history (2/4)...")
+            t0 = datetime.now()
+            json_data = gzip.decompress(gziped_data)
+            del gziped_data
+            logging.info(f"log {self.guild.id} > gzip decompress in {delta(t0):,}ms")
+            if self.check_cancelled():
+                return CANCELLED, 0
+            await code_message(progress, "Reading saved history (3/4)...")
+            t0 = datetime.now()
+            channels = json.loads(json_data)
+            del json_data
+            logging.info(f"log {self.guild.id} > json parse in {delta(t0):,}ms")
+            if self.check_cancelled():
+                return CANCELLED, 0
+            await code_message(progress, "Reading saved history (4/4)...")
+            t0 = datetime.now()
+            self.channels = {
+                int(id): ChannelLogs(channels[id], self) for id in channels
+            }
+            # remove invalid format
+            self.channels = {
+                id: self.channels[id]
+                for id in self.channels
+                if self.channels[id].is_format()
+            }
+            logging.info(f"log {self.guild.id} > loaded in {delta(t0):,}ms")
+        except json.decoder.JSONDecodeError:
+            logging.error(f"log {self.guild.id} > invalid JSON")
+        except IOError:
+            logging.error(f"log {self.guild.id} > cannot read")
 
         if len(target_channels) == 0:
             target_channels = (
@@ -326,6 +324,29 @@ class GuildLogs:
                 f"No cancellable analysis are currently running on this server",
                 reference=message,
             )
+
+    @staticmethod
+    def init_log(guild: List[discord.Guild]):
+        if not os.path.exists(LOG_DIR):
+            os.mkdir(LOG_DIR)
+        filename = os.path.join(LOG_DIR, f"{guild.id}{LOG_EXT}")
+        if not os.path.exists(filename):
+            with open(filename, mode="wb") as f:
+                f.write(gzip.compress(bytes("{}", "utf-8")))
+            logging.info(f"log {guild.id} > created")
+        else:
+            logging.info(f"log {guild.id} > already exists")
+
+    @staticmethod
+    def remove_log(guild: List[discord.Guild]):
+        if not os.path.exists(LOG_DIR):
+            os.mkdir(LOG_DIR)
+        filename = os.path.join(LOG_DIR, f"{guild.id}{LOG_EXT}")
+        if os.path.exists(filename):
+            os.unlink(filename)
+            logging.info(f"log {guild.id} > removed")
+        else:
+            logging.info(f"log {guild.id} > does not exists")
 
     @staticmethod
     def check_logs(guilds: List[discord.Guild]):
