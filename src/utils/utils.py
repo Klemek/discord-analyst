@@ -1,5 +1,5 @@
 from calendar import month
-from typing import List, Dict, Union, Optional, Any
+from typing import Callable, List, Dict, Union, Optional, Any
 import os
 import logging
 import discord
@@ -117,11 +117,19 @@ def no_duplicate(seq: list) -> list:
 # DICTS
 
 
-def top_key(d: Dict[Union[str, int], int]) -> Union[str, int]:
-    return sorted(d, key=lambda k: d[k])[-1]
+def top_key(
+    d: Dict[Union[str, int], int], key: Optional[Callable] = None
+) -> Union[str, int]:
+    if len(d) == 0:
+        return None
+    if key is None:
+        key = lambda k: d[k]
+    return sorted(d, key=key)[-1]
 
 
 def val_sum(d: Dict[Any, int]) -> int:
+    if len(d) == 0:
+        return 0
     return sum(d.values())
 
 

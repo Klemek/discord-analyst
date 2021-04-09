@@ -67,13 +67,8 @@ class Frequency:
             f"- **busiest hour ever**: {str_datetime(self.busiest_hour)} ({from_now(self.busiest_hour)}, {self.busiest_hour_count} msg)",
             f"- **longest break**: {plural(round(self.longest_break.total_seconds()/3600), 'hour')} ({plural(self.longest_break.days,'day')}) from {str_datetime(self.longest_break_start)} ({from_now(self.longest_break_start)})",
             f"- **avg. streak**: {precise(sum(self.streaks)/len(self.streaks), precision=3)} msg",
+            f"- **longest streak**: {self.longest_streak:,} msg from {str_datetime(self.longest_streak_start)} ({from_now(self.longest_streak_start)})"
+            if member_specific
+            else f"- **longest streak**: {mention(self.longest_streak_author)} ({self.longest_streak:,} msg from {str_datetime(self.longest_streak_start)}, {from_now(self.longest_streak_start)})",
         ]
-        if member_specific:
-            ret += [
-                f"- **longest streak**: {self.longest_streak:,} msg from {str_datetime(self.longest_streak_start)} ({from_now(self.longest_streak_start)})"
-            ]
-        else:
-            ret += [
-                f"- **longest streak**: {mention(self.longest_streak_author)} ({self.longest_streak:,} msg from {str_datetime(self.longest_streak_start)}, {from_now(self.longest_streak_start)})"
-            ]
         return ret

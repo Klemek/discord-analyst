@@ -94,5 +94,6 @@ class ChannelLogs:
         channel = dict(self.__dict__)
         channel.pop("channel", None)
         channel.pop("guild", None)
+        channel.pop("start_date", None)
         channel["messages"] = [message.dict() for message in self.messages]
         return channel
