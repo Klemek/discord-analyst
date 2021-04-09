@@ -8,21 +8,13 @@ import discord
 from .scanner import Scanner
 from data_types import Composition
 from logs import ChannelLogs, MessageLog
-from utils import emojis, COMMON_HELP_ARGS
+from utils import emojis, generate_help
 
 
 class CompositionScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%compo: Show composition statistics\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* all/everyone - include bots\n"
-            + "Example: %compo #mychannel1 @user\n"
-            + "```"
-        )
+        return generate_help("compo", "Show composition statistics")
 
     def __init__(self):
         super().__init__(

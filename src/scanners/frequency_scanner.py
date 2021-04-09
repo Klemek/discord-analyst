@@ -8,21 +8,13 @@ import discord
 from .scanner import Scanner
 from data_types import Frequency
 from logs import ChannelLogs, MessageLog
-from utils import COMMON_HELP_ARGS
+from utils import generate_help
 
 
 class FrequencyScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%freq: Show frequency-related statistics\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* all/everyone - include bots\n"
-            + "Example: %freq #mychannel1 @user\n"
-            + "```"
-        )
+        return generate_help("freq", "Show frequency-related statistics")
 
     def __init__(self):
         super().__init__(
@@ -55,7 +47,7 @@ class FrequencyScanner(Scanner):
         freq: Frequency,
         raw_members: List[int],
         *,
-        all_messages: bool
+        all_messages: bool,
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)

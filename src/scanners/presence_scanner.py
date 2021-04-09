@@ -7,21 +7,13 @@ import discord
 from .scanner import Scanner
 from data_types import Presence
 from logs import ChannelLogs, MessageLog
-from utils import COMMON_HELP_ARGS
+from utils import generate_help
 
 
 class PresenceScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%pres: Show presence statistics\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* all/everyone - include bots\n"
-            + "Example: %pres #mychannel1 @user\n"
-            + "```"
-        )
+        return generate_help("pres", "Show presence statistics")
 
     def __init__(self):
         super().__init__(

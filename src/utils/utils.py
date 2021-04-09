@@ -7,13 +7,31 @@ from datetime import datetime
 
 # OTHER
 
-COMMON_HELP_ARGS = (
-    ""
-    + "* @member/me - filter for one or more member\n"
-    + "* #channel/here - filter for one or more channel\n"
-    + "* fast - only read cache\n"
-    + "* fresh - does not read cache (long)\n"
-)
+COMMON_HELP_ARGS = [
+    "@member/me - filter for one or more member",
+    "#channel/here - filter for one or more channel",
+    "fast - only read cache",
+    "fresh - does not read cache (long)",
+]
+
+
+def generate_help(
+    cmd: str,
+    info: str,
+    *,
+    args=["all/everyone - include bots"],
+    example="#mychannel1 @user",
+    replace_args=[],
+):
+    arg_list = "* " + "\n* ".join(
+        replace_args + COMMON_HELP_ARGS[len(replace_args) :] + args
+    )
+    return f"""```
+%{cmd}: {info}
+arguments:
+{arg_list}
+Example: %{cmd} {example}
+```"""
 
 
 def delta(t0: datetime):

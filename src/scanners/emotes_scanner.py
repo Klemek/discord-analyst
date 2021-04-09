@@ -8,24 +8,23 @@ import discord
 from logs import ChannelLogs, MessageLog
 from data_types import Emote, get_emote_dict
 from .scanner import Scanner
-from utils import emojis, COMMON_HELP_ARGS, plural, precise
+from utils import emojis, generate_help, plural, precise
 
 
 class EmotesScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%emojis: Rank emojis by their usage\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* <n> - top <n> emojis, default is 20\n"
-            + "* all - list all common emojis in addition to this guild's\n"
-            + "* members - show top member for each emojis\n"
-            + "* sort:usage/reaction - other sorting methods\n"
-            + "* everyone - include bots\n"
-            + "Example: %emojis 10 all #mychannel1 #mychannel2 @user\n"
-            + "```"
+        return generate_help(
+            "emojis",
+            "Rank emojis by their usage",
+            args=[
+                "<n> - top <n> emojis, default is 20",
+                "all - list all common emojis in addition to this guild's",
+                "members - show top member for each emojis",
+                "sort:usage/reaction - other sorting methods",
+                "everyone - include bots",
+            ],
+            example="10 all #mychannel1 #mychannel2 @user",
         )
 
     def __init__(self):

@@ -9,7 +9,7 @@ from logs import ChannelLogs, MessageLog
 from .scanner import Scanner
 from data_types import Counter
 from utils import (
-    COMMON_HELP_ARGS,
+    generate_help,
     plural,
     precise,
 )
@@ -18,16 +18,15 @@ from utils import (
 class WordsScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%words: (BETA) Rank words by their usage\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* <n> - words containings <n> or more letters, default is 3\n"
-            + "* <n2> - top <n2> words, default is 10\n"
-            + "* everyone - include bots\n"
-            + "Example: %words 5 10 #mychannel1 #mychannel2 @user\n"
-            + "```"
+        return generate_help(
+            "words",
+            "(BETA) Rank words by their usage",
+            args=[
+                "<n> - words containings <n> or more letters, default is 3",
+                "<n2> - top <n2> words, default is 10",
+                "all/everyone - include bots",
+            ],
+            example="5 10 #mychannel1 #mychannel2 @user",
         )
 
     def __init__(self):
