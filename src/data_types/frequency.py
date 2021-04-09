@@ -49,7 +49,7 @@ class Frequency:
         if (
             self.dates[0].weekday() <= busiest_weekday
             and self.dates[-1].weekday() >= busiest_weekday
-        ):
+        ) or n_weekdays == 0:
             n_weekdays += 1
         n_hours = delta.days
         if self.dates[0].hour <= busiest_hour and self.dates[-1].hour >= busiest_hour:
