@@ -59,7 +59,7 @@ async def process(client: discord.client, message: discord.Message, *args: str):
     elif args[1] in ["agree", "accept"]:
         GuildLogs.init_log(message.channel.guild)
         await message.channel.send(AGREE_TEXT, reference=message)
-    elif args[1] in ["revoke", "cancel"]:
+    elif args[1] in ["revoke", "cancel", "remove", "delete"]:
         GuildLogs.remove_log(message.channel.guild)
         await message.channel.send(REVOKE_TEXT, reference=message)
     else:

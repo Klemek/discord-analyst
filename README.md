@@ -21,6 +21,7 @@
 * %first - read first message
 * %rand - read a random message
 * %last - read last message
+* %gdpr - displays GDPR information
 * %emojis - rank emotes by their usage
   * arguments:
     * <n> - top <n> emojis, default is 20
@@ -107,6 +108,7 @@ python3 src/main.py
 * **v1.13**
   * improved scan `%words`
   * remove old and unused logs at start and guild leaving
+  * GDPR disclaimer before scanning
 * **v1.12**
   * more scans: `%words`
   * concurrent `fast` analysis
