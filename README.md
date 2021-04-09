@@ -59,7 +59,7 @@
     * fast: only read cache
     * fresh: does not read cache
 
-(Dates are formated 'yyyy-mm-dd' or 'yyyy-mm-ddThh:mm' (ISO 8601) or 'week/month/year')
+(Dates are formated 'yyyy-mm-dd' or 'yyyy-mm-ddThh:mm' (ISO 8601) or 'week' or '8days' or '1y')
 ```
 
 ## Running this bot

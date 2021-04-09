@@ -12,8 +12,8 @@ from utils import (
     delta,
     gdpr,
     ISO8601_REGEX,
+    RELATIVE_REGEX,
     parse_time,
-    RELATIVE_TIME,
 )
 from logs import (
     GuildLogs,
@@ -70,7 +70,7 @@ class Scanner(ABC):
                     arg = arg[3:-1] if "!" in arg else arg[2:-1]
                 elif re.match(r"^<#!?\d+>$", arg):
                     arg = arg[3:-1] if "!" in arg else arg[2:-1]
-                elif re.match(ISO8601_REGEX, arg) or arg in RELATIVE_TIME:
+                elif re.match(ISO8601_REGEX, arg) or re.match(RELATIVE_REGEX, arg):
                     dates += [parse_time(arg)]
                     skip_check = True
                     if len(dates) > 2:

@@ -36,7 +36,7 @@ def generate_help(
 %{cmd}: {info}
 arguments:
 {arg_list}
-(Dates are formated 'yyyy-mm-dd' or 'yyyy-mm-ddThh:mm' (ISO 8601) or 'week/month/year')
+(Dates are formated 'yyyy-mm-dd' or 'yyyy-mm-ddThh:mm' (ISO 8601) or 'week' or '8days' or '1y')
 Example: %{cmd} {example}
 ```"""
 
@@ -180,21 +180,37 @@ def parse_iso_datetime(str_date: str) -> datetime:
     return dateutil.parser.parse(str_date)
 
 
-RELATIVE_TIME = {
-    "today": relativedelta(days=1),
-    "yesterday": relativedelta(days=2),
-    "week": relativedelta(weeks=1),
-    "month": relativedelta(months=1),
-    "year": relativedelta(years=1),
-}
+RELATIVE_REGEX = (
+    r"(yesterday|today|\d*h(ours?)?|\d*d(ays?)?|\d*w(eeks?)?|\d*m(onths?)?|\d*y(ears?))"
+)
 
 
 def parse_relative_time(src: str) -> datetime:
-    return datetime.utcnow() - RELATIVE_TIME[src]
+    timezone_delta = datetime.utcnow() - datetime.now()
+    if src == "today":
+        return datetime.today() + timezone_delta
+    elif src == "yesterday":
+        return datetime.today() - relativedelta(days=1) + timezone_delta
+    else:
+        m = re.match("(\d*)(\w+)", src)
+        delta = None
+        value = int(m[1])
+        unit = m[2][0]
+        if unit == "h":
+            delta = relativedelta(hours=value)
+        elif unit == "d":
+            delta = relativedelta(days=value)
+        elif unit == "w":
+            delta = relativedelta(weeks=value)
+        elif unit == "m":
+            delta = relativedelta(months=value)
+        elif unit == "y":
+            delta = relativedelta(years=value)
+        return datetime.utcnow() - delta
 
 
 def parse_time(src: str) -> datetime:
-    if src in RELATIVE_TIME:
+    if re.match(RELATIVE_REGEX, src):
         return parse_relative_time(src)
     else:
         return parse_iso_datetime(src)
