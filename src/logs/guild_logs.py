@@ -330,6 +330,8 @@ class GuildLogs:
     @staticmethod
     def check_logs(guilds: List[discord.Guild]):
         logging.info(f"checking logs...")
+        if not os.path.exists(LOG_DIR):
+            os.mkdir(LOG_DIR)
         guild_ids = [str(guild.id) for guild in guilds]
         for item in os.listdir(LOG_DIR):
             path = os.path.join(LOG_DIR, item)
