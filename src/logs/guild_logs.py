@@ -89,21 +89,22 @@ class GuildLogs:
         return self.locked and self.log_file not in current_analysis
 
     def lock(self) -> bool:
-        self.locked = True
         current_analysis_lock.acquire()
         if self.log_file in current_analysis:
             current_analysis_lock.release()
             return False
+        self.locked = True
         current_analysis.append(self.log_file)
         current_analysis_lock.release()
         return True
 
     def unlock(self):
-        self.locked = False
-        current_analysis_lock.acquire()
-        if self.log_file in current_analysis:
-            current_analysis.remove(self.log_file)
-        current_analysis_lock.release()
+        if self.locked:
+            self.locked = False
+            current_analysis_lock.acquire()
+            if self.log_file in current_analysis:
+                current_analysis.remove(self.log_file)
+            current_analysis_lock.release()
 
     async def load(
         self,
