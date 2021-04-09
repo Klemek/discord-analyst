@@ -8,6 +8,9 @@ IMAGE_FORMAT = [".gif", ".gifv", ".png", ".jpg", ".jpeg", ".bmp"]
 EMBED_IMAGES = ["image", "gifv"]
 
 
+NOT_SERIALIZED = ["channel"]
+
+
 class MessageLog:
     def __init__(self, message: Union[discord.Message, dict], channel: Any):
         self.channel = channel
@@ -79,7 +82,8 @@ class MessageLog:
 
     def dict(self) -> dict:
         message = dict(self.__dict__)
-        message.pop("channel", None)
+        for key in NOT_SERIALIZED:
+            message.pop(key, None)
         message["created_at"] = self.created_at.isoformat()
         message["edited_at"] = (
             self.edited_at.isoformat() if self.edited_at is not None else None

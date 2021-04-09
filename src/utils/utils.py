@@ -1,19 +1,44 @@
-from typing import List, Dict, Union, Optional, Any
+from calendar import month
+from typing import Callable, List, Dict, Union, Optional, Any
 import os
 import logging
 import discord
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
+import re
+import dateutil.parser
+from dateutil.relativedelta import relativedelta
 
 # OTHER
 
-COMMON_HELP_ARGS = (
-    ""
-    + "* @member/me - filter for one or more member\n"
-    + "* #channel/here - filter for one or more channel\n"
-    + "* fast - only read cache\n"
-    + "* fresh - does not read cache (long)\n"
-)
+COMMON_HELP_ARGS = [
+    "@member/me - filter for one or more member",
+    "#channel/here - filter for one or more channel",
+    "<date1> - filter after <date1>",
+    "<date2> - filter before <date2>",
+    "fast - only read cache",
+    "fresh - does not read cache (long)",
+]
+
+
+def generate_help(
+    cmd: str,
+    info: str,
+    *,
+    args=["all/everyone - include bots"],
+    example="#mychannel1 @user",
+    replace_args=[],
+):
+    arg_list = "* " + "\n* ".join(
+        replace_args + COMMON_HELP_ARGS[len(replace_args) :] + args
+    )
+    return f"""```
+%{cmd}: {info}
+arguments:
+{arg_list}
+(Sample dates: 2020 / 2021-11 / 2021-06-28 / 2020-06-28T23:00 / today / week / 8days / 1y)
+Example: %{cmd} {example}
+```"""
 
 
 def delta(t0: datetime):
@@ -92,11 +117,19 @@ def no_duplicate(seq: list) -> list:
 # DICTS
 
 
-def top_key(d: Dict[Union[str, int], int]) -> Union[str, int]:
-    return sorted(d, key=lambda k: d[k])[-1]
+def top_key(
+    d: Dict[Union[str, int], int], key: Optional[Callable] = None
+) -> Union[str, int]:
+    if len(d) == 0:
+        return None
+    if key is None:
+        key = lambda k: d[k]
+    return sorted(d, key=key)[-1]
 
 
 def val_sum(d: Dict[Any, int]) -> int:
+    if len(d) == 0:
+        return 0
     return sum(d.values())
 
 
@@ -135,6 +168,51 @@ def precise(p: float, *, precision: int = 2) -> str:
 
 # DATE FORMATTING
 
+ISO8601_REGEX = r"^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$"
+ISO8601_FULL = "0000-01-01T00:00:00"
+
+
+def parse_iso_datetime(str_date: str) -> datetime:
+    if re.match(
+        "^\d{4}(-\d{2}(-\d{2}(T\d{2}(:\d{2}(:\d{2}(:\d{2})?)?)?)?)?)?$", str_date
+    ):
+        str_date = str_date + "0000-01-01T00:00:00"[len(str_date) :]
+    return dateutil.parser.parse(str_date)
+
+
+RELATIVE_REGEX = r"(yesterday|today|\d*h(ours?)?|\d*d(ays?)?|\d*w(eeks?)?|\d*m(onths?)?|\d*y(ears?)?)"
+
+
+def parse_relative_time(src: str) -> datetime:
+    timezone_delta = datetime.utcnow() - datetime.now()
+    if src == "today":
+        return datetime.today() + timezone_delta
+    elif src == "yesterday":
+        return datetime.today() - relativedelta(days=1) + timezone_delta
+    else:
+        m = re.match("(\d*)(\w+)", src)
+        delta = None
+        value = int(m[1]) if m[1] else 1
+        unit = m[2][0]
+        if unit == "h":
+            delta = relativedelta(hours=value)
+        elif unit == "d":
+            delta = relativedelta(days=value)
+        elif unit == "w":
+            delta = relativedelta(weeks=value)
+        elif unit == "m":
+            delta = relativedelta(months=value)
+        elif unit == "y":
+            delta = relativedelta(years=value)
+        return datetime.utcnow() - delta
+
+
+def parse_time(src: str) -> datetime:
+    if re.match(RELATIVE_REGEX, src):
+        return parse_relative_time(src)
+    else:
+        return parse_iso_datetime(src)
+
 
 def str_date(date: datetime) -> str:
     return date.strftime("%d %b. %Y")  # 12 Jun. 2018
@@ -144,29 +222,37 @@ def str_datetime(date: datetime) -> str:
     return date.strftime("%H:%M, %d %b. %Y")  # 12:05, 12 Jun. 2018
 
 
-def from_now(src: Optional[datetime]) -> str:
-    if src is None:
-        return "never"
-    delay = datetime.utcnow() - src
+def str_delta(delay: timedelta) -> str:
     seconds = delay.seconds
     minutes = seconds // 60
     hours = minutes // 60
     if delay.days < 1:
         if hours < 1:
             if minutes == 0:
-                return "now"
+                return "no time"
             elif minutes == 1:
-                return "a minute ago"
+                return "a minute"
             else:
-                return f"{minutes} minutes ago"
+                return f"{minutes} minutes"
         elif hours == 1:
-            return "an hour ago"
+            return "an hour"
         else:
-            return f"{hours} hours ago"
+            return f"{hours} hours"
     elif delay.days == 1:
-        return "yesterday"
+        return "one day"
     else:
-        return f"{delay.days:,} days ago"
+        return f"{delay.days:,} days"
+
+
+def from_now(src: Optional[datetime]) -> str:
+    if src is None:
+        return "never"
+    output = str_delta(datetime.utcnow() - src)
+    if output == "no time":
+        return "now"
+    elif output == "one day":
+        return "yesterday"
+    return output + " ago"
 
 
 # APP SPECIFIC
@@ -179,46 +265,48 @@ def get_intro(
     members: List[discord.Member],
     nmm: int,  # number of messages impacted
     nc: int,  # number of impacted channels
+    start_datetime: datetime,
+    stop_datetime: datetime,
 ) -> str:
     """
     Get the introduction sentence of the response
     """
+    time_text = ""
+    if start_datetime is not None:
+        stop_datetime = datetime.now() if stop_datetime is None else stop_datetime
+        time_text = f" (in {str_delta(stop_datetime - start_datetime)})"
     # Show all data (members, channels) when it's less than 5 units
     if len(members) == 0:
         # Full scan of the server
         if full:
-            return f"{subject} in this server ({nc} channels, {nmm:,} messages):"
+            return f"{subject} in this server ({nc} channels, {nmm:,} messages){time_text}:"
         elif len(channels) < 5:
-            return f"{aggregate([c.mention for c in channels])} {subject.lower()} in {nmm:,} messages:"
+            return f"{aggregate([c.mention for c in channels])} {subject.lower()} in {nmm:,} messages{time_text}:"
         else:
-            return (
-                f"These {len(channels)} channels {subject.lower()} in {nmm:,} messages:"
-            )
+            return f"These {len(channels)} channels {subject.lower()} in {nmm:,} messages{time_text}:"
     elif len(members) < 5:
         if full:
-            return f"{aggregate([m.mention for m in members])} {subject.lower()} in {nmm:,} messages:"
+            return f"{aggregate([m.mention for m in members])} {subject.lower()} in {nmm:,} messages{time_text}:"
         elif len(channels) < 5:
             return (
                 f"{aggregate([m.mention for m in members])} on {aggregate([c.mention for c in channels])} "
-                f"{subject.lower()} in {nmm:,} messages:"
+                f"{subject.lower()} in {nmm:,} messages{time_text}:"
             )
         else:
             return (
                 f"{aggregate([m.mention for m in members])} on these {len(channels)} channels "
-                f"{subject.lower()} in {nmm:,} messages:"
+                f"{subject.lower()} in {nmm:,} messages{time_text}:"
             )
     else:
         if full:
-            return (
-                f"These {len(members)} members {subject.lower()} in {nmm:,} messages:"
-            )
+            return f"These {len(members)} members {subject.lower()} in {nmm:,} messages{time_text}:"
         elif len(channels) < 5:
             return (
                 f"These {len(members)} members on {aggregate([c.mention for c in channels])} "
-                f"{subject.lower()} in {nmm:,} messages:"
+                f"{subject.lower()} in {nmm:,} messages{time_text}:"
             )
         else:
             return (
                 f"These {len(members)} members on these {len(channels)} channels "
-                f"{subject.lower()} in {nmm:,} messages:"
+                f"{subject.lower()} in {nmm:,} messages{time_text}:"
             )

@@ -8,20 +8,17 @@ import discord
 from logs import ChannelLogs, MessageLog
 from .scanner import Scanner
 from data_types import Counter
-from utils import COMMON_HELP_ARGS, mention, channel_mention
+from utils import generate_help, mention, channel_mention
 
 
 class ReactionsScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%react: Rank users by their reactions\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* <n> - top <n>, default is 10\n"
-            + "Example: %react 10 #channel\n"
-            + "```"
+        return generate_help(
+            "react",
+            "Rank users by their reactions",
+            args=["<n> - top <n>, default is 10"],
+            example="10 #channel",
         )
 
     def __init__(self):

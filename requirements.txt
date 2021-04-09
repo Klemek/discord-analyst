@@ -1,3 +1,4 @@
 discord.py
 python-dotenv
+python-dateutil
 git+git://github.com/Klemek/miniscord.git

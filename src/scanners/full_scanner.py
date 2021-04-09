@@ -8,21 +8,13 @@ from .scanner import Scanner
 from . import FrequencyScanner, CompositionScanner, PresenceScanner
 from data_types import Frequency, Composition, Presence
 from logs import ChannelLogs, MessageLog
-from utils import COMMON_HELP_ARGS
+from utils import generate_help
 
 
 class FullScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%scan: Show full statistics\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* all/everyone - include bots\n"
-            + "Example: %scan #mychannel1 @user\n"
-            + "```"
-        )
+        return generate_help("scan", "Show full statistics")
 
     def __init__(self):
         super().__init__(

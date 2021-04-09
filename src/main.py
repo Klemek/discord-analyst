@@ -6,7 +6,7 @@ if sys.version_info < (3, 7):
     print("Please upgrade your Python version to 3.7.0 or higher")
     sys.exit(1)
 
-from utils import emojis
+from utils import emojis, gdpr
 from scanners import (
     EmotesScanner,
     FullScanner,
@@ -33,17 +33,43 @@ emojis.load_emojis()
 
 bot = Bot(
     "Discord Analyst",
-    "1.12",
+    "1.13",
     alias="%",
 )
 
 bot.log_calls = True
 
+
+async def on_ready():
+    GuildLogs.check_logs(bot.client.guilds)
+    return True
+
+
+async def on_guild_remove():
+    GuildLogs.check_logs(bot.client.guilds)
+    return True
+
+
+bot.register_event(on_ready)
+bot.register_event(on_guild_remove)
+
 bot.register_command(
     "(cancel|stop)",
     GuildLogs.cancel,
     "cancel: stop current analysis (not launched with fast)",
-    "```\n" + "%cancel: Stop current analysis (not launched with fast)\n" + "```",
+    "```\n%cancel: Stop current analysis (not launched with fast)\n```",
+)
+bot.register_command(
+    "gdpr",
+    gdpr.process,
+    "gdpr: displays GDPR information",
+    gdpr.HELP,
+)
+bot.register_command(
+    "words",
+    lambda *args: WordsScanner().compute(*args),
+    "words: (BETA) rank words by their usage",
+    WordsScanner.help(),
 )
 bot.register_command(
     "last",
@@ -62,12 +88,6 @@ bot.register_command(
     lambda *args: FirstScanner().compute(*args),
     "first: read first message",
     FirstScanner.help(),
-)
-bot.register_command(
-    "words",
-    lambda *args: WordsScanner().compute(*args),
-    "words: rank words by their usage",
-    WordsScanner.help(),
 )
 bot.register_command(
     "mentioned",

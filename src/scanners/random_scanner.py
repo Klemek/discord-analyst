@@ -3,14 +3,13 @@ from typing import List
 # Custom libs
 
 from .history_scanner import HistoryScanner
+from utils import generate_help
 
 
 class RandomScanner(HistoryScanner):
     @staticmethod
     def help() -> str:
-        return super(RandomScanner, RandomScanner).help(
-            cmd="rand", text="Read a random message"
-        )
+        return generate_help("rand", "Read a random message")
 
     def __init__(self):
         super().__init__(help=RandomScanner.help())

@@ -7,22 +7,9 @@ import discord
 from .scanner import Scanner
 from data_types import History
 from logs import ChannelLogs, MessageLog
-from utils import COMMON_HELP_ARGS
 
 
 class HistoryScanner(Scanner, ABC):
-    @staticmethod
-    def help(*, cmd: str, text: str) -> str:
-        return (
-            "```\n"
-            + f"%{cmd}: {text}\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* all/everyone - include bots\n"
-            + "Example: %{cmd} #mychannel1 @user\n"
-            + "```"
-        )
-
     def __init__(self, *, help: str):
         super().__init__(
             has_digit_args=True,

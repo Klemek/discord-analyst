@@ -21,6 +21,7 @@
 * %first - read first message
 * %rand - read a random message
 * %last - read last message
+* %gdpr - displays GDPR information
 * %emojis - rank emotes by their usage
   * arguments:
     * <n> - top <n> emojis, default is 20
@@ -43,7 +44,7 @@
 * %react - rank users by their reactions
   * arguments:
     * <n> - top <n> messages, default is 10
-* %words - rank words by their usage
+* %words - (BETA) rank words by their usage
   * arguments:
     * <n> - words containings <n> or more letters, default is 3
     * <n2> - top <n2> words, default is 10
@@ -52,9 +53,13 @@
 * Common arguments:
     * @member/me: filter for one or more member
     * #channel/here: filter for one or more channel
+    * <date1> - filter after <date1>
+    * <date2> - filter before <date2>
     * all/everyone - include bots messages
     * fast: only read cache
     * fresh: does not read cache
+
+(Sample dates: 2020 / 2021-11 / 2021-06-28 / 2020-06-28T23:00 / today / week / 8days / 1y)
 ```
 
 ## Running this bot
@@ -104,6 +109,12 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.13**
+  * improved scan `%words`
+  * remove old and unused logs at start and guild leaving
+  * GDPR disclaimer before scanning
+  * start and stop dates
+  * bug fix and improvements
 * **v1.12**
   * more scans: `%words`
   * concurrent `fast` analysis

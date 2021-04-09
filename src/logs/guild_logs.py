@@ -15,6 +15,7 @@ from utils import code_message, delta, deltas
 
 
 LOG_DIR = "logs"
+LOG_EXT = ".logz"
 
 current_analysis = []
 current_analysis_lock = threading.Lock()
@@ -22,12 +23,22 @@ current_analysis_lock = threading.Lock()
 
 ALREADY_RUNNING = -100
 CANCELLED = -200
+NO_FILE = -300
 
+# 5 minutes, assume 'fast' arg
 MIN_MODIFICATION_TIME = 5 * 60
+# ~1 year, remove log file
+MAX_MODIFICATION_TIME = 365 * 24 * 60 * 60
 
 
 class Worker:
-    def __init__(self, channel_log: ChannelLogs, channel: discord.TextChannel):
+    def __init__(
+        self,
+        channel_log: ChannelLogs,
+        channel: discord.TextChannel,
+        start_date: datetime,
+        stop_date: datetime,
+    ):
         self.channel_log = channel_log
         self.channel = channel
         self.start_msg = len(channel_log.messages)
@@ -36,12 +47,16 @@ class Worker:
         self.done = False
         self.cancelled = False
         self.loop = asyncio.get_event_loop()
+        self.start_date = start_date
+        self.stop_date = stop_date
 
     def start(self):
         asyncio.run_coroutine_threadsafe(self.process(), self.loop)
 
     async def process(self):
-        async for count, done in self.channel_log.load(self.channel):
+        async for count, done in self.channel_log.load(
+            self.channel, self.start_date, self.stop_date
+        ):
             if count > 0:
                 self.queried_msg = count - self.start_msg
                 self.total_msg = count
@@ -54,7 +69,7 @@ class GuildLogs:
     def __init__(self, guild: discord.Guild):
         self.id = guild.id
         self.guild = guild
-        self.log_file = os.path.join(LOG_DIR, f"{guild.id}.logz")
+        self.log_file = os.path.join(LOG_DIR, f"{guild.id}{LOG_EXT}")
         self.channels = {}
         self.locked = False
 
@@ -74,26 +89,29 @@ class GuildLogs:
         return self.locked and self.log_file not in current_analysis
 
     def lock(self) -> bool:
-        self.locked = True
         current_analysis_lock.acquire()
         if self.log_file in current_analysis:
             current_analysis_lock.release()
             return False
+        self.locked = True
         current_analysis.append(self.log_file)
         current_analysis_lock.release()
         return True
 
     def unlock(self):
-        self.locked = False
-        current_analysis_lock.acquire()
-        if self.log_file in current_analysis:
-            current_analysis.remove(self.log_file)
-        current_analysis_lock.release()
+        if self.locked:
+            self.locked = False
+            current_analysis_lock.acquire()
+            if self.log_file in current_analysis:
+                current_analysis.remove(self.log_file)
+            current_analysis_lock.release()
 
     async def load(
         self,
         progress: discord.Message,
-        target_channels: List[discord.TextChannel] = [],
+        target_channels: List[discord.TextChannel],
+        start_date: datetime,
+        stop_date: datetime,
         *,
         fast: bool,
         fresh: bool,
@@ -106,52 +124,49 @@ class GuildLogs:
         if not os.path.exists(LOG_DIR):
             os.mkdir(LOG_DIR)
         last_time = None
-        if os.path.exists(self.log_file):
-            channels = {}
-            try:
-                last_time = os.path.getmtime(self.log_file)
-                gziped_data = None
-                await code_message(progress, "Reading saved history (1/4)...")
-                t0 = datetime.now()
-                with open(self.log_file, mode="rb") as f:
-                    gziped_data = f.read()
-                logging.info(f"log {self.guild.id} > read in {delta(t0):,}ms")
-                if self.check_cancelled():
-                    return CANCELLED, 0
-                await code_message(progress, "Reading saved history (2/4)...")
-                t0 = datetime.now()
-                json_data = gzip.decompress(gziped_data)
-                del gziped_data
-                logging.info(
-                    f"log {self.guild.id} > gzip decompress in {delta(t0):,}ms"
-                )
-                if self.check_cancelled():
-                    return CANCELLED, 0
-                await code_message(progress, "Reading saved history (3/4)...")
-                t0 = datetime.now()
-                channels = json.loads(json_data)
-                del json_data
-                logging.info(f"log {self.guild.id} > json parse in {delta(t0):,}ms")
-                if self.check_cancelled():
-                    return CANCELLED, 0
-                await code_message(progress, "Reading saved history (4/4)...")
-                t0 = datetime.now()
-                self.channels = {
-                    int(id): ChannelLogs(channels[id], self) for id in channels
-                }
-                # remove invalid format
-                self.channels = {
-                    id: self.channels[id]
-                    for id in self.channels
-                    if self.channels[id].is_format()
-                }
-                logging.info(f"log {self.guild.id} > loaded in {delta(t0):,}ms")
-            except json.decoder.JSONDecodeError:
-                logging.error(f"log {self.guild.id} > invalid JSON")
-            except IOError:
-                logging.error(f"log {self.guild.id} > cannot read")
-        else:
-            fast = False
+        if not os.path.exists(self.log_file):
+            return NO_FILE, 0
+        channels = {}
+        try:
+            last_time = os.path.getmtime(self.log_file)
+            gziped_data = None
+            await code_message(progress, "Reading saved history (1/4)...")
+            t0 = datetime.now()
+            with open(self.log_file, mode="rb") as f:
+                gziped_data = f.read()
+            logging.info(f"log {self.guild.id} > read in {delta(t0):,}ms")
+            if self.check_cancelled():
+                return CANCELLED, 0
+            await code_message(progress, "Reading saved history (2/4)...")
+            t0 = datetime.now()
+            json_data = gzip.decompress(gziped_data)
+            del gziped_data
+            logging.info(f"log {self.guild.id} > gzip decompress in {delta(t0):,}ms")
+            if self.check_cancelled():
+                return CANCELLED, 0
+            await code_message(progress, "Reading saved history (3/4)...")
+            t0 = datetime.now()
+            channels = json.loads(json_data)
+            del json_data
+            logging.info(f"log {self.guild.id} > json parse in {delta(t0):,}ms")
+            if self.check_cancelled():
+                return CANCELLED, 0
+            await code_message(progress, "Reading saved history (4/4)...")
+            t0 = datetime.now()
+            self.channels = {
+                int(id): ChannelLogs(channels[id], self) for id in channels
+            }
+            # remove invalid format
+            self.channels = {
+                id: self.channels[id]
+                for id in self.channels
+                if self.channels[id].is_format()
+            }
+            logging.info(f"log {self.guild.id} > loaded in {delta(t0):,}ms")
+        except json.decoder.JSONDecodeError:
+            logging.error(f"log {self.guild.id} > invalid JSON")
+        except IOError:
+            logging.error(f"log {self.guild.id} > cannot read")
 
         if len(target_channels) == 0:
             target_channels = (
@@ -171,6 +186,8 @@ class GuildLogs:
         if (
             not fast
             and not fresh
+            and start_date is None
+            and stop_date is None
             and last_time is not None
             and (time.time() - last_time) < MIN_MODIFICATION_TIME
         ):
@@ -178,8 +195,10 @@ class GuildLogs:
                 channel
                 for channel in target_channels
                 if channel.id not in self.channels
+                or self.channels[channel.id].first_message_id is not None
             ]
             if len(invalid_target_channels) == 0:
+                logging.info(f"log {self.guild.id} > assumed fast")
                 fast = True
                 if self.locked:
                     self.unlock()
@@ -212,7 +231,9 @@ class GuildLogs:
                 if channel.id not in self.channels or fresh:
                     loading_new += 1
                     self.channels[channel.id] = ChannelLogs(channel, self)
-                workers += [Worker(self.channels[channel.id], channel)]
+                workers += [
+                    Worker(self.channels[channel.id], channel, start_date, stop_date)
+                ]
             warning_msg = "(this might take a while)"
             if len(target_channels) > 5 and loading_new > 5:
                 warning_msg = "(most channels are new, this will take a long while)"
@@ -253,7 +274,7 @@ class GuildLogs:
                     f"Reading new history...\n{total_msg:,} messages in {total_chan:,}/{max_chan:,} channels ({round(queried_msg/deltas(t0)):,}m/s)\n{warning_msg}{remaining_msg}",
                 )
             logging.info(
-                f"log {self.guild.id} > queried in {delta(t0):,}ms -> {queried_msg / deltas(t0):,.3f} m/s"
+                f"log {self.guild.id} > queried {queried_msg} in {delta(t0):,}ms -> {queried_msg / deltas(t0):,.3f} m/s"
             )
             # write logs
             real_total_msg = sum(
@@ -322,3 +343,46 @@ class GuildLogs:
                 f"No cancellable analysis are currently running on this server",
                 reference=message,
             )
+
+    @staticmethod
+    def init_log(guild: List[discord.Guild]):
+        if not os.path.exists(LOG_DIR):
+            os.mkdir(LOG_DIR)
+        filename = os.path.join(LOG_DIR, f"{guild.id}{LOG_EXT}")
+        if not os.path.exists(filename):
+            with open(filename, mode="wb") as f:
+                f.write(gzip.compress(bytes("{}", "utf-8")))
+            logging.info(f"log {guild.id} > created")
+        else:
+            logging.info(f"log {guild.id} > already exists")
+
+    @staticmethod
+    def remove_log(guild: List[discord.Guild]):
+        if not os.path.exists(LOG_DIR):
+            os.mkdir(LOG_DIR)
+        filename = os.path.join(LOG_DIR, f"{guild.id}{LOG_EXT}")
+        if os.path.exists(filename):
+            os.unlink(filename)
+            logging.info(f"log {guild.id} > removed")
+        else:
+            logging.info(f"log {guild.id} > does not exists")
+
+    @staticmethod
+    def check_logs(guilds: List[discord.Guild]):
+        logging.info(f"checking logs...")
+        if not os.path.exists(LOG_DIR):
+            os.mkdir(LOG_DIR)
+        guild_ids = [str(guild.id) for guild in guilds]
+        for item in os.listdir(LOG_DIR):
+            path = os.path.join(LOG_DIR, item)
+            name, ext = os.path.splitext(item)
+            if os.path.isfile(path) and ext == LOG_EXT:
+                if (
+                    name in guild_ids
+                    and (time.time() - os.path.getmtime(path)) > MAX_MODIFICATION_TIME
+                ):
+                    logging.info(f"> removing old log '{path}'")
+                    os.unlink(path)
+                elif name not in guild_ids:
+                    logging.info(f"> removing unused log '{path}'")
+                    os.unlink(path)

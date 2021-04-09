@@ -8,21 +8,17 @@ import discord
 from logs import ChannelLogs, MessageLog
 from .scanner import Scanner
 from data_types import Counter
-from utils import COMMON_HELP_ARGS, mention, channel_mention
+from utils import generate_help, mention, channel_mention
 
 
 class ChannelsScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%chan: Rank channels by their messages\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* <n> - top <n>, default is 10\n"
-            + "* all/everyone - include bots\n"
-            + "Example: %chan 10 @user\n"
-            + "```"
+        return generate_help(
+            "chan",
+            "Rank channels by their messages",
+            args=["<n> - top <n>, default is 10", "all/everyone - include bots"],
+            example="5 @user",
         )
 
     def __init__(self):

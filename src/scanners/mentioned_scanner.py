@@ -8,22 +8,18 @@ import discord
 from logs import ChannelLogs, MessageLog
 from .scanner import Scanner
 from data_types import Counter
-from utils import COMMON_HELP_ARGS, plural, precise, mention, alt_mention
+from utils import generate_help, plural, precise, mention, alt_mention
 
 
 class MentionedScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%mentioned: Rank specific user's mentions by their usage\n"
-            + "arguments:\n"
-            + "* @member/me - (required) one or more member\n"
-            + "\n".join(COMMON_HELP_ARGS.split("\n")[1:])
-            + "* <n> - top <n> mentions, default is 10\n"
-            + "* all - include bots mentions\n"
-            + "Example: %mentioned 10 @user\n"
-            + "```"
+        return generate_help(
+            "mentioned",
+            "Rank specific user's mentions by their usage",
+            args=["<n> - top <n>, default is 10", "all/everyone - include bots"],
+            example="5 @user",
+            replace_args=[" @member/me - (required) one or more member"],
         )
 
     def __init__(self):
@@ -45,7 +41,7 @@ class MentionedScanner(Scanner):
                 "You need to mention at least one member or use `me`", reference=message
             )
             return False
-        self.all_mentions = "all" in args
+        self.all_mentions = "all" in args or "everyone" in args
         # Create mentions dict
         self.mentions = defaultdict(Counter)
         return True

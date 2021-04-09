@@ -9,7 +9,7 @@ from logs import ChannelLogs, MessageLog
 from .scanner import Scanner
 from data_types import Counter
 from utils import (
-    COMMON_HELP_ARGS,
+    generate_help,
     plural,
     precise,
     mention,
@@ -22,16 +22,15 @@ from utils import (
 class MentionsScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%mentions: Rank mentions by their usage\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* <n> - top <n> mentions, default is 10\n"
-            + "* all - show role/channel/everyone/here mentions\n"
-            + "* everyone - include bots mentions\n"
-            + "Example: %mentions 10 #mychannel1 #mychannel2 @user\n"
-            + "```"
+        return generate_help(
+            "mentions",
+            "Rank mentions by their usage",
+            args=[
+                "<n> - top <n>, default is 10",
+                "all - show role/channel/everyone/here mentions",
+                "everyone - include bots mentions",
+            ],
+            example="10 #mychannel1 #mychannel2 @user",
         )
 
     def __init__(self):

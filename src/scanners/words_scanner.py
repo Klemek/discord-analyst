@@ -9,7 +9,7 @@ from logs import ChannelLogs, MessageLog
 from .scanner import Scanner
 from data_types import Counter
 from utils import (
-    COMMON_HELP_ARGS,
+    generate_help,
     plural,
     precise,
 )
@@ -18,16 +18,15 @@ from utils import (
 class WordsScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return (
-            "```\n"
-            + "%words: Rank words by their usage\n"
-            + "arguments:\n"
-            + COMMON_HELP_ARGS
-            + "* <n> - words containings <n> or more letters, default is 3\n"
-            + "* <n2> - top <n2> words, default is 10\n"
-            + "* everyone - include bots\n"
-            + "Example: %words 5 10 #mychannel1 #mychannel2 @user\n"
-            + "```"
+        return generate_help(
+            "words",
+            "(BETA) Rank words by their usage",
+            args=[
+                "<n> - words containings <n> or more letters, default is 3",
+                "<n2> - top <n2> words, default is 10",
+                "all/everyone - include bots",
+            ],
+            example="5 10 #mychannel1 #mychannel2 @user",
         )
 
     def __init__(self):
@@ -104,16 +103,13 @@ class WordsScanner(Scanner):
             or message.author in raw_members
         ):
             impacted = True
-            content = " ".join(
-                [
-                    block
-                    for block in message.content.split()
-                    if not re.match(r"^\w+:\/\/", block)
-                ]
-            )
+            content = message.content
+            content = re.sub(r"```.+```", "", content, flags=re.DOTALL)
+            content = re.sub(r"`.+`", "", content, flags=re.DOTALL)
+            content = re.sub(r"\w+:\/\/[^ ]+", "", content)
             for word in re.split("[^\w\-':]", content):
                 m = re.match(
-                    r"(?!^:\w+:$)^[^\w]*((?![\d_])\w.*(?![\d_])\w)[^\w]*$", word
+                    r"(?!^:\w+:$)^[^\w]*((?![\d_])\w[\w\-']*(?![\d_])\w)[^\w]*$", word
                 )
                 if m:
                     word = m[1].lower()
@@ -126,7 +122,5 @@ class WordsScanner(Scanner):
                                 words[word] = words[word + case]
                                 del words[word + case]
                                 break
-                        words[word].update_use(
-                            message.content.count(word), message.created_at
-                        )
+                        words[word].update_use(1, message.created_at)
         return impacted
