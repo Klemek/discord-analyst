@@ -180,9 +180,7 @@ def parse_iso_datetime(str_date: str) -> datetime:
     return dateutil.parser.parse(str_date)
 
 
-RELATIVE_REGEX = (
-    r"(yesterday|today|\d*h(ours?)?|\d*d(ays?)?|\d*w(eeks?)?|\d*m(onths?)?|\d*y(ears?))"
-)
+RELATIVE_REGEX = r"(yesterday|today|\d*h(ours?)?|\d*d(ays?)?|\d*w(eeks?)?|\d*m(onths?)?|\d*y(ears?)?)"
 
 
 def parse_relative_time(src: str) -> datetime:

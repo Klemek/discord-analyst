@@ -1,6 +1,7 @@
 from typing import Union, Tuple, Any
 import discord
 from discord import message
+from datetime import datetime
 
 from . import MessageLog
 from utils import FakeMessage
@@ -18,6 +19,7 @@ class ChannelLogs:
             self.id = channel.id
             self.name = channel.name
             self.last_message_id = None
+            self.first_message_id = None
             self.format = FORMAT
             self.messages = []
             self.start_date = None
@@ -32,6 +34,12 @@ class ChannelLogs:
                 if channel["last_message_id"] is not None
                 else None
             )
+            self.first_message_id = (
+                int(channel["first_message_id"])
+                if "first_message_id" in channel
+                and channel["first_message_id"] is not None
+                else None
+            )
             self.messages = [
                 MessageLog(message, self) for message in channel["messages"]
             ]
@@ -42,48 +50,74 @@ class ChannelLogs:
     def is_format(self):
         return self.format == FORMAT
 
-    async def load(self, channel: discord.TextChannel) -> Tuple[int, int]:
+    async def load(
+        self, channel: discord.TextChannel, start_date: datetime, stop_date: datetime
+    ) -> Tuple[int, int]:
         self.name = channel.name
         self.channel = channel
+        is_empty = self.last_message_id is None
         try:
-            if self.last_message_id is not None:  # append
+            if is_empty:
+                sanity_check = len(await channel.history(limit=1).flatten())
+                if sanity_check != 1:
+                    yield len(self.messages), True
+                    return
+            # load backward
+            if is_empty or (
+                start_date is not None
+                and self.start_date > start_date
+                and self.first_message_id is not None
+            ):
+                first_message_id = self.first_message_id
+                first_message_date = None
+                tmp_message_id = 0
+                done = 0
+                while (
+                    done >= CHUNK_SIZE
+                    or first_message_id is None
+                    or (first_message_date is None or first_message_date >= start_date)
+                    and start_date is not None
+                ) and tmp_message_id != first_message_id:
+                    tmp_message_id = first_message_id
+                    done = 0
+                    async for message in channel.history(
+                        limit=CHUNK_SIZE,
+                        before=FakeMessage(first_message_id)
+                        if first_message_id is not None
+                        else None,
+                        oldest_first=False,
+                    ):
+                        done += 1
+                        first_message_id = message.id
+                        first_message_date = message.created_at
+                        m = MessageLog(message, self)
+                        await m.load(message)
+                        self.messages += [m]
+                    yield len(self.messages), False
+                if done >= CHUNK_SIZE and first_message_date < start_date:
+                    # date was limiting here, store first message id
+                    self.first_message_id = first_message_id
+                self.last_message_id = channel.last_message_id
+            # load forward
+            if not is_empty:
                 tmp_message_id = None
+                last_message_date = self.messages[0].created_at
                 while (
                     self.last_message_id != channel.last_message_id
-                    and self.last_message_id != tmp_message_id
-                ):
+                    or (stop_date is not None and last_message_date <= stop_date)
+                ) and self.last_message_id != tmp_message_id:
                     tmp_message_id = self.last_message_id
                     async for message in channel.history(
                         limit=CHUNK_SIZE,
                         after=FakeMessage(self.last_message_id),
                         oldest_first=True,
                     ):
+                        last_message_date = message.created_at
                         self.last_message_id = message.id
                         m = MessageLog(message, self)
                         await m.load(message)
                         self.messages.insert(0, m)
                     yield len(self.messages), False
-            else:  # first load
-                last_message_id = None
-                done = 0
-                sanity_check = len(await channel.history(limit=1).flatten())
-                if sanity_check == 1:
-                    while done >= CHUNK_SIZE or last_message_id is None:
-                        done = 0
-                        async for message in channel.history(
-                            limit=CHUNK_SIZE,
-                            before=FakeMessage(last_message_id)
-                            if last_message_id is not None
-                            else None,
-                            oldest_first=False,
-                        ):
-                            done += 1
-                            last_message_id = message.id
-                            m = MessageLog(message, self)
-                            await m.load(message)
-                            self.messages += [m]
-                        yield len(self.messages), False
-                    self.last_message_id = channel.last_message_id
         except discord.errors.HTTPException:
             yield -1, True
             return  # When an exception occurs (like Forbidden)

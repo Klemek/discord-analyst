@@ -32,7 +32,13 @@ MAX_MODIFICATION_TIME = 365 * 24 * 60 * 60
 
 
 class Worker:
-    def __init__(self, channel_log: ChannelLogs, channel: discord.TextChannel):
+    def __init__(
+        self,
+        channel_log: ChannelLogs,
+        channel: discord.TextChannel,
+        start_date: datetime,
+        stop_date: datetime,
+    ):
         self.channel_log = channel_log
         self.channel = channel
         self.start_msg = len(channel_log.messages)
@@ -41,12 +47,16 @@ class Worker:
         self.done = False
         self.cancelled = False
         self.loop = asyncio.get_event_loop()
+        self.start_date = start_date
+        self.stop_date = stop_date
 
     def start(self):
         asyncio.run_coroutine_threadsafe(self.process(), self.loop)
 
     async def process(self):
-        async for count, done in self.channel_log.load(self.channel):
+        async for count, done in self.channel_log.load(
+            self.channel, self.start_date, self.stop_date
+        ):
             if count > 0:
                 self.queried_msg = count - self.start_msg
                 self.total_msg = count
@@ -98,7 +108,9 @@ class GuildLogs:
     async def load(
         self,
         progress: discord.Message,
-        target_channels: List[discord.TextChannel] = [],
+        target_channels: List[discord.TextChannel],
+        start_date: datetime,
+        stop_date: datetime,
         *,
         fast: bool,
         fresh: bool,
@@ -173,6 +185,8 @@ class GuildLogs:
         if (
             not fast
             and not fresh
+            and start_date is None
+            and stop_date is None
             and last_time is not None
             and (time.time() - last_time) < MIN_MODIFICATION_TIME
         ):
@@ -214,7 +228,9 @@ class GuildLogs:
                 if channel.id not in self.channels or fresh:
                     loading_new += 1
                     self.channels[channel.id] = ChannelLogs(channel, self)
-                workers += [Worker(self.channels[channel.id], channel)]
+                workers += [
+                    Worker(self.channels[channel.id], channel, start_date, stop_date)
+                ]
             warning_msg = "(this might take a while)"
             if len(target_channels) > 5 and loading_new > 5:
                 warning_msg = "(most channels are new, this will take a long while)"
@@ -255,7 +271,7 @@ class GuildLogs:
                     f"Reading new history...\n{total_msg:,} messages in {total_chan:,}/{max_chan:,} channels ({round(queried_msg/deltas(t0)):,}m/s)\n{warning_msg}{remaining_msg}",
                 )
             logging.info(
-                f"log {self.guild.id} > queried in {delta(t0):,}ms -> {queried_msg / deltas(t0):,.3f} m/s"
+                f"log {self.guild.id} > queried {queried_msg} in {delta(t0):,}ms -> {queried_msg / deltas(t0):,.3f} m/s"
             )
             # write logs
             real_total_msg = sum(

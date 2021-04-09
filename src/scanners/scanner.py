@@ -90,10 +90,10 @@ class Scanner(ABC):
                     )
                     return
 
-            self.start_datetime = None if len(dates) < 1 else min(dates)
-            self.stop_datetime = datetime.now() if len(dates) < 2 else max(dates)
+            self.start_date = None if len(dates) < 1 else min(dates)
+            self.stop_date = None if len(dates) < 2 else max(dates)
 
-            if self.start_datetime is not None and self.start_datetime > datetime.now():
+            if self.start_date is not None and self.start_date > datetime.now():
                 await message.channel.send(
                     f"Start date is after today", reference=message
                 )
@@ -130,20 +130,13 @@ class Scanner(ABC):
                     allowed_mentions=discord.AllowedMentions.none(),
                 )
                 total_msg, total_chan = await logs.load(
-                    progress, self.channels, fast="fast" in args, fresh="fresh" in args
+                    progress,
+                    self.channels,
+                    self.start_date,
+                    self.stop_date,
+                    fast="fast" in args,
+                    fresh="fresh" in args,
                 )
-                if self.start_datetime is not None:
-                    self.start_datetime = max(
-                        self.start_datetime,
-                        min(
-                            [
-                                logs.channels[channel.id].start_date
-                                for channel in self.channels
-                                if channel.id in logs.channels
-                                and logs.channels[channel.id].start_date is not None
-                            ]
-                        ),
-                    )
                 if total_msg == CANCELLED:
                     await message.channel.send(
                         "Operation cancelled by user",
@@ -157,6 +150,21 @@ class Scanner(ABC):
                 elif total_msg == NO_FILE:
                     await message.channel.send(gdpr.TEXT)
                 else:
+                    if self.start_date is not None:
+                        self.start_date = max(
+                            self.start_date,
+                            min(
+                                [
+                                    logs.channels[channel.id].start_date
+                                    for channel in self.channels
+                                    if channel.id in logs.channels
+                                    and logs.channels[channel.id].start_date is not None
+                                ]
+                            ),
+                        )
+                        if self.stop_date is None:
+                            self.stop_date = datetime.utcnow()
+
                     self.msg_count = 0
                     self.total_msg = 0
                     self.chan_count = 0
@@ -169,12 +177,12 @@ class Scanner(ABC):
                                     self.compute_message(channel_logs, message_log)
                                     for message_log in channel_logs.messages
                                     if (
-                                        self.start_datetime is None
-                                        or message_log.created_at >= self.start_datetime
+                                        self.start_date is None
+                                        or message_log.created_at >= self.start_date
                                     )
                                     and (
-                                        self.stop_datetime is None
-                                        or message_log.created_at <= self.stop_datetime
+                                        self.stop_date is None
+                                        or message_log.created_at <= self.stop_date
                                     )
                                 ]
                             )
@@ -199,8 +207,8 @@ class Scanner(ABC):
                                 self.members,
                                 self.msg_count,
                                 self.chan_count,
-                                self.start_datetime,
-                                self.stop_datetime,
+                                self.start_date,
+                                self.stop_date,
                             )
                         )
                         logging.info(f"scan {guild.id} > results in {delta(t0):,}ms")
