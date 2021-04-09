@@ -195,8 +195,10 @@ class GuildLogs:
                 channel
                 for channel in target_channels
                 if channel.id not in self.channels
+                or self.channels[channel.id].first_message_id is not None
             ]
             if len(invalid_target_channels) == 0:
+                logging.info(f"log {self.guild.id} > assumed fast")
                 fast = True
                 if self.locked:
                     self.unlock()

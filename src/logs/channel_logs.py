@@ -64,47 +64,48 @@ class ChannelLogs:
                     return
             # load backward
             if is_empty or (
-                start_date is not None
-                and self.start_date > start_date
-                and self.first_message_id is not None
+                self.first_message_id is not None
+                and (
+                    start_date is None
+                    or (self.start_date is not None and self.start_date > start_date)
+                )
             ):
-                first_message_id = self.first_message_id
                 first_message_date = None
                 tmp_message_id = 0
                 done = 0
                 while (
-                    done >= CHUNK_SIZE
-                    or first_message_id is None
-                    or (first_message_date is None or first_message_date >= start_date)
-                    and start_date is not None
-                ) and tmp_message_id != first_message_id:
-                    tmp_message_id = first_message_id
+                    first_message_date is None
+                    or (
+                        done >= CHUNK_SIZE
+                        and (start_date is None or first_message_date > start_date)
+                    )
+                ) and tmp_message_id != self.first_message_id:
+                    tmp_message_id = self.first_message_id
                     done = 0
                     async for message in channel.history(
                         limit=CHUNK_SIZE,
-                        before=FakeMessage(first_message_id)
-                        if first_message_id is not None
+                        before=FakeMessage(self.first_message_id)
+                        if self.first_message_id is not None
                         else None,
                         oldest_first=False,
                     ):
                         done += 1
-                        first_message_id = message.id
+                        self.first_message_id = message.id
                         first_message_date = message.created_at
                         m = MessageLog(message, self)
                         await m.load(message)
                         self.messages += [m]
                     yield len(self.messages), False
-                if done >= CHUNK_SIZE and first_message_date < start_date:
-                    # date was limiting here, store first message id
-                    self.first_message_id = first_message_id
+                if done < CHUNK_SIZE:  # reached bottom
+                    self.first_message_id = None
                 self.last_message_id = channel.last_message_id
             # load forward
-            if not is_empty:
+            last_message_date = self.messages[0].created_at
+            if not is_empty and (stop_date is None or last_message_date < stop_date):
                 tmp_message_id = None
-                last_message_date = self.messages[0].created_at
                 while (
                     self.last_message_id != channel.last_message_id
-                    or (stop_date is not None and last_message_date <= stop_date)
+                    and (stop_date is None or last_message_date < stop_date)
                 ) and self.last_message_id != tmp_message_id:
                     tmp_message_id = self.last_message_id
                     async for message in channel.history(

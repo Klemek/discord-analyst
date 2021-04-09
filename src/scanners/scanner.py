@@ -150,7 +150,7 @@ class Scanner(ABC):
                 elif total_msg == NO_FILE:
                     await message.channel.send(gdpr.TEXT)
                 else:
-                    if self.start_date is not None:
+                    if self.start_date is not None and len(logs.channels) > 0:
                         self.start_date = max(
                             self.start_date,
                             min(
