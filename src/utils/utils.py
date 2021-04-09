@@ -194,7 +194,7 @@ def parse_relative_time(src: str) -> datetime:
     else:
         m = re.match("(\d*)(\w+)", src)
         delta = None
-        value = int(m[1])
+        value = int(m[1]) if m[1] else 1
         unit = m[2][0]
         if unit == "h":
             delta = relativedelta(hours=value)
