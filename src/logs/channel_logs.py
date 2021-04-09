@@ -8,6 +8,8 @@ from utils import FakeMessage
 CHUNK_SIZE = 2000
 FORMAT = 3
 
+NOT_SERIALIZED = ["channel", "guild", "start_date"]
+
 
 class ChannelLogs:
     def __init__(self, channel: Union[discord.TextChannel, dict], guild: Any):
@@ -92,8 +94,7 @@ class ChannelLogs:
 
     def dict(self) -> dict:
         channel = dict(self.__dict__)
-        channel.pop("channel", None)
-        channel.pop("guild", None)
-        channel.pop("start_date", None)
+        for key in NOT_SERIALIZED:
+            channel.pop(key, None)
         channel["messages"] = [message.dict() for message in self.messages]
         return channel

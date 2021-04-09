@@ -114,6 +114,7 @@ python3 src/main.py
   * remove old and unused logs at start and guild leaving
   * GDPR disclaimer before scanning
   * start and stop dates
+  * bug fix and improvements
 * **v1.12**
   * more scans: `%words`
   * concurrent `fast` analysis
