@@ -36,7 +36,7 @@ def generate_help(
 %{cmd}: {info}
 arguments:
 {arg_list}
-(Dates are formated 'yyyy-mm-dd' or 'yyyy-mm-ddThh:mm' (ISO 8601) or 'week' or '8days' or '1y')
+(Sample dates: 2020 / 2021-11 / 2021-06-28 / 2020-06-28T23:00 / today / week / 8days / 1y)
 Example: %{cmd} {example}
 ```"""
 
