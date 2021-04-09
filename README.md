@@ -53,9 +53,13 @@
 * Common arguments:
     * @member/me: filter for one or more member
     * #channel/here: filter for one or more channel
+    * <date1> - filter after <date1>
+    * <date2> - filter before <date2>
     * all/everyone - include bots messages
     * fast: only read cache
     * fresh: does not read cache
+
+(Dates are formated 'yyyy-mm-dd' or 'yyyy-mm-ddThh:mm' (ISO 8601) or 'week/month/year')
 ```
 
 ## Running this bot
@@ -109,6 +113,7 @@ python3 src/main.py
   * improved scan `%words`
   * remove old and unused logs at start and guild leaving
   * GDPR disclaimer before scanning
+  * start and stop dates
 * **v1.12**
   * more scans: `%words`
   * concurrent `fast` analysis

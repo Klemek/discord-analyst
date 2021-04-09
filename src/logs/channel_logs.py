@@ -1,5 +1,6 @@
 from typing import Union, Tuple, Any
 import discord
+from discord import message
 
 from . import MessageLog
 from utils import FakeMessage
@@ -17,6 +18,7 @@ class ChannelLogs:
             self.last_message_id = None
             self.format = FORMAT
             self.messages = []
+            self.start_date = None
         elif isinstance(channel, dict):
             self.format = channel["format"] if "format" in channel else None
             if not self.is_format():
@@ -31,6 +33,9 @@ class ChannelLogs:
             self.messages = [
                 MessageLog(message, self) for message in channel["messages"]
             ]
+            self.start_date = (
+                self.messages[-1].created_at if len(self.messages) > 0 else None
+            )
 
     def is_format(self):
         return self.format == FORMAT
@@ -80,6 +85,9 @@ class ChannelLogs:
         except discord.errors.HTTPException:
             yield -1, True
             return  # When an exception occurs (like Forbidden)
+        self.start_date = (
+            self.messages[-1].created_at if len(self.messages) > 0 else None
+        )
         yield len(self.messages), True
 
     def dict(self) -> dict:
