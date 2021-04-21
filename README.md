@@ -115,6 +115,7 @@ python3 src/main.py
 * **v1.14**
   * `mobile/mention` arg to fix mobile bug
   * `%repeat`, `%mobile` to repeat commands
+  * bug fix
 * **v1.13**
   * improved scan `%words`
   * remove old and unused logs at start and guild leaving
