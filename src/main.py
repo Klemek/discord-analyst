@@ -6,7 +6,7 @@ if sys.version_info < (3, 7):
     print("Please upgrade your Python version to 3.7.0 or higher")
     sys.exit(1)
 
-from utils import emojis, gdpr
+from utils import emojis, gdpr, command_cache
 from scanners import (
     EmotesScanner,
     FullScanner,
@@ -70,6 +70,18 @@ bot.register_command(
     lambda *args: WordsScanner().compute(*args),
     "words: (BETA) rank words by their usage",
     WordsScanner.help(),
+)
+bot.register_command(
+    "repeat",
+    command_cache.repeat,
+    "repeat: repeat last analysis (adding supplied arguments)",
+    "```\n%repeat: repeat last analysis (adding supplied arguments)\n```",
+)
+bot.register_command(
+    "mobile",
+    lambda *args: command_cache.repeat(*args, add_args=["mobile"]),
+    "mobile: fix @invalid-user for last command but mentions users",
+    "```\n%mobile: fix @invalid-user for last command but mentions users\n```",
 )
 bot.register_command(
     "last",

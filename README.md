@@ -21,6 +21,8 @@
 * %first - read first message
 * %rand - read a random message
 * %last - read last message
+* %repeat - repeat last analysis (adding supplied arguments)
+* %mobile - fix @invalid-user for last command but mentions users
 * %gdpr - displays GDPR information
 * %emojis - rank emotes by their usage
   * arguments:
@@ -112,6 +114,7 @@ python3 src/main.py
 
 * **v1.14**
   * `mobile/mention` arg to fix mobile bug
+  * `%repeat`, `%mobile` to repeat commands
 * **v1.13**
   * improved scan `%words`
   * remove old and unused logs at start and guild leaving

@@ -14,6 +14,7 @@ from utils import (
     ISO8601_REGEX,
     RELATIVE_REGEX,
     parse_time,
+    command_cache,
 )
 from logs import (
     GuildLogs,
@@ -48,7 +49,11 @@ class Scanner(ABC):
         self.chan_count = 0
 
     async def compute(
-        self, client: discord.client, message: discord.Message, *args: str
+        self,
+        client: discord.client,
+        message: discord.Message,
+        *args: str,
+        other_mentions: List[str] = [],
     ):
         args = list(args)
         guild = message.guild
@@ -85,6 +90,7 @@ class Scanner(ABC):
                     and (not arg.isdigit() or not self.has_digit_args)
                     and arg not in str_channel_mentions
                     and arg not in str_mentions
+                    and arg not in other_mentions
                     and not skip_check
                 ):
                     await message.channel.send(
@@ -240,6 +246,7 @@ class Scanner(ABC):
                                 reference=message if first else None,
                                 allowed_mentions=allowed_mentions,
                             )
+                        command_cache.cache(self, message, args)
                 # Delete custom progress message
                 await progress.delete()
 
