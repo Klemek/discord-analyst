@@ -58,6 +58,7 @@
     * all/everyone - include bots messages
     * fast: only read cache
     * fresh: does not read cache
+    * mobile/mention: mentions users (fix @invalid-user bug)
 
 (Sample dates: 2020 / 2021-11 / 2021-06-28 / 2020-06-28T23:00 / today / week / 8days / 1y)
 ```
@@ -109,6 +110,8 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.14**
+  * `mobile/mention` arg to fix mobile bug
 * **v1.13**
   * improved scan `%words`
   * remove old and unused logs at start and guild leaving

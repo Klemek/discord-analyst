@@ -18,6 +18,7 @@ COMMON_HELP_ARGS = [
     "<date2> - filter before <date2>",
     "fast - only read cache",
     "fresh - does not read cache (long)",
+    "mobile/mention - mentions users (fix @invalid-user bug)",
 ]
 
 

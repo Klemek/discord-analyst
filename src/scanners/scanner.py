@@ -79,7 +79,9 @@ class Scanner(ABC):
                         )
                         return
                 if (
-                    arg not in self.valid_args + ["me", "here", "fast", "fresh"]
+                    arg
+                    not in self.valid_args
+                    + ["me", "here", "fast", "fresh", "mobile", "mention"]
                     and (not arg.isdigit() or not self.has_digit_args)
                     and arg not in str_channel_mentions
                     and arg not in str_mentions
@@ -118,6 +120,8 @@ class Scanner(ABC):
             if "me" in args:
                 self.members += [message.author]
                 self.raw_members += [message.author.id]
+
+            self.mention_users = "mention" in args or "mobile" in args
 
             if not await self.init(message, *args):
                 return
@@ -214,13 +218,18 @@ class Scanner(ABC):
                         logging.info(f"scan {guild.id} > results in {delta(t0):,}ms")
                         response = ""
                         first = True
+                        allowed_mentions = (
+                            discord.AllowedMentions.all()
+                            if self.mention_users
+                            else discord.AllowedMentions.none()
+                        )
                         for r in results:
                             if r:
                                 if len(response + "\n" + r) > 2000:
                                     await message.channel.send(
                                         response,
                                         reference=message if first else None,
-                                        allowed_mentions=discord.AllowedMentions.none(),
+                                        allowed_mentions=allowed_mentions,
                                     )
                                     first = False
                                     response = ""
@@ -229,7 +238,7 @@ class Scanner(ABC):
                             await message.channel.send(
                                 response,
                                 reference=message if first else None,
-                                allowed_mentions=discord.AllowedMentions.none(),
+                                allowed_mentions=allowed_mentions,
                             )
                 # Delete custom progress message
                 await progress.delete()
