@@ -23,7 +23,7 @@ async def repeat(
     *args: str,
     add_args: List[str] = [],
 ):
-    if "help" in args:
+    if len(args) > 1 and args[1] == "help":
         await client.bot.help(client, message, "help", args[0])
         return
     id = message.channel.id

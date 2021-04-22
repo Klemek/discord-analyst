@@ -67,7 +67,7 @@ class Scanner(ABC):
         try:
             with GuildLogs(guild) as logs:
                 # If "%cmd help" redirect to "%help cmd"
-                if "help" in args:
+                if len(args) > 1 and args[1] == "help":
                     await client.bot.help(client, message, "help", args[0])
                     return
 
@@ -98,6 +98,7 @@ class Scanner(ABC):
                         and arg not in str_mentions
                         and arg not in other_mentions
                         and not skip_check
+                        and len(arg) > 0
                     ):
                         if self.all_args:
                             self.other_args += [arg]
