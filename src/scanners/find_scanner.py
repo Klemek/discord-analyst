@@ -40,7 +40,7 @@ class FindScanner(Scanner):
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.matches = defaultdict(Counter)
         self.all_messages = "all" in args or "everyone" in args
-        self.top = "top" in args
+        self.top = "top" in args or len(self.other_args) == 1
         if len(self.other_args) == 0:
             await message.channel.send(
                 "You need to add a query to find (you can use quotes to add spaces in queries)",
