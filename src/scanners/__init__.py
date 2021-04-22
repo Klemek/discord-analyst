@@ -3,6 +3,7 @@ from .scanner import Scanner
 from .channels_scanner import ChannelsScanner
 from .composition_scanner import CompositionScanner
 from .emojis_scanner import EmojisScanner
+from .find_scanner import FindScanner
 from .first_scanner import FirstScanner
 from .frequency_scanner import FrequencyScanner
 from .full_scanner import FullScanner

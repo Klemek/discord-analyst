@@ -69,6 +69,12 @@ bot.register_command(
     "```\n%mobile: fix @invalid-user for last command but mentions users\n```",
 )
 bot.register_command(
+    "find",
+    lambda *args: scanners.FindScanner().compute(*args),
+    "find: find specific words or phrases",
+    scanners.FindScanner.help(),
+)
+bot.register_command(
     "last",
     lambda *args: scanners.LastScanner().compute(*args),
     "last: read last message",

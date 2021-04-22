@@ -21,6 +21,7 @@
 * %first - read first message
 * %rand - read a random message
 * %last - read last message
+* %find - find specific words or phrases
 * %repeat - repeat last analysis (adding supplied arguments)
 * %mobile - fix @invalid-user for last command but mentions users
 * %gdpr - displays GDPR information
@@ -115,6 +116,7 @@ python3 src/main.py
 * **v1.14**
   * `mobile/mention` arg to fix mobile bug
   * `%repeat`, `%mobile` to repeat commands
+  * more scan: `%find`
   * bug fix
 * **v1.13**
   * improved scan `%words`

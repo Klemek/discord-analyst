@@ -14,7 +14,7 @@ class Counter:
 
     def update_use(self, count: int, date: datetime, item: int = 0):
         self.usages[item] += count
-        if self.last_used is None or date > self.last_used:
+        if count > 0 and (self.last_used is None or date > self.last_used):
             self.last_used = date
 
     def score(self) -> float:
@@ -22,6 +22,8 @@ class Counter:
         # When 2 emojis have the same score,
         # the days since last use is stored in the digits
         # (more recent first)
+        if self.last_used is None:
+            return 0
         return self.all_usages() + 1 / (
             100000 * ((datetime.today() - self.last_used).days + 1)
         )
@@ -59,7 +61,7 @@ class Counter:
         else:
             output += f"{name} - unused"
         top_item = top_key(self.usages)
-        if top and top_item != 0 and transform is not None:
+        if sum > 0 and top and top_item != 0 and transform is not None:
             if self.usages[top_item] == sum:
                 output += f" (all{transform(top_item)})"
             else:
