@@ -1,4 +1,3 @@
-from calendar import month
 from typing import Callable, List, Dict, Union, Optional, Any
 import os
 import logging
@@ -79,6 +78,10 @@ def channel_mention(channel_id: int) -> str:
 
 def message_link(message: discord.Message) -> str:
     return f"https://discord.com/channels/{message.channel.guild.id}/{message.channel.id}/{message.id}"
+
+
+def escape_text(text: str) -> str:
+    return discord.utils.escape_markdown(discord.utils.escape_mentions(text))
 
 
 class FakeMessage:
