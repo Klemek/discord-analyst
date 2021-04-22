@@ -27,6 +27,8 @@ from logs import (
 
 
 class Scanner(ABC):
+    VALID_ARGS = ["me", "here", "fast", "fresh", "mobile", "mention"]
+
     def __init__(
         self,
         *,
@@ -34,11 +36,15 @@ class Scanner(ABC):
         valid_args: List[str] = [],
         help: str,
         intro_context: str,
+        all_args: bool = False,
     ):
         self.has_digit_args = has_digit_args
         self.valid_args = valid_args
+        self.all_args = all_args
         self.help = help
         self.intro_context = intro_context
+
+        self.other_args = []
 
         self.members = []
         self.raw_members = []
@@ -86,19 +92,20 @@ class Scanner(ABC):
                             )
                             return
                     if (
-                        arg
-                        not in self.valid_args
-                        + ["me", "here", "fast", "fresh", "mobile", "mention"]
+                        arg not in self.valid_args + Scanner.VALID_ARGS
                         and (not arg.isdigit() or not self.has_digit_args)
                         and arg not in str_channel_mentions
                         and arg not in str_mentions
                         and arg not in other_mentions
                         and not skip_check
                     ):
-                        await message.channel.send(
-                            f"Unrecognized argument: `{arg}`", reference=message
-                        )
-                        return
+                        if self.all_args:
+                            self.other_args += [arg]
+                        else:
+                            await message.channel.send(
+                                f"Unrecognized argument: `{arg}`", reference=message
+                            )
+                            return
 
                 self.start_date = None if len(dates) < 1 else min(dates)
                 self.stop_date = None if len(dates) < 2 else max(dates)

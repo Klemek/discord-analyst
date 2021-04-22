@@ -8,11 +8,7 @@ import re
 from logs import ChannelLogs, MessageLog
 from .scanner import Scanner
 from data_types import Counter
-from utils import (
-    generate_help,
-    plural,
-    precise,
-)
+from utils import generate_help, plural, precise, mention
 
 
 class WordsScanner(Scanner):
@@ -68,13 +64,14 @@ class WordsScanner(Scanner):
         words.sort(key=lambda word: self.words[word].score(), reverse=True)
         words = words[: self.top]
         usage_count = Counter.total(self.words)
-        print(len(self.words))
         res = [intro.format(self.letters)]
         res += [
             self.words[word].to_string(
                 words.index(word),
                 f"`{word}`",
                 total_usage=usage_count,
+                transform=lambda id: f" by {mention(id)}",
+                top=len(self.members) != 1,
             )
             for word in words
         ]
@@ -121,5 +118,5 @@ class WordsScanner(Scanner):
                                 words[word] = words[word + case]
                                 del words[word + case]
                                 break
-                        words[word].update_use(1, message.created_at)
+                        words[word].update_use(1, message.created_at, message.author)
         return impacted

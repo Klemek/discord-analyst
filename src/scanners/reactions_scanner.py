@@ -58,6 +58,7 @@ class ReactionsScanner(Scanner):
                 total_usage=usage_count,
                 counted="reaction",
                 transform=lambda id: f" in {channel_mention(id)}",
+                top=self.channels != 1,
             )
             for name in names
         ]

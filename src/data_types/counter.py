@@ -37,21 +37,29 @@ class Counter:
         total_usage: int,
         counted: str = "time",
         transform: Optional[Callable[[int], str]] = None,
+        ranking: bool = True,
+        top: bool = True,
     ) -> str:
         # place
         output = ""
-        if i == 0:
-            output += ":first_place:"
-        elif i == 1:
-            output += ":second_place:"
-        elif i == 2:
-            output += ":third_place:"
+        if ranking:
+            if i == 0:
+                output += ":first_place: "
+            elif i == 1:
+                output += ":second_place: "
+            elif i == 2:
+                output += ":third_place: "
+            else:
+                output += f"**#{i + 1}** "
         else:
-            output += f"**#{i + 1}**"
+            output += f"- "
         sum = val_sum(self.usages)
-        output += f" {name} - {plural(sum, counted)} ({percent(sum/total_usage)}, last {from_now(self.last_used)})"
+        if sum > 0:
+            output += f"{name} - {plural(sum, counted)} ({percent(sum/total_usage)}, last {from_now(self.last_used)})"
+        else:
+            output += f"{name} - unused"
         top_item = top_key(self.usages)
-        if top_item != 0 and transform is not None:
+        if top and top_item != 0 and transform is not None:
             if self.usages[top_item] == sum:
                 output += f" (all{transform(top_item)})"
             else:

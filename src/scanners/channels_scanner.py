@@ -61,6 +61,7 @@ class ChannelsScanner(Scanner):
                 total_usage=usage_count,
                 counted="message",
                 transform=lambda id: f" by {mention(id)}",
+                top=len(self.members) != 1,
             )
             for name in names
         ]
