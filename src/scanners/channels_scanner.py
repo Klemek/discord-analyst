@@ -30,7 +30,6 @@ class ChannelsScanner(Scanner):
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
-        # get max emotes to view
         self.top = 10
         for arg in args:
             if arg.isdigit():

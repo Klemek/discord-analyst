@@ -24,11 +24,11 @@
 * %repeat - repeat last analysis (adding supplied arguments)
 * %mobile - fix @invalid-user for last command but mentions users
 * %gdpr - displays GDPR information
-* %emojis - rank emotes by their usage
+* %emojis - rank emojis by their usage
   * arguments:
     * <n> - top <n> emojis, default is 20
     * all - list all common emojis in addition to this guild's
-    * members - show top member for each emote
+    * members - show top member for each emoji
     * sort:usage/reaction - other sorting methods
 * %mentions - rank mentions by their usage
   * arguments:
@@ -150,7 +150,7 @@ python3 src/main.py
   * more scans: `%scan`, `%freq`, `%compo`, `%pres`
   * huge bug fix
 * **v1.5**:
-  * top <n> emotes
+  * top <n> emojis
   * bug fix
 * **v1.4**:
   * integrate miniscord

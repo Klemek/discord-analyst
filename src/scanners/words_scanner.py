@@ -67,7 +67,6 @@ class WordsScanner(Scanner):
         words = [word for word in self.words]
         words.sort(key=lambda word: self.words[word].score(), reverse=True)
         words = words[: self.top]
-        # Get the total of all emotes used
         usage_count = Counter.total(self.words)
         print(len(self.words))
         res = [intro.format(self.letters)]

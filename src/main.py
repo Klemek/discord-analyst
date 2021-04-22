@@ -8,7 +8,7 @@ if sys.version_info < (3, 7):
 
 from utils import emojis, gdpr, command_cache
 from scanners import (
-    EmotesScanner,
+    EmojisScanner,
     FullScanner,
     FrequencyScanner,
     CompositionScanner,
@@ -115,9 +115,9 @@ bot.register_command(
 )
 bot.register_command(
     "(emojis?|emotes?)",
-    lambda *args: EmotesScanner().compute(*args),
+    lambda *args: EmojisScanner().compute(*args),
     "emojis: rank emojis by their usage",
-    EmotesScanner.help(),
+    EmojisScanner.help(),
 )
 bot.register_command(
     "(react(ions?)?)",

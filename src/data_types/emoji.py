@@ -8,9 +8,9 @@ import discord
 from utils import mention, plural, from_now, top_key, percent
 
 
-class Emote:
+class Emoji:
     """
-    Custom class to store emotes data
+    Custom class to store emojis data
     """
 
     def __init__(self, emoji: Optional[discord.Emoji] = None):
@@ -34,7 +34,7 @@ class Emote:
 
     def score(self, *, usage_weight: int = 1, react_weight: int = 1) -> float:
         # Score is compose of usages + reactions
-        # When 2 emotes have the same score,
+        # When 2 emojis have the same score,
         # the days since last use is stored in the digits
         # (more recent first)
         return (
@@ -99,8 +99,8 @@ class Emote:
         return output
 
 
-def get_emote_dict(guild: discord.Guild) -> Dict[str, Emote]:
-    emotes = defaultdict(Emote)
+def get_emoji_dict(guild: discord.Guild) -> Dict[str, Emoji]:
+    emojis = defaultdict(Emoji)
     for emoji in guild.emojis:
-        emotes[str(emoji)] = Emote(emoji)
-    return emotes
+        emojis[str(emoji)] = Emoji(emoji)
+    return emojis

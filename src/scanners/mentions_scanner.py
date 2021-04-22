@@ -42,7 +42,6 @@ class MentionsScanner(Scanner):
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
-        # get max emotes to view
         self.top = 10
         for arg in args:
             if arg.isdigit():
@@ -67,7 +66,6 @@ class MentionsScanner(Scanner):
         names = [name for name in self.mentions]
         names.sort(key=lambda name: self.mentions[name].score(), reverse=True)
         names = names[: self.top]
-        # Get the total of all emotes used
         usage_count = Counter.total(self.mentions)
         res = [intro]
         res += [

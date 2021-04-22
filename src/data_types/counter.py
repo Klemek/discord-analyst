@@ -19,7 +19,7 @@ class Counter:
 
     def score(self) -> float:
         # Score is compose of usages + reactions
-        # When 2 emotes have the same score,
+        # When 2 emojis have the same score,
         # the days since last use is stored in the digits
         # (more recent first)
         return self.all_usages() + 1 / (

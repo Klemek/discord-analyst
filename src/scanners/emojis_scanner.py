@@ -6,12 +6,12 @@ import discord
 # Custom libs
 
 from logs import ChannelLogs, MessageLog
-from data_types import Emote, get_emote_dict
+from data_types import Emoji, get_emoji_dict
 from .scanner import Scanner
 from utils import emojis, generate_help, plural, precise
 
 
-class EmotesScanner(Scanner):
+class EmojisScanner(Scanner):
     @staticmethod
     def help() -> str:
         return generate_help(
@@ -31,13 +31,13 @@ class EmotesScanner(Scanner):
         super().__init__(
             has_digit_args=True,
             valid_args=["all", "members", "sort:usage", "sort:reaction", "everyone"],
-            help=EmotesScanner.help(),
+            help=EmojisScanner.help(),
             intro_context="Emoji usage",
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
         guild = message.channel.guild
-        # get max emotes to view
+        # get max emojis to view
         self.top = 20
         for arg in args:
             if arg.isdigit():
@@ -47,8 +47,8 @@ class EmotesScanner(Scanner):
         self.show_members = "members" in args and (
             len(self.members) == 0 or len(self.members) > 1
         )
-        # Create emotes dict from custom emojis of the guild
-        self.emotes = get_emote_dict(guild)
+        # Create emojis dict from custom emojis of the guild
+        self.emojis = get_emoji_dict(guild)
         self.sort = None
         if "sort:usage" in args:
             self.sort = "usage"
@@ -58,36 +58,36 @@ class EmotesScanner(Scanner):
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
-        return EmotesScanner.analyse_message(
+        return EmojisScanner.analyse_message(
             message,
-            self.emotes,
+            self.emojis,
             self.raw_members,
             all_emojis=self.all_emojis,
             all_messages=self.all_messages,
         )
 
     def get_results(self, intro: str) -> List[str]:
-        names = [name for name in self.emotes]
+        names = [name for name in self.emojis]
         names.sort(
-            key=lambda name: self.emotes[name].score(
+            key=lambda name: self.emojis[name].score(
                 usage_weight=(0 if self.sort == "reaction" else 1),
                 react_weight=(0 if self.sort == "usage" else 1),
             ),
             reverse=True,
         )
         names = names[: self.top]
-        # Get the total of all emotes used
+        # Get the total of all emojis used
         usage_count = 0
         reaction_count = 0
-        for name in self.emotes:
-            usage_count += self.emotes[name].usages
-            reaction_count += self.emotes[name].reactions
+        for name in self.emojis:
+            usage_count += self.emojis[name].usages
+            reaction_count += self.emojis[name].reactions
         res = [intro]
         allow_unused = self.full and len(self.members) == 0
         if self.sort is not None:
             res += [f"(Sorted by {self.sort})"]
         res += [
-            self.emotes[name].to_string(
+            self.emojis[name].to_string(
                 names.index(name),
                 name,
                 total_usage=usage_count,
@@ -96,7 +96,7 @@ class EmotesScanner(Scanner):
                 show_members=self.show_members or len(self.raw_members) == 0,
             )
             for name in names
-            if allow_unused or self.emotes[name].used()
+            if allow_unused or self.emojis[name].used()
         ]
         res += [
             f"Total: {plural(usage_count,'time')} ({precise(usage_count/self.msg_count)}/msg)"
@@ -108,7 +108,7 @@ class EmotesScanner(Scanner):
     @staticmethod
     def analyse_message(
         message: MessageLog,
-        emotes: Dict[str, Emote],
+        emojis_dict: Dict[str, Emoji],
         raw_members: List[int],
         *,
         all_emojis: bool,
@@ -122,27 +122,29 @@ class EmotesScanner(Scanner):
             or message.author in raw_members
         ):
             impacted = True
-            # Find all emotes un the current message in the form "<:emoji:123456789>"
-            # Filter for known emotes
+            # Find all emojis un the current message in the form "<:emoji:123456789>"
+            # Filter for known emojis
             found = emojis.regex.findall(message.content)
-            # For each emote, update its usage
+            # For each emoji, update its usage
             for name in found:
-                if name not in emotes:
+                if name not in emojis_dict:
                     if not all_emojis or name not in emojis.unicode_list:
                         continue
-                emotes[name].usages += 1
-                emotes[name].update_use(message.created_at, [message.author])
-        # For each reaction of this message, test if known emote and update when it's the case
+                emojis_dict[name].usages += 1
+                emojis_dict[name].update_use(message.created_at, [message.author])
+        # For each reaction of this message, test if known emoji and update when it's the case
         for name in message.reactions:
-            if name not in emotes:
+            if name not in emojis_dict:
                 if not all_emojis or name not in emojis.unicode_list:
                     continue
             if len(raw_members) == 0:
-                emotes[name].reactions += len(message.reactions[name])
-                emotes[name].update_use(message.created_at, message.reactions[name])
+                emojis_dict[name].reactions += len(message.reactions[name])
+                emojis_dict[name].update_use(
+                    message.created_at, message.reactions[name]
+                )
             else:
                 for member in raw_members:
                     if member in message.reactions[name]:
-                        emotes[name].reactions += 1
-                        emotes[name].update_use(message.created_at, [member])
+                        emojis_dict[name].reactions += 1
+                        emojis_dict[name].update_use(message.created_at, [member])
         return impacted

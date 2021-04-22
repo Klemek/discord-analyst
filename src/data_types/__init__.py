@@ -1,4 +1,4 @@
-from .emote import Emote, get_emote_dict
+from .emoji import Emoji, get_emoji_dict
 from .frequency import Frequency
 from .composition import Composition
 from .presence import Presence

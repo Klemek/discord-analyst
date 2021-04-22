@@ -1,5 +1,5 @@
 from .scanner import Scanner
-from .emotes_scanner import EmotesScanner
+from .emojis_scanner import EmojisScanner
 from .frequency_scanner import FrequencyScanner
 from .composition_scanner import CompositionScanner
 from .presence_scanner import PresenceScanner
