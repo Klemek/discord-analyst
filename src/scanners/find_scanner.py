@@ -77,9 +77,7 @@ class FindScanner(Scanner):
             res += [
                 self.matches[match].to_string(
                     matches.index(match),
-                    f'"{escape_text(match)}"'
-                    if not match.startswith("<:")
-                    else escape_text(match),
+                    f'"{escape_text(match)}"',
                     total_usage=self.msg_count,
                     ranking=False,
                     transform=lambda id: f" by {mention(id)}",
