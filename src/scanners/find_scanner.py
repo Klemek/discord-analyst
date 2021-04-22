@@ -21,7 +21,7 @@ class FindScanner(Scanner):
     def help() -> str:
         return generate_help(
             "find",
-            "Find specific words or phrases",
+            "Find specific words or phrases (you can use quotes to add spaces in queries)",
             args=[
                 "all/everyone - include bots",
             ],
@@ -39,6 +39,12 @@ class FindScanner(Scanner):
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.matches = defaultdict(Counter)
         self.all_messages = "all" in args or "everyone" in args
+        if len(self.other_args) == 0:
+            await message.channel.send(
+                "You need to add a query to find (you can use quotes to add spaces in queries)",
+                reference=message,
+            )
+            return False
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
