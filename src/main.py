@@ -7,22 +7,7 @@ if sys.version_info < (3, 7):
     sys.exit(1)
 
 from utils import emojis, gdpr, command_cache
-from scanners import (
-    EmojisScanner,
-    FullScanner,
-    FrequencyScanner,
-    CompositionScanner,
-    PresenceScanner,
-    MentionsScanner,
-    MentionedScanner,
-    MessagesScanner,
-    ChannelsScanner,
-    ReactionsScanner,
-    FirstScanner,
-    RandomScanner,
-    LastScanner,
-    WordsScanner,
-)
+import scanners
 from logs import GuildLogs
 
 logging.basicConfig(
@@ -67,9 +52,9 @@ bot.register_command(
 )
 bot.register_command(
     "words",
-    lambda *args: WordsScanner().compute(*args),
+    lambda *args: scanners.WordsScanner().compute(*args),
     "words: (BETA) rank words by their usage",
-    WordsScanner.help(),
+    scanners.WordsScanner.help(),
 )
 bot.register_command(
     "repeat",
@@ -85,81 +70,81 @@ bot.register_command(
 )
 bot.register_command(
     "last",
-    lambda *args: LastScanner().compute(*args),
+    lambda *args: scanners.LastScanner().compute(*args),
     "last: read last message",
-    LastScanner.help(),
+    scanners.LastScanner.help(),
 )
 bot.register_command(
     "rand(om)?",
-    lambda *args: RandomScanner().compute(*args),
+    lambda *args: scanners.RandomScanner().compute(*args),
     "rand: read a random message",
-    RandomScanner.help(),
+    scanners.RandomScanner.help(),
 )
 bot.register_command(
     "first",
-    lambda *args: FirstScanner().compute(*args),
+    lambda *args: scanners.FirstScanner().compute(*args),
     "first: read first message",
-    FirstScanner.help(),
+    scanners.FirstScanner.help(),
 )
 bot.register_command(
     "mentioned",
-    lambda *args: MentionedScanner().compute(*args),
+    lambda *args: scanners.MentionedScanner().compute(*args),
     "mentioned: rank specific user mentions by their usage",
-    MentionedScanner.help(),
+    scanners.MentionedScanner.help(),
 )
 bot.register_command(
     "(mentions?)",
-    lambda *args: MentionsScanner().compute(*args),
+    lambda *args: scanners.MentionsScanner().compute(*args),
     "mentions: rank mentions by their usage",
-    MentionsScanner.help(),
+    scanners.MentionsScanner.help(),
 )
 bot.register_command(
     "(emojis?|emotes?)",
-    lambda *args: EmojisScanner().compute(*args),
+    lambda *args: scanners.EmojisScanner().compute(*args),
     "emojis: rank emojis by their usage",
-    EmojisScanner.help(),
+    scanners.EmojisScanner.help(),
 )
 bot.register_command(
     "(react(ions?)?)",
-    lambda *args: ReactionsScanner().compute(*args),
+    lambda *args: scanners.ReactionsScanner().compute(*args),
     "react: rank users by their reactions",
-    ReactionsScanner.help(),
+    scanners.ReactionsScanner.help(),
 )
 bot.register_command(
     "(channels?|chan)",
-    lambda *args: ChannelsScanner().compute(*args),
+    lambda *args: scanners.ChannelsScanner().compute(*args),
     "chan: rank channels by their messages",
-    ChannelsScanner.help(),
+    scanners.ChannelsScanner.help(),
 )
 bot.register_command(
     "(messages?|msg)",
-    lambda *args: MessagesScanner().compute(*args),
+    lambda *args: scanners.MessagesScanner().compute(*args),
     "msg: rank users by their messages",
-    MessagesScanner.help(),
+    scanners.MessagesScanner.help(),
 )
 bot.register_command(
     "pres(ence)?",
-    lambda *args: PresenceScanner().compute(*args),
+    lambda *args: scanners.PresenceScanner().compute(*args),
     "pres: presence analysis",
-    PresenceScanner.help(),
+    scanners.PresenceScanner.help(),
 )
 bot.register_command(
     "compo(sition)?",
-    lambda *args: CompositionScanner().compute(*args),
+    lambda *args: scanners.CompositionScanner().compute(*args),
     "compo: composition analysis",
-    CompositionScanner.help(),
+    scanners.CompositionScanner.help(),
 )
 bot.register_command(
     "freq(ency)?",
-    lambda *args: FrequencyScanner().compute(*args),
+    lambda *args: scanners.FrequencyScanner().compute(*args),
     "freq: frequency analysis",
-    FrequencyScanner.help(),
+    scanners.FrequencyScanner.help(),
 )
 bot.register_command(
     "(full|scan)",
-    lambda *args: FullScanner().compute(*args),
+    lambda *args: scanners.FullScanner().compute(*args),
     "scan: full analysis",
-    FullScanner.help(),
+    scanners.FullScanner.help(),
 )
 
 bot.start()
