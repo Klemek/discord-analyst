@@ -5,7 +5,9 @@ import discord
 # Custom libs
 
 from .scanner import Scanner
-from . import FrequencyScanner, CompositionScanner, PresenceScanner
+from .composition_scanner import CompositionScanner
+from .frequency_scanner import FrequencyScanner
+from .presence_scanner import PresenceScanner
 from data_types import Frequency, Composition, Presence
 from logs import ChannelLogs, MessageLog
 from utils import generate_help

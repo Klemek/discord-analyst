@@ -49,10 +49,10 @@ async def process(client: discord.client, message: discord.Message, *args: str):
     args = list(args)
     if len(args) == 1:
         await message.channel.send(TEXT)
+    elif args[1] == "help":
+        await client.bot.help(client, message, "help", args[0])
     elif len(args) > 2:
         await message.channel.send(f"Too many arguments", reference=message)
-    elif args[1] == "help":
-        await message.channel.send(HELP, reference=message)
     elif args[1] in ["agree", "accept"]:
         GuildLogs.init_log(message.channel.guild)
         await message.channel.send(AGREE_TEXT, reference=message)

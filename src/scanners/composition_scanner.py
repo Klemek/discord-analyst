@@ -57,19 +57,19 @@ class CompositionScanner(Scanner):
             impacted = True
             compo.total_characters += len(message.content)
 
-            emotes_found = emojis.regex.findall(message.content)
-            without_emote = message.content
-            for name in emotes_found:
+            emojis_found = emojis.regex.findall(message.content)
+            without_emoji = message.content
+            for name in emojis_found:
                 if name in emojis.unicode_list or re.match(
                     r"(<a?:[\w\-\~]+:\d+>|:[\w\\-\~]+:)", name
                 ):
-                    compo.emotes[name] += 1
-                    i = without_emote.index(name)
-                    without_emote = without_emote[:i] + without_emote[i + len(name) :]
-            if len(message.content.strip()) > 0 and len(without_emote.strip()) == 0:
-                compo.emote_only += 1
-            if len(emotes_found) > 0:
-                compo.emote_msg += 1
+                    compo.emojis[name] += 1
+                    i = without_emoji.index(name)
+                    without_emoji = without_emoji[:i] + without_emoji[i + len(name) :]
+            if len(message.content.strip()) > 0 and len(without_emoji.strip()) == 0:
+                compo.emoji_only += 1
+            if len(emojis_found) > 0:
+                compo.emoji_msg += 1
 
             links_found = re.findall(r"https?:\/\/", message.content)
             compo.links += len(links_found)
@@ -102,7 +102,7 @@ class CompositionScanner(Scanner):
                 compo.tts += 1
 
             if (
-                len(emotes_found) == 0
+                len(emojis_found) == 0
                 and message.reference is None
                 and not message.image
                 and len(message.mentions) == 0

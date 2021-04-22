@@ -21,12 +21,15 @@
 * %first - read first message
 * %rand - read a random message
 * %last - read last message
+* %find - find specific words or phrases
+* %repeat - repeat last analysis (adding supplied arguments)
+* %mobile - fix @invalid-user for last command but mentions users
 * %gdpr - displays GDPR information
-* %emojis - rank emotes by their usage
+* %emojis - rank emojis by their usage
   * arguments:
     * <n> - top <n> emojis, default is 20
     * all - list all common emojis in addition to this guild's
-    * members - show top member for each emote
+    * members - show top member for each emoji
     * sort:usage/reaction - other sorting methods
 * %mentions - rank mentions by their usage
   * arguments:
@@ -58,6 +61,7 @@
     * all/everyone - include bots messages
     * fast: only read cache
     * fresh: does not read cache
+    * mobile/mention: mentions users (fix @invalid-user bug)
 
 (Sample dates: 2020 / 2021-11 / 2021-06-28 / 2020-06-28T23:00 / today / week / 8days / 1y)
 ```
@@ -109,6 +113,11 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.14**
+  * `mobile/mention` arg to fix mobile bug
+  * `%repeat`, `%mobile` to repeat commands
+  * more scan: `%find`
+  * bug fix
 * **v1.13**
   * improved scan `%words`
   * remove old and unused logs at start and guild leaving
@@ -143,7 +152,7 @@ python3 src/main.py
   * more scans: `%scan`, `%freq`, `%compo`, `%pres`
   * huge bug fix
 * **v1.5**:
-  * top <n> emotes
+  * top <n> emojis
   * bug fix
 * **v1.4**:
   * integrate miniscord

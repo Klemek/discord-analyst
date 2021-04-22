@@ -8,9 +8,9 @@ class Composition:
     def __init__(self):
         self.total_characters = 0
         self.plain_text = 0
-        self.emote_msg = 0
-        self.emote_only = 0
-        self.emotes = defaultdict(int)
+        self.emoji_msg = 0
+        self.emoji_only = 0
+        self.emojis = defaultdict(int)
         self.edited = 0
         self.everyone = 0
         self.answers = 0
@@ -23,8 +23,8 @@ class Composition:
         self.spoilers = 0
 
     def to_string(self, msg_count: int) -> List[str]:
-        total_emotes = val_sum(self.emotes)
-        top_emote = top_key(self.emotes)
+        total_emojis = val_sum(self.emojis)
+        top_emoji = top_key(self.emojis)
         ret = [
             f"- **avg. characters / message**: {self.total_characters/msg_count:.2f}",
             f"- **plain text messages**: {self.plain_text:,} ({percent(self.plain_text/msg_count)})"
@@ -42,14 +42,14 @@ class Composition:
             f"- **answers**: {self.answers:,} ({percent(self.answers/msg_count)})"
             if self.answers > 0
             else "",
-            f"- **emojis**: {total_emotes:,} (in {percent(self.emote_msg/msg_count)} of msg, avg. {precise(total_emotes/msg_count)}/msg)"
-            if total_emotes > 0
+            f"- **emojis**: {total_emojis:,} (in {percent(self.emoji_msg/msg_count)} of msg, avg. {precise(total_emojis/msg_count)}/msg)"
+            if total_emojis > 0
             else "",
-            f"- **most used emoji**: {top_emote} ({plural(self.emotes[top_emote], 'time')}, {percent(self.emotes[top_emote]/total_emotes)})"
-            if total_emotes > 0
+            f"- **most used emoji**: {top_emoji} ({plural(self.emojis[top_emoji], 'time')}, {percent(self.emojis[top_emoji]/total_emojis)})"
+            if total_emojis > 0
             else "",
-            f"- **emoji-only messages**: {self.emote_only:,} ({percent(self.emote_only/msg_count)})"
-            if self.emote_only > 0
+            f"- **emoji-only messages**: {self.emoji_only:,} ({percent(self.emoji_only/msg_count)})"
+            if self.emoji_only > 0
             else "",
             f"- **images**: {self.images:,} ({percent(self.images/msg_count)})"
             if self.images > 0

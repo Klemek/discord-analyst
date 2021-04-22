@@ -1,6 +1,6 @@
-from .emote import Emote, get_emote_dict
-from .frequency import Frequency
+from .emoji import Emoji, get_emoji_dict
 from .composition import Composition
-from .presence import Presence
 from .counter import Counter
+from .frequency import Frequency
 from .history import History
+from .presence import Presence

@@ -14,14 +14,16 @@ class Counter:
 
     def update_use(self, count: int, date: datetime, item: int = 0):
         self.usages[item] += count
-        if self.last_used is None or date > self.last_used:
+        if count > 0 and (self.last_used is None or date > self.last_used):
             self.last_used = date
 
     def score(self) -> float:
         # Score is compose of usages + reactions
-        # When 2 emotes have the same score,
+        # When 2 emojis have the same score,
         # the days since last use is stored in the digits
         # (more recent first)
+        if self.last_used is None:
+            return 0
         return self.all_usages() + 1 / (
             100000 * ((datetime.today() - self.last_used).days + 1)
         )
@@ -37,21 +39,29 @@ class Counter:
         total_usage: int,
         counted: str = "time",
         transform: Optional[Callable[[int], str]] = None,
+        ranking: bool = True,
+        top: bool = True,
     ) -> str:
         # place
         output = ""
-        if i == 0:
-            output += ":first_place:"
-        elif i == 1:
-            output += ":second_place:"
-        elif i == 2:
-            output += ":third_place:"
+        if ranking:
+            if i == 0:
+                output += ":first_place: "
+            elif i == 1:
+                output += ":second_place: "
+            elif i == 2:
+                output += ":third_place: "
+            else:
+                output += f"**#{i + 1}** "
         else:
-            output += f"**#{i + 1}**"
+            output += f"- "
         sum = val_sum(self.usages)
-        output += f" {name} - {plural(sum, counted)} ({percent(sum/total_usage)}, last {from_now(self.last_used)})"
+        if sum > 0:
+            output += f"{name} - {plural(sum, counted)} ({percent(sum/total_usage)}, last {from_now(self.last_used)})"
+        else:
+            output += f"{name} - unused"
         top_item = top_key(self.usages)
-        if top_item != 0 and transform is not None:
+        if sum > 0 and top and top_item != 0 and transform is not None:
             if self.usages[top_item] == sum:
                 output += f" (all{transform(top_item)})"
             else:

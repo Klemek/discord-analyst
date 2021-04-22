@@ -18,6 +18,7 @@ COMMON_HELP_ARGS = [
     "<date2> - filter before <date2>",
     "fast - only read cache",
     "fresh - does not read cache (long)",
+    "mobile/mention - mentions users (fix @invalid-user bug)",
 ]
 
 
@@ -180,15 +181,16 @@ def parse_iso_datetime(str_date: str) -> datetime:
     return dateutil.parser.parse(str_date)
 
 
-RELATIVE_REGEX = r"(yesterday|today|\d*h(ours?)?|\d*d(ays?)?|\d*w(eeks?)?|\d*m(onths?)?|\d*y(ears?)?)"
+RELATIVE_REGEX = r"(yesterday|today|\d*hours?|\d+h(ours?)?|\d*days?|\d+d(ays?)?|\d*weeks?|\d+w(eeks?)?|\d*months?|\d+m(onths?)?|\d*years?|\d+y(ears?)?)"
 
 
 def parse_relative_time(src: str) -> datetime:
-    timezone_delta = datetime.utcnow() - datetime.now()
+    today = datetime.utcnow().date()
+    today = datetime(today.year, today.month, today.day)
     if src == "today":
-        return datetime.today() + timezone_delta
+        return today
     elif src == "yesterday":
-        return datetime.today() - relativedelta(days=1) + timezone_delta
+        return today - relativedelta(days=1)
     else:
         m = re.match("(\d*)(\w+)", src)
         delta = None

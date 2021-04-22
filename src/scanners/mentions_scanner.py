@@ -42,7 +42,6 @@ class MentionsScanner(Scanner):
         )
 
     async def init(self, message: discord.Message, *args: str) -> bool:
-        # get max emotes to view
         self.top = 10
         for arg in args:
             if arg.isdigit():
@@ -67,7 +66,6 @@ class MentionsScanner(Scanner):
         names = [name for name in self.mentions]
         names.sort(key=lambda name: self.mentions[name].score(), reverse=True)
         names = names[: self.top]
-        # Get the total of all emotes used
         usage_count = Counter.total(self.mentions)
         res = [intro]
         res += [
@@ -75,6 +73,8 @@ class MentionsScanner(Scanner):
                 names.index(name),
                 name,
                 total_usage=usage_count,
+                transform=lambda id: f" by {mention(id)}",
+                top=len(self.members) != 1,
             )
             for name in names
         ]
@@ -105,24 +105,28 @@ class MentionsScanner(Scanner):
                 count = message.content.count(name) + message.content.count(
                     alt_mention(member_id)
                 )
-                mentions[name].update_use(count, message.created_at)
+                mentions[name].update_use(count, message.created_at, message.author)
             if all_mentions:
                 for role_id in message.role_mentions:
                     name = role_mention(role_id)
                     mentions[name].update_use(
-                        message.content.count(name), message.created_at
+                        message.content.count(name), message.created_at, message.author
                     )
                 for channel_id in message.channel_mentions:
                     name = channel_mention(channel_id)
                     mentions[name].update_use(
-                        message.content.count(name), message.created_at
+                        message.content.count(name), message.created_at, message.author
                     )
                 if "@everyone" in message.content:
                     mentions["@\u200beveryone"].update_use(
-                        message.content.count("@everyone"), message.created_at
+                        message.content.count("@everyone"),
+                        message.created_at,
+                        message.author,
                     )
                 if "@here" in message.content:
                     mentions["@\u200bhere"].update_use(
-                        message.content.count("@here"), message.created_at
+                        message.content.count("@here"),
+                        message.created_at,
+                        message.author,
                     )
         return impacted
