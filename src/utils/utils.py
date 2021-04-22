@@ -185,11 +185,12 @@ RELATIVE_REGEX = r"(yesterday|today|\d*h(ours?)?|\d*d(ays?)?|\d*w(eeks?)?|\d*m(o
 
 
 def parse_relative_time(src: str) -> datetime:
-    timezone_delta = datetime.utcnow() - datetime.now()
+    today = datetime.utcnow().date()
+    today = datetime(today.year, today.month, today.day)
     if src == "today":
-        return datetime.today() + timezone_delta
+        return today
     elif src == "yesterday":
-        return datetime.today() - relativedelta(days=1) + timezone_delta
+        return today - relativedelta(days=1)
     else:
         m = re.match("(\d*)(\w+)", src)
         delta = None
