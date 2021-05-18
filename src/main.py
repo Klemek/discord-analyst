@@ -81,7 +81,7 @@ bot.register_command(
     scanners.LastScanner.help(),
 )
 bot.register_command(
-    "rand(om)?",
+    "(rand(om)?|mood)",
     lambda *args: scanners.RandomScanner().compute(*args),
     "rand: read a random message",
     scanners.RandomScanner.help(),
