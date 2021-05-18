@@ -47,11 +47,17 @@ class ChannelLogs:
     def is_format(self):
         return self.format == FORMAT
 
+    def preload(self, channel: discord.TextChannel):
+        self.name = channel.name
+        self.channel = channel
+
+    @property
+    def nsfw(self):
+        self.channel.nsfw
+
     async def load(
         self, channel: discord.TextChannel, start_date: datetime, stop_date: datetime
     ) -> Tuple[int, int]:
-        self.name = channel.name
-        self.channel = channel
         is_empty = self.last_message_id is None
         try:
             if is_empty:
@@ -125,6 +131,8 @@ class ChannelLogs:
         yield len(self.messages), True
 
     def dict(self) -> dict:
-        channel = serialize(self, not_serialized=["channel", "guild", "start_date"])
+        channel = serialize(
+            self, not_serialized=["channel", "guild", "start_date"]
+        )
         channel["messages"] = [message.dict() for message in self.messages]
         return channel

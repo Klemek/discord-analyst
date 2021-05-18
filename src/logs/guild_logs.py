@@ -231,6 +231,7 @@ class GuildLogs:
                 if channel.id not in self.channels or fresh:
                     loading_new += 1
                     self.channels[channel.id] = ChannelLogs(channel, self)
+                self.channels[channel.id].preload(channel)
                 workers += [
                     Worker(self.channels[channel.id], channel, start_date, stop_date)
                 ]

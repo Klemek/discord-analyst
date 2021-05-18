@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Callable, List, Dict, Union, Optional, Any
 import os
 import logging
@@ -17,6 +18,7 @@ COMMON_HELP_ARGS = [
     "<date2> - filter before <date2>",
     "fast - only read cache",
     "fresh - does not read cache (long)",
+    "nsfw:allow/only - allow messages from nsfw channels",
     "mobile/mention - mentions users (fix @invalid-user bug)",
 ]
 
@@ -47,6 +49,12 @@ def delta(t0: datetime):
 
 def deltas(t0: datetime):
     return (datetime.now() - t0).total_seconds()
+
+
+class FilterLevel(Enum):
+    NONE = 0
+    ALLOW = 1
+    ONLY = 2
 
 
 # DISCORD API
