@@ -14,5 +14,8 @@ class FirstScanner(HistoryScanner):
     def __init__(self):
         super().__init__(help=FirstScanner.help())
 
+    def allow_message(self, *_) -> bool:
+        return True
+
     def get_results(self, intro: str) -> List[str]:
         return self.history.to_string(type="first")

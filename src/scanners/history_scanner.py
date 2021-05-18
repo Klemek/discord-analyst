@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Callable, List
 import discord
 
 # Custom libs
@@ -10,10 +10,10 @@ from logs import ChannelLogs, MessageLog
 
 
 class HistoryScanner(Scanner, ABC):
-    def __init__(self, *, help: str):
+    def __init__(self, *, valid_args: List[str] = [], help: str):
         super().__init__(
             has_digit_args=True,
-            valid_args=["all", "everyone"],
+            valid_args=["all", "everyone"] + valid_args,
             help=help,
             intro_context="",
         )
@@ -30,10 +30,15 @@ class HistoryScanner(Scanner, ABC):
             self.history,
             self.raw_members,
             all_messages=self.all_messages,
+            allow_message=self.allow_message,
         )
 
     @abstractmethod
     def get_results(self, intro: str):
+        pass
+
+    @abstractmethod
+    def allow_message(self, channel: ChannelLogs, message: MessageLog) -> bool:
         pass
 
     @staticmethod
@@ -44,14 +49,19 @@ class HistoryScanner(Scanner, ABC):
         raw_members: List[int],
         *,
         all_messages: bool,
+        allow_message: Callable
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
         if (
-            (not message.bot or all_messages)
-            and len(raw_members) == 0
-            or message.author in raw_members
-        ) and (message.content or message.attachment):
+            (
+                (not message.bot or all_messages)
+                and len(raw_members) == 0
+                or message.author in raw_members
+            )
+            and (message.content or message.attachment)
+            and allow_message(channel, message)
+        ):
             impacted = True
             history.messages += [message]
         return impacted
