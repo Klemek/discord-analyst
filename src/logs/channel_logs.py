@@ -1,10 +1,8 @@
 from typing import Union, Tuple, Any
 import discord
-from discord import message
 from datetime import datetime
 
 from . import MessageLog
-from utils import FakeMessage
 
 CHUNK_SIZE = 2000
 FORMAT = 3
@@ -84,7 +82,9 @@ class ChannelLogs:
                     done = 0
                     async for message in channel.history(
                         limit=CHUNK_SIZE,
-                        before=FakeMessage(self.first_message_id)
+                        before=discord.MessageReference(
+                            self.first_message_id, self.id, guild_id=self.guild.id
+                        )
                         if self.first_message_id is not None
                         else None,
                         oldest_first=False,
@@ -110,7 +110,9 @@ class ChannelLogs:
                     tmp_message_id = self.last_message_id
                     async for message in channel.history(
                         limit=CHUNK_SIZE,
-                        after=FakeMessage(self.last_message_id),
+                        after=discord.MessageReference(
+                            self.first_message_id, self.id, guild_id=self.guild.id
+                        ),
                         oldest_first=True,
                     ):
                         last_message_date = message.created_at
