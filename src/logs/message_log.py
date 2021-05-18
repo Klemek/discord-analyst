@@ -2,13 +2,10 @@ from typing import Union, Any
 import discord
 from datetime import datetime
 
-from utils import is_extension
+from utils import is_extension, serialize
 
 IMAGE_FORMAT = [".gif", ".gifv", ".png", ".jpg", ".jpeg", ".bmp"]
-EMBED_IMAGES = ["image", "gifv"]
-
-
-NOT_SERIALIZED = ["channel"]
+EMBED_IMAGES = ["image", "gifv", "gif"]
 
 
 class MessageLog:
@@ -81,11 +78,6 @@ class MessageLog:
                 self.reactions[str(reaction.emoji)] += [user.id]
 
     def dict(self) -> dict:
-        message = dict(self.__dict__)
-        for key in NOT_SERIALIZED:
-            message.pop(key, None)
-        message["created_at"] = self.created_at.isoformat()
-        message["edited_at"] = (
-            self.edited_at.isoformat() if self.edited_at is not None else None
+        return serialize(
+            self, not_serialized=["channel"], dates=["created_at", "edited_at"]
         )
-        return message

@@ -3,11 +3,10 @@ import discord
 from datetime import datetime
 
 from . import MessageLog
+from utils import serialize, FakeMessage
 
 CHUNK_SIZE = 2000
 FORMAT = 3
-
-NOT_SERIALIZED = ["channel", "guild", "start_date"]
 
 
 class ChannelLogs:
@@ -82,9 +81,7 @@ class ChannelLogs:
                     done = 0
                     async for message in channel.history(
                         limit=CHUNK_SIZE,
-                        before=discord.MessageReference(
-                            self.first_message_id, self.id, guild_id=self.guild.id
-                        )
+                        before=FakeMessage(self.first_message_id)
                         if self.first_message_id is not None
                         else None,
                         oldest_first=False,
@@ -110,9 +107,7 @@ class ChannelLogs:
                     tmp_message_id = self.last_message_id
                     async for message in channel.history(
                         limit=CHUNK_SIZE,
-                        after=discord.MessageReference(
-                            self.first_message_id, self.id, guild_id=self.guild.id
-                        ),
+                        after=FakeMessage(self.first_message_id),
                         oldest_first=True,
                     ):
                         last_message_date = message.created_at
@@ -121,7 +116,7 @@ class ChannelLogs:
                         await m.load(message)
                         self.messages.insert(0, m)
                     yield len(self.messages), False
-        except discord.errors.HTTPException:
+        except discord.errors.HTTPException as e:
             yield -1, True
             return  # When an exception occurs (like Forbidden)
         self.start_date = (
@@ -130,8 +125,6 @@ class ChannelLogs:
         yield len(self.messages), True
 
     def dict(self) -> dict:
-        channel = dict(self.__dict__)
-        for key in NOT_SERIALIZED:
-            channel.pop(key, None)
+        channel = serialize(self, not_serialized=["channel", "guild", "start_date"])
         channel["messages"] = [message.dict() for message in self.messages]
         return channel

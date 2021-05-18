@@ -30,7 +30,7 @@ def generate_help(
     replace_args=[],
 ):
     arg_list = "* " + "\n* ".join(
-        replace_args + COMMON_HELP_ARGS[len(replace_args) :] + args
+        args + replace_args + COMMON_HELP_ARGS[len(replace_args) :]
     )
     return f"""```
 %{cmd}: {info}
@@ -84,6 +84,10 @@ def escape_text(text: str) -> str:
     return discord.utils.escape_markdown(discord.utils.escape_mentions(text))
 
 
+class FakeMessage:
+    def __init__(self, id: int):
+        self.id = id
+
 # FILE
 
 
@@ -130,6 +134,21 @@ def val_sum(d: Dict[Any, int]) -> int:
     if len(d) == 0:
         return 0
     return sum(d.values())
+
+
+def serialize(
+    obj: Any, *, not_serialized: List[str] = [], dates: List[str] = []
+) -> Dict:
+    output = dict(obj.__dict__)
+    for key in not_serialized:
+        output.pop(key, None)
+    for key in dates:
+        if output[key]:
+            try:
+                output[key] = getattr(obj, key).isoformat()
+            except AttributeError:
+                pass
+    return output
 
 
 # MESSAGE FORMATTING
