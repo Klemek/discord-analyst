@@ -1,4 +1,4 @@
-FROM python
+FROM python:3.8.10-alpine
 
 # Create app directory
 WORKDIR /usr/src/app
