@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import IntEnum
 from typing import Callable, List, Dict, Union, Optional, Any
 import os
 import logging
@@ -51,7 +51,7 @@ def deltas(t0: datetime):
     return (datetime.now() - t0).total_seconds()
 
 
-class FilterLevel(Enum):
+class FilterLevel(IntEnum):
     NONE = 0
     ALLOW = 1
     ONLY = 2
@@ -113,7 +113,7 @@ def should_allow_spoiler(message: discord.Message, spoiler: FilterLevel) -> bool
     is_spoiler = is_image_spoiler(message)
     return (
         not is_spoiler
-        and spoiler <= FilterLevel.ALLOW
+        and spoiler <= FilterLevel.ONLY
         or is_spoiler
         and spoiler >= FilterLevel.ALLOW
     )
