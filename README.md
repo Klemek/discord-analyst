@@ -113,6 +113,12 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.15**
+  * `nsfw:allow/only` filter nsfw channels
+  * `%find` can use regexes
+  * `%first`, `%rand` and `%last` can be filter with specific keywords
+  * `%first`, `%rand` and `%last` can pull images
+  * bug fix
 * **v1.14**
   * `mobile/mention` arg to fix mobile bug
   * `%repeat`, `%mobile` to repeat commands
