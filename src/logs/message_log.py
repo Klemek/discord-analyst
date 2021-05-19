@@ -76,13 +76,12 @@ class MessageLog:
             self.reactions[str(reaction.emoji)] = []
             async for user in reaction.users():
                 self.reactions[str(reaction.emoji)] += [user.id]
-    
+
     async def fetch(self) -> Optional[discord.Message]:
         try:
             return await self.channel.channel.fetch_message(self.id)
         except (discord.NotFound, discord.Forbidden, discord.HTTPException):
             return None
-
 
     def dict(self) -> dict:
         return serialize(

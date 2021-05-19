@@ -30,7 +30,17 @@ from logs import (
 
 
 class Scanner(ABC):
-    VALID_ARGS = ["me", "here", "fast", "fresh", "mobile", "mention", "nsfw", "nsfw:allow", "nsfw:only"]
+    VALID_ARGS = [
+        "me",
+        "here",
+        "fast",
+        "fresh",
+        "mobile",
+        "mention",
+        "nsfw",
+        "nsfw:allow",
+        "nsfw:only",
+    ]
 
     def __init__(
         self,
@@ -149,18 +159,22 @@ class Scanner(ABC):
                     self.nsfw = FilterLevel.ONLY
                 else:
                     self.nsfw = FilterLevel.NONE
-                
+
                 # fix nsfw filter if channel specified
                 if not self.full and any(channel.nsfw for channel in self.channels):
                     self.nsfw = FilterLevel.ALLOW
                 elif all(channel.nsfw for channel in self.channels):
                     self.nsfw = FilterLevel.ONLY
-                
+
                 # filter nsfw channels
                 if self.nsfw == FilterLevel.NONE:
-                    self.channels = list(filter(lambda channel:not channel.nsfw, self.channels))
+                    self.channels = list(
+                        filter(lambda channel: not channel.nsfw, self.channels)
+                    )
                 elif self.nsfw == FilterLevel.ONLY:
-                    self.channels = list(filter(lambda channel:channel.nsfw, self.channels))
+                    self.channels = list(
+                        filter(lambda channel: channel.nsfw, self.channels)
+                    )
 
                 if not await self.init(message, *args):
                     return
@@ -244,15 +258,15 @@ class Scanner(ABC):
                             # Display results
                             t0 = datetime.now()
                             intro = get_intro(
-                                    self.intro_context,
-                                    self.full,
-                                    self.channels,
-                                    self.members,
-                                    self.msg_count,
-                                    self.chan_count,
-                                    self.start_date,
-                                    self.stop_date,
-                                )
+                                self.intro_context,
+                                self.full,
+                                self.channels,
+                                self.members,
+                                self.msg_count,
+                                self.chan_count,
+                                self.start_date,
+                                self.stop_date,
+                            )
                             if inspect.iscoroutinefunction(self.get_results):
                                 results = await self.get_results(intro)
                             else:

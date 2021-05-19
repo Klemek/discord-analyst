@@ -48,7 +48,10 @@ class FindScanner(Scanner):
                 reference=message,
             )
             return False
-        self.queries = [(query, query.strip("`") if re.match(r"^`.*`$", query) else None) for query in self.other_args]
+        self.queries = [
+            (query, query.strip("`") if re.match(r"^`.*`$", query) else None)
+            for query in self.other_args
+        ]
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
@@ -125,5 +128,7 @@ class FindScanner(Scanner):
                     if count > 0:
                         matches[message.author].update_use(count, message.created_at)
                 else:
-                    matches[query[0]].update_use(count, message.created_at, message.author)
+                    matches[query[0]].update_use(
+                        count, message.created_at, message.author
+                    )
         return impacted

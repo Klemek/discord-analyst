@@ -7,6 +7,7 @@ from utils import mention, from_now, str_datetime, message_link, SPLIT_TOKEN
 
 MAX_RANDOM_TRIES = 10
 
+
 class History:
     def __init__(self):
         self.messages = []
@@ -40,7 +41,7 @@ class History:
                 message = random.choice(self.messages)
                 real_message = await message.fetch()
                 tries += 1
-        
+
         if real_message is None:
             return ["There was no messages matching your filters"]
         image = "<Error>"

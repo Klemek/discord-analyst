@@ -25,7 +25,13 @@ class HistoryScanner(Scanner, ABC):
         self.all_messages = "all" in args or "everyone" in args
         self.images_only = "image" in args
         if not self.images_only:
-            self.queries = [(query.lower(), query.strip("`") if re.match(r"^`.*`$", query) else None) for query in self.other_args]
+            self.queries = [
+                (
+                    query.lower(),
+                    query.strip("`") if re.match(r"^`.*`$", query) else None,
+                )
+                for query in self.other_args
+            ]
         else:
             self.queries = []
         return True

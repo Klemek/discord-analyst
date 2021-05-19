@@ -131,8 +131,6 @@ class ChannelLogs:
         yield len(self.messages), True
 
     def dict(self) -> dict:
-        channel = serialize(
-            self, not_serialized=["channel", "guild", "start_date"]
-        )
+        channel = serialize(self, not_serialized=["channel", "guild", "start_date"])
         channel["messages"] = [message.dict() for message in self.messages]
         return channel
