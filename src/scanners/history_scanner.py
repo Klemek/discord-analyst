@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, List
+from typing import List, Tuple, Optional
 import discord
 import re
 
@@ -11,20 +11,20 @@ from logs import ChannelLogs, MessageLog
 
 
 class HistoryScanner(Scanner, ABC):
-    def __init__(self, *, help: str, valid_args: List[str] = [], allow_queries: bool = False):
+    def __init__(self, *, help: str):
         super().__init__(
             has_digit_args=True,
-            valid_args=["all", "everyone"] + valid_args,
+            valid_args=["all", "everyone"],
             help=help,
             intro_context="",
-            all_args=allow_queries,
+            all_args=True,
         )
-        self.allow_queries = allow_queries
 
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.history = History()
         self.all_messages = "all" in args or "everyone" in args
-        if self.allow_queries:
+        self.images_only = "image" in args
+        if not self.images_only:
             self.queries = [(query.lower(), query.strip("`") if re.match(r"^`.*`$", query) else None) for query in self.other_args]
         else:
             self.queries = []
@@ -37,29 +37,13 @@ class HistoryScanner(Scanner, ABC):
             self.history,
             self.raw_members,
             all_messages=self.all_messages,
-            allow_message=lambda *args: self.allow_message(*args) and self.allow_message_query(*args),
+            queries=self.queries,
+            images_only=self.images_only,
         )
 
     @abstractmethod
     def get_results(self, intro: str):
         pass
-
-    @abstractmethod
-    def allow_message(self, channel: ChannelLogs, message: MessageLog) -> bool:
-        pass
-
-    def allow_message_query(self, channel: ChannelLogs, message: MessageLog) -> bool:
-        if not self.allow_queries or len(self.queries) == 0:
-            return True
-        else:
-            content = message.content.lower()
-            for query in self.queries:
-                if query[1] is not None:
-                    if not re.match(query[1], message.content):
-                        return False
-                elif not query[0] in content:
-                    return False
-        return True
 
     @staticmethod
     def analyse_message(
@@ -69,7 +53,8 @@ class HistoryScanner(Scanner, ABC):
         raw_members: List[int],
         *,
         all_messages: bool,
-        allow_message: Callable
+        queries: List[Tuple[str, Optional[str]]],
+        images_only: bool,
     ) -> bool:
         impacted = False
         # If author is included in the selection (empty list is all)
@@ -80,8 +65,15 @@ class HistoryScanner(Scanner, ABC):
                 or message.author in raw_members
             )
             and (message.content or message.attachment)
-            and allow_message(channel, message)
+            and (not images_only or message.image)
         ):
+            content = message.content.lower()
+            for query in queries:
+                if query[1] is not None:
+                    if not re.match(query[1], message.content):
+                        return False
+                elif not query[0] in content:
+                    return False
             impacted = True
             history.messages += [message]
         return impacted

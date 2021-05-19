@@ -57,6 +57,9 @@ class FilterLevel(Enum):
     ONLY = 2
 
 
+SPLIT_TOKEN = 1152317803
+
+
 # DISCORD API
 
 

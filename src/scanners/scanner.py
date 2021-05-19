@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import re
 import discord
+import inspect
 
 
 from utils import (
@@ -16,6 +17,7 @@ from utils import (
     parse_time,
     command_cache,
     FilterLevel,
+    SPLIT_TOKEN,
 )
 from logs import (
     GuildLogs,
@@ -241,8 +243,7 @@ class Scanner(ABC):
                             await progress.edit(content="```Computing results...```")
                             # Display results
                             t0 = datetime.now()
-                            results = self.get_results(
-                                get_intro(
+                            intro = get_intro(
                                     self.intro_context,
                                     self.full,
                                     self.channels,
@@ -252,7 +253,10 @@ class Scanner(ABC):
                                     self.start_date,
                                     self.stop_date,
                                 )
-                            )
+                            if inspect.iscoroutinefunction(self.get_results):
+                                results = await self.get_results(intro)
+                            else:
+                                results = self.get_results(intro)
                             logging.info(
                                 f"scan {guild.id} > results in {delta(t0):,}ms"
                             )
@@ -265,7 +269,7 @@ class Scanner(ABC):
                             )
                             for r in results:
                                 if r:
-                                    if len(response + "\n" + r) > 2000:
+                                    if isinstance(r, int) and r == SPLIT_TOKEN:
                                         await message.channel.send(
                                             response,
                                             reference=message if first else None,
@@ -273,7 +277,16 @@ class Scanner(ABC):
                                         )
                                         first = False
                                         response = ""
-                                    response += "\n" + r
+                                    elif isinstance(r, str):
+                                        if len(response + "\n" + r) > 2000:
+                                            await message.channel.send(
+                                                response,
+                                                reference=message if first else None,
+                                                allowed_mentions=allowed_mentions,
+                                            )
+                                            first = False
+                                            response = ""
+                                        response += "\n" + r
                             if len(response) > 0:
                                 await message.channel.send(
                                     response,
