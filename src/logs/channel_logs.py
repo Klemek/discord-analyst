@@ -1,15 +1,12 @@
 from typing import Union, Tuple, Any
 import discord
-from discord import message
 from datetime import datetime
 
 from . import MessageLog
-from utils import FakeMessage
+from utils import serialize, FakeMessage
 
 CHUNK_SIZE = 2000
 FORMAT = 3
-
-NOT_SERIALIZED = ["channel", "guild", "start_date"]
 
 
 class ChannelLogs:
@@ -50,11 +47,17 @@ class ChannelLogs:
     def is_format(self):
         return self.format == FORMAT
 
+    def preload(self, channel: discord.TextChannel):
+        self.name = channel.name
+        self.channel = channel
+
+    @property
+    def nsfw(self):
+        self.channel.nsfw
+
     async def load(
         self, channel: discord.TextChannel, start_date: datetime, stop_date: datetime
     ) -> Tuple[int, int]:
-        self.name = channel.name
-        self.channel = channel
         is_empty = self.last_message_id is None
         try:
             if is_empty:
@@ -110,7 +113,7 @@ class ChannelLogs:
                     tmp_message_id = self.last_message_id
                     async for message in channel.history(
                         limit=CHUNK_SIZE,
-                        after=FakeMessage(self.last_message_id),
+                        after=FakeMessage(self.first_message_id),
                         oldest_first=True,
                     ):
                         last_message_date = message.created_at
@@ -119,7 +122,7 @@ class ChannelLogs:
                         await m.load(message)
                         self.messages.insert(0, m)
                     yield len(self.messages), False
-        except discord.errors.HTTPException:
+        except discord.errors.HTTPException as e:
             yield -1, True
             return  # When an exception occurs (like Forbidden)
         self.start_date = (
@@ -128,8 +131,6 @@ class ChannelLogs:
         yield len(self.messages), True
 
     def dict(self) -> dict:
-        channel = dict(self.__dict__)
-        for key in NOT_SERIALIZED:
-            channel.pop(key, None)
+        channel = serialize(self, not_serialized=["channel", "guild", "start_date"])
         channel["messages"] = [message.dict() for message in self.messages]
         return channel

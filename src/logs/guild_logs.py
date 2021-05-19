@@ -215,6 +215,8 @@ class GuildLogs:
                 ]
             )
             total_chan = len(target_channels)
+            for channel in target_channels:
+                self.channels[channel.id].preload(channel)
         else:
             if not self.locked and not self.lock():
                 return ALREADY_RUNNING, 0
@@ -231,6 +233,7 @@ class GuildLogs:
                 if channel.id not in self.channels or fresh:
                     loading_new += 1
                     self.channels[channel.id] = ChannelLogs(channel, self)
+                self.channels[channel.id].preload(channel)
                 workers += [
                     Worker(self.channels[channel.id], channel, start_date, stop_date)
                 ]

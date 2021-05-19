@@ -1,5 +1,4 @@
 from typing import Dict, List
-from collections import defaultdict
 import discord
 
 

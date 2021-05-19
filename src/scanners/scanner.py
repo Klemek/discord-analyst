@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import re
 import discord
+import inspect
 
 
 from utils import (
@@ -15,6 +16,8 @@ from utils import (
     RELATIVE_REGEX,
     parse_time,
     command_cache,
+    FilterLevel,
+    SPLIT_TOKEN,
 )
 from logs import (
     GuildLogs,
@@ -27,7 +30,17 @@ from logs import (
 
 
 class Scanner(ABC):
-    VALID_ARGS = ["me", "here", "fast", "fresh", "mobile", "mention"]
+    VALID_ARGS = [
+        "me",
+        "here",
+        "fast",
+        "fresh",
+        "mobile",
+        "mention",
+        "nsfw",
+        "nsfw:allow",
+        "nsfw:only",
+    ]
 
     def __init__(
         self,
@@ -139,6 +152,30 @@ class Scanner(ABC):
 
                 self.mention_users = "mention" in args or "mobile" in args
 
+                # nsfw filter
+                if "nsfw" in args or "nsfw:allow" in args:
+                    self.nsfw = FilterLevel.ALLOW
+                elif "nsfw:only" in args:
+                    self.nsfw = FilterLevel.ONLY
+                else:
+                    self.nsfw = FilterLevel.NONE
+
+                # fix nsfw filter if channel specified
+                if not self.full and any(channel.nsfw for channel in self.channels):
+                    self.nsfw = FilterLevel.ALLOW
+                elif all(channel.nsfw for channel in self.channels):
+                    self.nsfw = FilterLevel.ONLY
+
+                # filter nsfw channels
+                if self.nsfw == FilterLevel.NONE:
+                    self.channels = list(
+                        filter(lambda channel: not channel.nsfw, self.channels)
+                    )
+                elif self.nsfw == FilterLevel.ONLY:
+                    self.channels = list(
+                        filter(lambda channel: channel.nsfw, self.channels)
+                    )
+
                 if not await self.init(message, *args):
                     return
 
@@ -220,18 +257,20 @@ class Scanner(ABC):
                             await progress.edit(content="```Computing results...```")
                             # Display results
                             t0 = datetime.now()
-                            results = self.get_results(
-                                get_intro(
-                                    self.intro_context,
-                                    self.full,
-                                    self.channels,
-                                    self.members,
-                                    self.msg_count,
-                                    self.chan_count,
-                                    self.start_date,
-                                    self.stop_date,
-                                )
+                            intro = get_intro(
+                                self.intro_context,
+                                self.full,
+                                self.channels,
+                                self.members,
+                                self.msg_count,
+                                self.chan_count,
+                                self.start_date,
+                                self.stop_date,
                             )
+                            if inspect.iscoroutinefunction(self.get_results):
+                                results = await self.get_results(intro)
+                            else:
+                                results = self.get_results(intro)
                             logging.info(
                                 f"scan {guild.id} > results in {delta(t0):,}ms"
                             )
@@ -244,7 +283,7 @@ class Scanner(ABC):
                             )
                             for r in results:
                                 if r:
-                                    if len(response + "\n" + r) > 2000:
+                                    if isinstance(r, int) and r == SPLIT_TOKEN:
                                         await message.channel.send(
                                             response,
                                             reference=message if first else None,
@@ -252,7 +291,16 @@ class Scanner(ABC):
                                         )
                                         first = False
                                         response = ""
-                                    response += "\n" + r
+                                    elif isinstance(r, str):
+                                        if len(response + "\n" + r) > 2000:
+                                            await message.channel.send(
+                                                response,
+                                                reference=message if first else None,
+                                                allowed_mentions=allowed_mentions,
+                                            )
+                                            first = False
+                                            response = ""
+                                        response += "\n" + r
                             if len(response) > 0:
                                 await message.channel.send(
                                     response,

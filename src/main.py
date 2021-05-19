@@ -18,7 +18,7 @@ emojis.load_emojis()
 
 bot = Bot(
     "Discord Analyst",
-    "1.14",
+    "1.15",
     alias="%",
 )
 
@@ -81,7 +81,7 @@ bot.register_command(
     scanners.LastScanner.help(),
 )
 bot.register_command(
-    "rand(om)?",
+    "(rand(om)?|mood)",
     lambda *args: scanners.RandomScanner().compute(*args),
     "rand: read a random message",
     scanners.RandomScanner.help(),

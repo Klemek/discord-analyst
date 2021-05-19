@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Callable, List, Dict, Union, Optional, Any
 import os
 import logging
@@ -17,6 +18,7 @@ COMMON_HELP_ARGS = [
     "<date2> - filter before <date2>",
     "fast - only read cache",
     "fresh - does not read cache (long)",
+    "nsfw:allow/only - allow messages from nsfw channels",
     "mobile/mention - mentions users (fix @invalid-user bug)",
 ]
 
@@ -30,7 +32,7 @@ def generate_help(
     replace_args=[],
 ):
     arg_list = "* " + "\n* ".join(
-        replace_args + COMMON_HELP_ARGS[len(replace_args) :] + args
+        args + replace_args + COMMON_HELP_ARGS[len(replace_args) :]
     )
     return f"""```
 %{cmd}: {info}
@@ -47,6 +49,15 @@ def delta(t0: datetime):
 
 def deltas(t0: datetime):
     return (datetime.now() - t0).total_seconds()
+
+
+class FilterLevel(Enum):
+    NONE = 0
+    ALLOW = 1
+    ONLY = 2
+
+
+SPLIT_TOKEN = 1152317803
 
 
 # DISCORD API
@@ -87,6 +98,25 @@ def escape_text(text: str) -> str:
 class FakeMessage:
     def __init__(self, id: int):
         self.id = id
+
+
+def is_image_spoiler(message: discord.Message) -> bool:
+    if len(message.attachments) > 0:
+        return message.attachments[0].is_spoiler()
+    elif len(message.embeds) > 0:
+        return re.match(r"||[^|]*http[^|]||", message.content.lower()) is not None
+    else:
+        return False
+
+
+def should_allow_spoiler(message: discord.Message, spoiler: FilterLevel) -> bool:
+    is_spoiler = is_image_spoiler(message)
+    return (
+        not is_spoiler
+        and spoiler <= FilterLevel.ALLOW
+        or is_spoiler
+        and spoiler >= FilterLevel.ALLOW
+    )
 
 
 # FILE
@@ -135,6 +165,21 @@ def val_sum(d: Dict[Any, int]) -> int:
     if len(d) == 0:
         return 0
     return sum(d.values())
+
+
+def serialize(
+    obj: Any, *, not_serialized: List[str] = [], dates: List[str] = []
+) -> Dict:
+    output = dict(obj.__dict__)
+    for key in not_serialized:
+        output.pop(key, None)
+    for key in dates:
+        if output[key]:
+            try:
+                output[key] = getattr(obj, key).isoformat()
+            except AttributeError:
+                pass
+    return output
 
 
 # MESSAGE FORMATTING
