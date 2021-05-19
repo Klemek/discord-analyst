@@ -18,13 +18,24 @@
 * %freq - frequency analysis
 * %compo - composition analysis
 * %pres - presence analysis
-* %first - read first message
-* %rand - read a random message
-* %last - read last message
-* %find - find specific words or phrases
 * %repeat - repeat last analysis (adding supplied arguments)
 * %mobile - fix @invalid-user for last command but mentions users
 * %gdpr - displays GDPR information
+* %find - find specific words or phrases (you can use quotes to add spaces in queries, backticks define regexes)
+  * arguments:
+    * top - rank users for these queries
+* %first - read first message (add text to filter like %find)
+  * arguments:
+    * image - pull an image instead of a message
+    * spoiler:allow/only - allow spoiler images
+* %rand - read a random message (add text to filter like %find)
+  * arguments:
+    * image - pull an image instead of a message
+    * spoiler:allow/only - allow spoiler images
+* %last - read last message (add text to filter like %find)
+  * arguments:
+    * image - pull an image instead of a message
+    * spoiler:allow/only - allow spoiler images
 * %emojis - rank emojis by their usage
   * arguments:
     * <n> - top <n> emojis, default is 20
@@ -61,6 +72,7 @@
     * all/everyone - include bots messages
     * fast: only read cache
     * fresh: does not read cache
+    * nsfw:allow/only - allow messages from nsfw channels
     * mobile/mention: mentions users (fix @invalid-user bug)
 
 (Sample dates: 2020 / 2021-11 / 2021-06-28 / 2020-06-28T23:00 / today / week / 8days / 1y)
