@@ -8,13 +8,14 @@ import re
 from .scanner import Scanner
 from data_types import History
 from logs import ChannelLogs, MessageLog
+from utils import FilterLevel
 
 
 class HistoryScanner(Scanner, ABC):
     def __init__(self, *, help: str):
         super().__init__(
             has_digit_args=True,
-            valid_args=["all", "everyone"],
+            valid_args=["all", "everyone", "spoiler", "spoiler:allow", "spoiler:only"],
             help=help,
             intro_context="",
             all_args=True,
@@ -24,6 +25,12 @@ class HistoryScanner(Scanner, ABC):
         self.history = History()
         self.all_messages = "all" in args or "everyone" in args
         self.images_only = "image" in args
+        if "spoiler" in args or "spoiler:allow" in args:
+            self.spoiler = FilterLevel.ALLOW
+        elif "spoiler:only" in args:
+            self.spoiler = FilterLevel.ONLY
+        else:
+            self.spoiler = FilterLevel.NONE
         if not self.images_only:
             self.queries = [
                 (

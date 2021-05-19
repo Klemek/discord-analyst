@@ -12,7 +12,10 @@ class FirstScanner(HistoryScanner):
         return generate_help(
             "first",
             "Read first message  (add text to filter like %find)",
-            args=["image - pull an image instead of a message"],
+            args=[
+                "image - pull an image instead of a message",
+                "spoiler:allow/only - allow spoiler images",
+            ],
         )
 
     def __init__(self):
@@ -20,6 +23,8 @@ class FirstScanner(HistoryScanner):
 
     async def get_results(self, intro: str) -> List[str]:
         if self.images_only:
-            return await self.history.to_string_image(type="first")
+            return await self.history.to_string_image(
+                type="first", spoiler=self.spoiler
+            )
         else:
             return self.history.to_string(type="first")

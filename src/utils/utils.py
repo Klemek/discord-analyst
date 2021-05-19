@@ -100,6 +100,25 @@ class FakeMessage:
         self.id = id
 
 
+def is_image_spoiler(message: discord.Message) -> bool:
+    if len(message.attachments) > 0:
+        return message.attachments[0].is_spoiler()
+    elif len(message.embeds) > 0:
+        return re.match(r"||[^|]*http[^|]||", message.content.lower()) is not None
+    else:
+        return False
+
+
+def should_allow_spoiler(message: discord.Message, spoiler: FilterLevel) -> bool:
+    is_spoiler = is_image_spoiler(message)
+    return (
+        not is_spoiler
+        and spoiler <= FilterLevel.ALLOW
+        or is_spoiler
+        and spoiler >= FilterLevel.ALLOW
+    )
+
+
 # FILE
 
 
