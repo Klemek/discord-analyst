@@ -1,6 +1,7 @@
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 from collections import defaultdict
 import discord
+import re
 
 # Custom libs
 
@@ -21,7 +22,7 @@ class FindScanner(Scanner):
     def help() -> str:
         return generate_help(
             "find",
-            "Find specific words or phrases (you can use quotes to add spaces in queries)",
+            "Find specific words or phrases (you can use quotes to add spaces in queries, backticks define regexes)",
             args=[
                 "top - rank users for these queries",
                 "all/everyone - include bots",
@@ -43,17 +44,18 @@ class FindScanner(Scanner):
         self.top = "top" in args or len(self.other_args) == 1
         if len(self.other_args) == 0:
             await message.channel.send(
-                "You need to add a query to find (you can use quotes to add spaces in queries)",
+                "You need to add a query to find (you can use quotes to add spaces in queries, backticks define regexes)",
                 reference=message,
             )
             return False
+        self.queries = [(query, query.strip("`") if re.match(r"^`.*`$", query) else None) for query in self.other_args]
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
         return FindScanner.analyse_message(
             message,
             self.matches,
-            self.other_args,
+            self.queries,
             self.raw_members,
             all_messages=self.all_messages,
             top=self.top,
@@ -77,7 +79,9 @@ class FindScanner(Scanner):
             res += [
                 self.matches[match].to_string(
                     matches.index(match),
-                    f'"{escape_text(match)}"',
+                    f'"{escape_text(match)}"'
+                    if len(match.strip("`")) == len(match)
+                    else match,
                     total_usage=self.msg_count,
                     ranking=False,
                     transform=lambda id: f" by {mention(id)}",
@@ -97,7 +101,7 @@ class FindScanner(Scanner):
     def analyse_message(
         message: MessageLog,
         matches: Dict[str, Counter],
-        queries: List[str],
+        queries: List[Tuple[str, Optional[str]]],
         raw_members: List[int],
         *,
         all_messages: bool,
@@ -113,10 +117,13 @@ class FindScanner(Scanner):
             impacted = True
             content = message.content.lower()
             for query in queries:
-                count = content.count(query.lower())
+                if query[1] is not None:
+                    count = len(re.findall(query[1], message.content))
+                else:
+                    count = content.count(query[0].lower())
                 if top:
                     if count > 0:
                         matches[message.author].update_use(count, message.created_at)
                 else:
-                    matches[query].update_use(count, message.created_at, message.author)
+                    matches[query[0]].update_use(count, message.created_at, message.author)
         return impacted
