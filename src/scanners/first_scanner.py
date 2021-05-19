@@ -9,10 +9,10 @@ from utils import generate_help
 class FirstScanner(HistoryScanner):
     @staticmethod
     def help() -> str:
-        return generate_help("first", "Read first message")
+        return generate_help("first", "Read first message  (add text to filter like %find)")
 
     def __init__(self):
-        super().__init__(help=FirstScanner.help())
+        super().__init__(help=FirstScanner.help(), allow_queries=True)
 
     def allow_message(self, *_) -> bool:
         return True

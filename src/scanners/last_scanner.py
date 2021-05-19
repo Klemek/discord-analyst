@@ -9,10 +9,10 @@ from utils import generate_help
 class LastScanner(HistoryScanner):
     @staticmethod
     def help() -> str:
-        return generate_help("last", "Read last message")
+        return generate_help("last", "Read last message (add text to filter like %find)")
 
     def __init__(self):
-        super().__init__(help=LastScanner.help())
+        super().__init__(help=LastScanner.help(), allow_queries=True)
 
     def allow_message(self, *_) -> bool:
         return True

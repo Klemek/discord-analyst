@@ -9,10 +9,10 @@ from utils import generate_help
 class RandomScanner(HistoryScanner):
     @staticmethod
     def help() -> str:
-        return generate_help("rand", "Read a random message")
+        return generate_help("rand", "Read a random message (add text to filter like %find)")
 
     def __init__(self):
-        super().__init__(help=RandomScanner.help())
+        super().__init__(help=RandomScanner.help(), allow_queries=True)
 
     def allow_message(self, *_) -> bool:
         return True
