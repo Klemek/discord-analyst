@@ -63,6 +63,9 @@ class MessageLog:
             self.attachment = message["attachment"]
             self.reactions = message["reactions"]
 
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, self.__class__) and other.id == self.id
+
     async def load(self, message: discord.Message):
         for reaction in message.reactions:
             self.reactions[str(reaction.emoji)] = []

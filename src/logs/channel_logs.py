@@ -1,3 +1,4 @@
+import logging
 from typing import Union, Tuple, Any
 import discord
 from datetime import datetime
@@ -50,6 +51,7 @@ class ChannelLogs:
     def preload(self, channel: discord.TextChannel):
         self.name = channel.name
         self.channel = channel
+        self.clean()
 
     @property
     def nsfw(self):
@@ -97,7 +99,8 @@ class ChannelLogs:
                         first_message_date = message.created_at
                         m = MessageLog(message, self)
                         await m.load(message)
-                        self.messages += [m]
+                        if m not in self.messages:
+                            self.messages += [m]
                     yield len(self.messages), False
                 if done < CHUNK_SIZE:  # reached bottom
                     self.first_message_id = None
@@ -120,7 +123,8 @@ class ChannelLogs:
                         self.last_message_id = message.id
                         m = MessageLog(message, self)
                         await m.load(message)
-                        self.messages.insert(0, m)
+                        if m not in self.messages:
+                            self.messages.insert(0, m)
                     yield len(self.messages), False
         except discord.errors.HTTPException as e:
             yield -1, True
@@ -128,7 +132,20 @@ class ChannelLogs:
         self.start_date = (
             self.messages[-1].created_at if len(self.messages) > 0 else None
         )
+        self.clean()
         yield len(self.messages), True
+
+    def clean(self):
+        ids = []
+        count = 0
+        for message in self.messages:
+            if message.id in ids:
+                self.messages.remove(message)
+                count += 1
+            else:
+                ids += [message.id]
+        if count > 0:
+            logging.info(f"log {self.guild.id}.{self.id} > cleaned {count} messages")
 
     def dict(self) -> dict:
         channel = serialize(self, not_serialized=["channel", "guild", "start_date"])
