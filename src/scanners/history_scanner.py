@@ -15,7 +15,16 @@ class HistoryScanner(Scanner, ABC):
     def __init__(self, *, help: str):
         super().__init__(
             has_digit_args=True,
-            valid_args=["all", "everyone", "spoiler", "spoiler:allow", "spoiler:only"],
+            valid_args=[
+                "all",
+                "everyone",
+                "spoiler",
+                "spoiler:allow",
+                "spoiler:only",
+                "image",
+                "img",
+                "gif",
+            ],
             help=help,
             intro_context="",
             all_args=True,
@@ -24,7 +33,8 @@ class HistoryScanner(Scanner, ABC):
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.history = History()
         self.all_messages = "all" in args or "everyone" in args
-        self.images_only = "image" in args
+        self.images_only = "image" in args or "img" in args or "gif" in args
+        self.gif_only = "gif" in args
         if "spoiler" in args or "spoiler:allow" in args:
             self.spoiler = FilterLevel.ALLOW
         elif "spoiler:only" in args:
@@ -80,13 +90,14 @@ class HistoryScanner(Scanner, ABC):
             and (message.content or message.attachment)
             and (not images_only or message.image)
         ):
-            content = message.content.lower()
-            for query in queries:
-                if query[1] is not None:
-                    if not re.match(query[1], message.content):
+            if not images_only:
+                content = message.content.lower()
+                for query in queries:
+                    if query[1] is not None:
+                        if not re.match(query[1], message.content):
+                            return False
+                    elif not query[0] in content:
                         return False
-                elif not query[0] in content:
-                    return False
             impacted = True
             history.messages += [message]
         return impacted

@@ -13,7 +13,7 @@ class LastScanner(HistoryScanner):
             "last",
             "Read last message (add text to filter like %find)",
             args=[
-                "image - pull an image instead of a message",
+                "image/gif - pull an image instead of a message",
                 "spoiler:allow/only - allow spoiler images",
             ],
         )
@@ -23,6 +23,8 @@ class LastScanner(HistoryScanner):
 
     async def get_results(self, intro: str) -> List[str]:
         if self.images_only:
-            return await self.history.to_string_image(type="last", spoiler=self.spoiler)
+            return await self.history.to_string_image(
+                type="last", spoiler=self.spoiler, gif_only=self.gif_only
+            )
         else:
             return self.history.to_string(type="last")
