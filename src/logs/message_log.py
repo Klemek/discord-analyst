@@ -2,10 +2,10 @@ from typing import Optional, Union, Any
 import discord
 from datetime import datetime
 
-from utils import is_extension, serialize
-
-IMAGE_FORMAT = [".gif", ".gifv", ".png", ".jpg", ".jpeg", ".bmp"]
-EMBED_IMAGES = ["image", "gifv"]
+from utils import (
+    serialize,
+    has_image,
+)
 
 
 class MessageLog:
@@ -36,15 +36,7 @@ class MessageLog:
             self.image = False
             self.attachment = len(message.attachments) > 0
             self.embed = len(message.embeds) > 0
-            for attachment in message.attachments:
-                if is_extension(attachment.filename, IMAGE_FORMAT):
-                    self.image = True
-                    break
-            else:
-                for embed in message.embeds:
-                    if embed.type in EMBED_IMAGES:
-                        self.image = True
-                        break
+            self.image = has_image(message)
             self.reactions = {}
         elif isinstance(message, dict):
             self.id = int(message["id"])

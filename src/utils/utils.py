@@ -60,6 +60,26 @@ class FilterLevel(IntEnum):
 SPLIT_TOKEN = 1152317803
 
 
+# FILE
+
+IMAGE_FORMAT = [".png", ".jpg", ".jpeg", ".bmp"]
+EMBED_IMAGES = ["image"]
+
+GIF_FORMAT = [".gif", ".gifv"]
+EMBED_GIF = ["gifv"]
+
+
+def is_extension(filepath: str, ext_list: List[str]) -> bool:
+    filename, file_extension = os.path.splitext(filepath.lower())
+    return file_extension in ext_list
+
+
+def get_resource_path(filename: str) -> str:
+    return os.path.realpath(
+        os.path.join(os.path.dirname(__file__), "..", "resources", filename)
+    )
+
+
 # DISCORD API
 
 
@@ -100,11 +120,30 @@ class FakeMessage:
         self.id = id
 
 
+def has_image(message: discord.Message) -> bool:
+    for attachment in message.attachments:
+        if is_extension(attachment.filename, GIF_FORMAT + IMAGE_FORMAT):
+            return True
+    for embed in message.embeds:
+        if embed.type in (EMBED_IMAGES + EMBED_GIF):
+            return True
+    return False
+
+
 def is_image_spoiler(message: discord.Message) -> bool:
     if len(message.attachments) > 0:
         return message.attachments[0].is_spoiler()
     elif len(message.embeds) > 0:
-        return re.match(r"||[^|]*http[^|]||", message.content.lower()) is not None
+        return re.match(r"\|\|[^|]*http[^|]\|\|", message.content.lower()) is not None
+    else:
+        return False
+
+
+def is_image_gif(message: discord.Message) -> bool:
+    if len(message.attachments) > 0:
+        return is_extension(message.attachments[0].filename, GIF_FORMAT)
+    elif len(message.embeds) > 0:
+        return message.embeds[0].type in EMBED_GIF
     else:
         return False
 
@@ -116,20 +155,6 @@ def should_allow_spoiler(message: discord.Message, spoiler: FilterLevel) -> bool
         and spoiler <= FilterLevel.ONLY
         or is_spoiler
         and spoiler >= FilterLevel.ALLOW
-    )
-
-
-# FILE
-
-
-def is_extension(filepath: str, ext_list: List[str]) -> bool:
-    filename, file_extension = os.path.splitext(filepath.lower())
-    return file_extension in ext_list
-
-
-def get_resource_path(filename: str) -> str:
-    return os.path.realpath(
-        os.path.join(os.path.dirname(__file__), "..", "resources", filename)
     )
 
 

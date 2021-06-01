@@ -11,6 +11,7 @@ from utils import (
     SPLIT_TOKEN,
     FilterLevel,
     should_allow_spoiler,
+    is_image_gif,
 )
 
 MAX_RANDOM_TRIES = 100
@@ -20,7 +21,9 @@ class History:
     def __init__(self):
         self.messages = []
 
-    async def to_string_image(self, *, type: str, spoiler: FilterLevel) -> List[str]:
+    async def to_string_image(
+        self, *, type: str, spoiler: FilterLevel, gif_only: bool
+    ) -> List[str]:
         if len(self.messages) == 0:
             return ["There was no messages matching your filters"]
         message = None
@@ -32,8 +35,9 @@ class History:
             while real_message is None and index < len(self.messages):
                 message = self.messages[index]
                 real_message = await message.fetch()
-                if real_message is not None and not should_allow_spoiler(
-                    real_message, spoiler
+                if real_message is not None and (
+                    not should_allow_spoiler(real_message, spoiler)
+                    or (gif_only and not is_image_gif(real_message))
                 ):
                     real_message = None
                 index += 1
@@ -44,8 +48,9 @@ class History:
             while real_message is None and index < len(self.messages):
                 message = self.messages[index]
                 real_message = await message.fetch()
-                if real_message is not None and not should_allow_spoiler(
-                    real_message, spoiler
+                if real_message is not None and (
+                    not should_allow_spoiler(real_message, spoiler)
+                    or (gif_only and not is_image_gif(real_message))
                 ):
                     real_message = None
                 index += 1
@@ -56,8 +61,9 @@ class History:
             while real_message is None and tries < MAX_RANDOM_TRIES:
                 message = random.choice(self.messages)
                 real_message = await message.fetch()
-                if real_message is not None and not should_allow_spoiler(
-                    real_message, spoiler
+                if real_message is not None and (
+                    not should_allow_spoiler(real_message, spoiler)
+                    or (gif_only and not is_image_gif(real_message))
                 ):
                     real_message = None
                 tries += 1
