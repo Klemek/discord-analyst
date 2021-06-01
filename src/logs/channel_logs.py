@@ -38,11 +38,11 @@ class ChannelLogs:
                 and channel["first_message_id"] is not None
                 else None
             )
-            self.messages = [
+            self.messages = {
                 MessageLog(message, self) for message in channel["messages"]
-            ]
+            }
             self.start_date = (
-                self.messages[-1].created_at if len(self.messages) > 0 else None
+                self.sorted_messages[0].created_at if len(self.messages) > 0 else None
             )
 
     def is_format(self):
@@ -51,7 +51,10 @@ class ChannelLogs:
     def preload(self, channel: discord.TextChannel):
         self.name = channel.name
         self.channel = channel
-        self.clean()
+    
+    @property
+    def sorted_messages(self):
+        return sorted(self.messages)
 
     @property
     def nsfw(self):
@@ -99,14 +102,13 @@ class ChannelLogs:
                         first_message_date = message.created_at
                         m = MessageLog(message, self)
                         await m.load(message)
-                        if m not in self.messages:
-                            self.messages += [m]
+                        self.messages.add(m)
                     yield len(self.messages), False
                 if done < CHUNK_SIZE:  # reached bottom
                     self.first_message_id = None
                 self.last_message_id = channel.last_message_id
             # load forward
-            last_message_date = self.messages[0].created_at
+            last_message_date = self.sorted_messages[-1].created_at
             if not is_empty and (stop_date is None or last_message_date < stop_date):
                 tmp_message_id = None
                 while (
@@ -123,29 +125,15 @@ class ChannelLogs:
                         self.last_message_id = message.id
                         m = MessageLog(message, self)
                         await m.load(message)
-                        if m not in self.messages:
-                            self.messages.insert(0, m)
+                        self.messages.add(m)
                     yield len(self.messages), False
         except discord.errors.HTTPException as e:
             yield -1, True
             return  # When an exception occurs (like Forbidden)
         self.start_date = (
-            self.messages[-1].created_at if len(self.messages) > 0 else None
+            self.sorted_messages[0].created_at if len(self.messages) > 0 else None
         )
-        self.clean()
         yield len(self.messages), True
-
-    def clean(self):
-        ids = []
-        count = 0
-        for message in self.messages:
-            if message.id in ids:
-                self.messages.remove(message)
-                count += 1
-            else:
-                ids += [message.id]
-        if count > 0:
-            logging.info(f"log {self.guild.id}.{self.id} > cleaned {count} messages")
 
     def dict(self) -> dict:
         channel = serialize(self, not_serialized=["channel", "guild", "start_date"])
