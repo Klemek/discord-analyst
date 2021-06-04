@@ -92,7 +92,9 @@ class Scanner(ABC):
                 dates = []
                 for i, arg in enumerate(args[1:]):
                     skip_check = False
-                    if re.match(r"^<@!?\d+>$", arg):
+                    if self.all_args and f"'{arg}'" in message.content or f"\"{arg}\"" in message.content:
+                        self.other_args += [arg]
+                    elif re.match(r"^<@!?\d+>$", arg):
                         arg = arg[3:-1] if "!" in arg else arg[2:-1]
                     elif re.match(r"^<#!?\d+>$", arg):
                         arg = arg[3:-1] if "!" in arg else arg[2:-1]
@@ -120,6 +122,9 @@ class Scanner(ABC):
                                 f"Unrecognized argument: `{arg}`", reference=message
                             )
                             return
+
+                for arg in self.other_args:
+                    args.remove(arg)
 
                 self.start_date = None if len(dates) < 1 else min(dates)
                 self.stop_date = None if len(dates) < 2 else max(dates)
