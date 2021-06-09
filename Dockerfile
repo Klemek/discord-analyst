@@ -9,7 +9,7 @@ COPY requirements.txt ./
 
 RUN pip install -r requirements.txt
 
-RUN touch logs/guilds.log && touch guilds.log && ln -s logs/guilds.log guilds.log
+RUN mkdir -p logs && touch logs/guilds.log && ln -s logs/guilds.log guilds.log
 
 # Bundle app source
 COPY . .
