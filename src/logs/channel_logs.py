@@ -19,7 +19,7 @@ class ChannelLogs:
             self.last_message_id = None
             self.first_message_id = None
             self.format = FORMAT
-            self.messages = []
+            self.messages = set()
             self.start_date = None
         elif isinstance(channel, dict):
             self.format = channel["format"] if "format" in channel else None
