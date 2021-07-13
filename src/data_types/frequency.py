@@ -50,10 +50,9 @@ class Frequency:
 
         fig, ax = plt.subplots()
 
-        fig.patch.set_facecolor("#36393F")
-        ax.patch.set_alpha(0)
-
         times = range(25)
+        ax.set_xticks(times)
+        ax.set_xticklabels([f"{t:0>2}h" if t%2 == 0 else "" for t in times])
 
         for i in range(7):
             hours = [self.hours[i][hour] * 7 / n_hours for hour in range(24)] + [
@@ -66,14 +65,17 @@ class Frequency:
         hours = [day[hour] / n_hours for hour in range(24)] + [day[0] / n_hours]
         ax.plot(times, hours, c="r", label="average", linewidth=1.5)
 
-        ax.set_xlabel("hour of day")
+        fig.patch.set_facecolor("#36393F")
+        ax.patch.set_alpha(0)
         ax.set_xlim([0, 24])
+        ax.set_ylim([0, None])
         ax.set_ylabel("average messages")
         ax.legend(framealpha=0)
+        ax.grid(True, alpha=0.1)
 
         with BytesIO() as f:
             plt.savefig(
-                f, format="png", facecolor=fig.get_facecolor(), edgecolor="none"
+                f, format="png", facecolor=fig.get_facecolor(), edgecolor="none", bbox_inches='tight', dpi=300
             )
             f.seek(0)
             return [discord.File(f, f"{time.time()}-plot.png")]
