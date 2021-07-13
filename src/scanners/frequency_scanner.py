@@ -14,9 +14,13 @@ from utils import generate_help
 class FrequencyScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return generate_help("freq", "(BETA) Show frequency-related statistics", args=[
+        return generate_help(
+            "freq",
+            "(BETA) Show frequency-related statistics",
+            args=[
                 "graph - plot hours of week",
-            ],)
+            ],
+        )
 
     def __init__(self):
         super().__init__(

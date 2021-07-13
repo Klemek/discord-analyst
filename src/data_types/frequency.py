@@ -45,34 +45,38 @@ class Frequency:
         n_hours = delta.days
         if self.dates[0].hour <= busiest_hour and self.dates[-1].hour >= busiest_hour:
             n_hours += 1
-        
-        plt.style.use('dark_background')
+
+        plt.style.use("dark_background")
 
         fig, ax = plt.subplots()
 
-        fig.patch.set_facecolor('#36393F')
+        fig.patch.set_facecolor("#36393F")
         ax.patch.set_alpha(0)
 
         times = range(25)
 
         for i in range(7):
-            hours = [self.hours[i][hour]*7/n_hours for hour in range(24)] + [self.hours[i][0]*7/n_hours]
-            ax.plot(times, hours, label=calendar.day_name[i], linestyle='--', linewidth=0.8)
-        
-        hours = [day[hour]/n_hours for hour in range(24)] + [day[0]/n_hours]
-        ax.plot(times, hours, c='r', label='average', linewidth=1.5)
+            hours = [self.hours[i][hour] * 7 / n_hours for hour in range(24)] + [
+                self.hours[i][0] * 7 / n_hours
+            ]
+            ax.plot(
+                times, hours, label=calendar.day_name[i], linestyle="--", linewidth=0.8
+            )
 
-        ax.set_xlabel('hour of day')
+        hours = [day[hour] / n_hours for hour in range(24)] + [day[0] / n_hours]
+        ax.plot(times, hours, c="r", label="average", linewidth=1.5)
+
+        ax.set_xlabel("hour of day")
         ax.set_xlim([0, 24])
-        ax.set_ylabel('average messages')
+        ax.set_ylabel("average messages")
         ax.legend(framealpha=0)
 
         with BytesIO() as f:
-            plt.savefig(f, format='png', facecolor=fig.get_facecolor(), edgecolor='none')
+            plt.savefig(
+                f, format="png", facecolor=fig.get_facecolor(), edgecolor="none"
+            )
             f.seek(0)
-            return [
-                discord.File(f, f"{time.time()}-plot.png")
-            ]
+            return [discord.File(f, f"{time.time()}-plot.png")]
 
     def to_string(
         self,
@@ -107,14 +111,16 @@ class Frequency:
             f"- **messages/day**: {precise(total_msg/delta.days, precision=3)}",
             f"- **busiest day of week**: {calendar.day_name[busiest_weekday]} (~{precise(week[busiest_weekday]/n_weekdays, precision=3)} msg, {percent(week[busiest_weekday]/total_msg)})",
             f"- **quietest day of week**: {calendar.day_name[quietest_weekday]} (~{precise(week[quietest_weekday]/n_weekdays, precision=3)} msg, {percent(week[quietest_weekday]/total_msg)})"
-            if week[quietest_weekday] > 0 else "",
+            if week[quietest_weekday] > 0
+            else "",
             f"- **busiest day ever**: {from_now(self.busiest_day)} ({self.busiest_day_count} msg)"
             if self.busiest_day is not None
             else "",
             f"- **messages/hour**: {precise(total_msg*3600/delta.total_seconds(), precision=3)}",
             f"- **busiest hour of day**: {busiest_hour:0>2}:00 (~{precise(day[busiest_hour]/n_hours, precision=3)} msg, {percent(day[busiest_hour]/total_msg)})",
             f"- **quietest hour of day**: {quietest_hour:0>2}:00 (~{precise(day[quietest_hour]/n_hours, precision=3)} msg, {percent(day[quietest_hour]/total_msg)})"
-            if day[quietest_hour] > 0 else "",
+            if day[quietest_hour] > 0
+            else "",
             f"- **busiest hour ever**: {from_now(self.busiest_hour)} ({self.busiest_hour_count} msg)",
             f"- **longest break**: {plural(round(self.longest_break.total_seconds()/3600), 'hour')} ({plural(self.longest_break.days,'day')}), started {from_now(self.longest_break_start)}",
             f"- **avg. streak**: {precise(sum(self.streaks)/len(self.streaks), precision=3)} msg",
