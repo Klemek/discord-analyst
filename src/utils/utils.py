@@ -177,13 +177,13 @@ def no_duplicate(seq: list) -> list:
 
 
 def top_key(
-    d: Dict[Union[str, int], int], key: Optional[Callable] = None
+    d: Dict[Union[str, int], int], key: Optional[Callable] = None, reverse: bool = False
 ) -> Union[str, int]:
     if len(d) == 0:
         return None
     if key is None:
         key = lambda k: d[k]
-    return sorted(d, key=key)[-1]
+    return sorted(d, key=key, reverse=reverse)[-1]
 
 
 def val_sum(d: Dict[Any, int]) -> int:
