@@ -92,7 +92,9 @@ class Scanner(ABC):
                 dates = []
                 for i, arg in enumerate(args[1:]):
                     skip_check = False
-                    if self.all_args and (f"'{arg}'" in message.content or f"\"{arg}\"" in message.content):
+                    if self.all_args and (
+                        f"'{arg}'" in message.content or f'"{arg}"' in message.content
+                    ):
                         self.other_args += [arg]
                     elif re.match(r"^<@!?\d+>$", arg):
                         arg = arg[3:-1] if "!" in arg else arg[2:-1]
