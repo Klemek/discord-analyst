@@ -1,6 +1,11 @@
 from typing import List
 from datetime import timedelta
 import calendar
+import matplotlib.pyplot as plt
+import numpy as np
+from io import BytesIO
+import discord
+import time
 
 from utils import (
     from_now,
@@ -29,6 +34,45 @@ class Frequency:
         self.longest_streak = None
         self.longest_streak_start = None
         self.longest_streak_author = None
+
+    def to_graph(self) -> List[str]:
+        self.dates.sort()
+        delta = self.dates[-1] - self.dates[0]
+        if delta.days == 0:
+            delta = timedelta(days=1)
+        day = {j: sum(self.hours[i][j] for i in range(7)) for j in range(24)}
+        busiest_hour = top_key(day)
+        n_hours = delta.days
+        if self.dates[0].hour <= busiest_hour and self.dates[-1].hour >= busiest_hour:
+            n_hours += 1
+        
+        plt.style.use('dark_background')
+
+        fig, ax = plt.subplots()
+
+        fig.patch.set_facecolor('#36393F')
+        ax.patch.set_alpha(0)
+
+        times = range(25)
+
+        for i in range(7):
+            hours = [self.hours[i][hour]*7/n_hours for hour in range(24)] + [self.hours[i][0]*7/n_hours]
+            ax.plot(times, hours, label=calendar.day_name[i], linestyle='--', linewidth=0.8)
+        
+        hours = [day[hour]/n_hours for hour in range(24)] + [day[0]/n_hours]
+        ax.plot(times, hours, c='r', label='average', linewidth=1.5)
+
+        ax.set_xlabel('hour of day')
+        ax.set_xlim([0, 24])
+        ax.set_ylabel('average messages')
+        ax.legend(framealpha=0)
+
+        with BytesIO() as f:
+            plt.savefig(f, format='png', facecolor=fig.get_facecolor(), edgecolor='none')
+            f.seek(0)
+            return [
+                discord.File(f, f"{time.time()}-plot.png")
+            ]
 
     def to_string(
         self,

@@ -14,11 +14,13 @@ from utils import generate_help
 class FrequencyScanner(Scanner):
     @staticmethod
     def help() -> str:
-        return generate_help("freq", "Show frequency-related statistics")
+        return generate_help("freq", "(BETA) Show frequency-related statistics", args=[
+                "graph - plot hours of week",
+            ],)
 
     def __init__(self):
         super().__init__(
-            valid_args=["all", "everyone"],
+            valid_args=["all", "everyone", "graph"],
             help=FrequencyScanner.help(),
             intro_context="Frequency",
         )
@@ -27,6 +29,7 @@ class FrequencyScanner(Scanner):
         self.freq = Frequency()
         self.all_messages = "all" in args or "everyone" in args
         self.member_specific = len(self.members) > 0
+        self.to_graph = "graph" in args
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
@@ -36,10 +39,13 @@ class FrequencyScanner(Scanner):
 
     def get_results(self, intro: str) -> List[str]:
         FrequencyScanner.compute_results(self.freq)
-        res = [intro]
-        res += self.freq.to_string(
-            member_specific=self.member_specific,
-        )
+        if self.to_graph:
+            res = self.freq.to_graph()
+        else:
+            res = [intro]
+            res += self.freq.to_string(
+                member_specific=self.member_specific,
+            )
         return res
 
     @staticmethod

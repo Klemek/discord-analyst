@@ -288,15 +288,20 @@ class Scanner(ABC):
                                 if self.mention_users
                                 else discord.AllowedMentions.none()
                             )
+                            file = None
                             for r in results:
                                 if r:
-                                    if isinstance(r, int) and r == SPLIT_TOKEN:
+                                    if isinstance(r, discord.File):
+                                        file = r
+                                    elif isinstance(r, int) and r == SPLIT_TOKEN:
                                         await message.channel.send(
                                             response,
                                             reference=message if first else None,
                                             allowed_mentions=allowed_mentions,
+                                            file=file,
                                         )
                                         first = False
+                                        file = None
                                         response = ""
                                     elif isinstance(r, str):
                                         if len(response + "\n" + r) > 2000:
@@ -304,15 +309,18 @@ class Scanner(ABC):
                                                 response,
                                                 reference=message if first else None,
                                                 allowed_mentions=allowed_mentions,
+                                                file=file,
                                             )
                                             first = False
+                                            file = None
                                             response = ""
                                         response += "\n" + r
-                            if len(response) > 0:
+                            if len(response) > 0 or file is not None:
                                 await message.channel.send(
                                     response,
                                     reference=message if first else None,
                                     allowed_mentions=allowed_mentions,
+                                    file=file,
                                 )
                             command_cache.cache(self, message, args)
                 # Delete custom progress message
