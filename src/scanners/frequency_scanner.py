@@ -26,6 +26,7 @@ class FrequencyScanner(Scanner):
     async def init(self, message: discord.Message, *args: str) -> bool:
         self.freq = Frequency()
         self.all_messages = "all" in args or "everyone" in args
+        self.member_specific = len(self.members) > 0
         return True
 
     def compute_message(self, channel: ChannelLogs, message: MessageLog):
