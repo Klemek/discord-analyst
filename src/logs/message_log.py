@@ -66,7 +66,7 @@ class MessageLog:
     def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and other.id == self.id
 
-    def __gt__(self, other: 'MessageLog') -> bool:
+    def __gt__(self, other: "MessageLog") -> bool:
         return self.created_at > other.created_at
 
     def __hash__(self) -> int:

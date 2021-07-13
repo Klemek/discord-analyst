@@ -6,7 +6,6 @@ import random
 from utils import (
     mention,
     from_now,
-    str_datetime,
     message_link,
     SPLIT_TOKEN,
     FilterLevel,
@@ -78,7 +77,7 @@ class History:
 
         return [
             intro,
-            f"{str_datetime(message.created_at)} ({from_now(message.created_at)}) {mention(message.author)} sent:",
+            f"{from_now(message.created_at)}, {mention(message.author)} sent:",
             f"<{message_link(message)}>",
             SPLIT_TOKEN,
             image,
@@ -107,7 +106,7 @@ class History:
 
         return [
             intro,
-            f"{str_datetime(message.created_at)} ({from_now(message.created_at)}) {mention(message.author)} said:",
+            f"{from_now(message.created_at)}, {mention(message.author)} said:",
             *text,
             f"<{message_link(message)}>",
         ]

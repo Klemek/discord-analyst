@@ -51,7 +51,7 @@ class ChannelLogs:
     def preload(self, channel: discord.TextChannel):
         self.name = channel.name
         self.channel = channel
-    
+
     @property
     def sorted_messages(self):
         return sorted(self.messages)

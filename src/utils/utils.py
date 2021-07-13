@@ -6,6 +6,7 @@ import discord
 import math
 from datetime import datetime, timedelta
 import re
+import time
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
 
@@ -177,13 +178,13 @@ def no_duplicate(seq: list) -> list:
 
 
 def top_key(
-    d: Dict[Union[str, int], int], key: Optional[Callable] = None
+    d: Dict[Union[str, int], int], key: Optional[Callable] = None, reverse: bool = False
 ) -> Union[str, int]:
     if len(d) == 0:
         return None
     if key is None:
         key = lambda k: d[k]
-    return sorted(d, key=key)[-1]
+    return sorted(d, key=key, reverse=reverse)[-1]
 
 
 def val_sum(d: Dict[Any, int]) -> int:
@@ -290,11 +291,11 @@ def parse_time(src: str) -> datetime:
 
 
 def str_date(date: datetime) -> str:
-    return date.strftime("%d %b. %Y")  # 12 Jun. 2018
+    return f"<t:{int(time.mktime(date.timetuple()))}:D>"
 
 
 def str_datetime(date: datetime) -> str:
-    return date.strftime("%H:%M, %d %b. %Y")  # 12:05, 12 Jun. 2018
+    return f"<t:{int(time.mktime(date.timetuple()))}:f>"
 
 
 def str_delta(delay: timedelta) -> str:
@@ -322,12 +323,7 @@ def str_delta(delay: timedelta) -> str:
 def from_now(src: Optional[datetime]) -> str:
     if src is None:
         return "never"
-    output = str_delta(datetime.utcnow() - src)
-    if output == "no time":
-        return "now"
-    elif output == "one day":
-        return "yesterday"
-    return output + " ago"
+    return f"<t:{int(time.mktime(src.timetuple()))}:R>"
 
 
 # APP SPECIFIC
