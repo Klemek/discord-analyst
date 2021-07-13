@@ -125,6 +125,11 @@ python3 src/main.py
 
 ## Changelog
 
+* **v1.16**
+  * `%freq graph` graph hours frequency along the week
+  * uses discord new time format
+  * `%freq` now shows quietest day of week and hour of day
+  * improvments and bug fix
 * **v1.15**
   * `nsfw:allow/only` filter nsfw channels
   * `%find` can use regexes
