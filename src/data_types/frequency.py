@@ -52,7 +52,7 @@ class Frequency:
 
         times = range(25)
         ax.set_xticks(times)
-        ax.set_xticklabels([f"{t:0>2}h" if t%2 == 0 else "" for t in times])
+        ax.set_xticklabels([f"{t:0>2}h" if t % 2 == 0 else "" for t in times])
 
         for i in range(7):
             hours = [self.hours[i][hour] * 7 / n_hours for hour in range(24)] + [
@@ -75,7 +75,12 @@ class Frequency:
 
         with BytesIO() as f:
             plt.savefig(
-                f, format="png", facecolor=fig.get_facecolor(), edgecolor="none", bbox_inches='tight', dpi=300
+                f,
+                format="png",
+                facecolor=fig.get_facecolor(),
+                edgecolor="none",
+                bbox_inches="tight",
+                dpi=300,
             )
             f.seek(0)
             return [discord.File(f, f"{time.time()}-plot.png")]
