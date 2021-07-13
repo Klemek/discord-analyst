@@ -16,6 +16,18 @@ from utils import (
     mention,
 )
 
+CB_color_cycle = [
+    "#e41a1c",
+    "#984ea3",
+    "#377eb8",
+    "#4daf4a",
+    "#dede00",
+    "#ff7f00",
+    "#a65628",
+    "#f781bf",
+    "#999999",
+]
+
 
 class Frequency:
     def __init__(self):
@@ -59,7 +71,12 @@ class Frequency:
                 self.hours[i][0] * 7 / n_hours
             ]
             ax.plot(
-                times, hours, label=calendar.day_name[i], linestyle="--", linewidth=0.8
+                times,
+                hours,
+                label=calendar.day_name[i],
+                linestyle="--",
+                linewidth=0.8,
+                c=CB_color_cycle[i],
             )
 
         hours = [day[hour] / n_hours for hour in range(24)] + [day[0] / n_hours]
