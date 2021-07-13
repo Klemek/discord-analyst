@@ -91,8 +91,7 @@ class FrequencyScanner(Scanner):
                 freq.longest_break_start = latest
             latest = date
             # calculate busiest weekday / hours
-            freq.week[date.weekday()] += 1
-            freq.day[date.hour] += 1
+            freq.hours[date.weekday()][date.hour] += 1
             # calculate busiest day ever
             start_delta = date - freq.dates[0]
             if start_delta.days > current_day:
