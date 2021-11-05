@@ -69,8 +69,8 @@ class PresenceScanner(Scanner):
             for mention in message.mentions:
                 pres.mention_others[mention] += 1
             pres.messages[message.author] += 1
-        pres.channel_total[channel.id] += 1
-        pres.mention_count[message.author] += len(message.mentions)
+            pres.channel_total[channel.id] += 1
+            pres.mention_count[message.author] += len(message.mentions)
         if len(raw_members) > 0:
             for mention in message.mentions:
                 if mention in raw_members:
