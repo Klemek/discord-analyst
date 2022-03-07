@@ -27,8 +27,8 @@ NO_FILE = -300
 
 # 5 minutes, assume 'fast' arg
 MIN_MODIFICATION_TIME = 5 * 60
-# ~1 year, remove log file
-MAX_MODIFICATION_TIME = 365 * 24 * 60 * 60
+# 30 days, remove log file
+MAX_MODIFICATION_TIME = 30 * 24 * 60 * 60
 
 
 class Worker:
