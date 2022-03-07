@@ -13,7 +13,7 @@ arguments:
 TEXT = """
 __**About Analyst-bot's data usage**__
 **TL;DR**
-Analyst-bot collects text message information. It does not share collected data with any third-party and data is retained 18 months or until the bot is leaving the guild/server.
+Analyst-bot collects text message information. It does not share collected data with any third-party and data is retained 30 days or until the bot is leaving the guild/server.
 **Data collection**
 Analyst-bot collects a Discord guild/server's history when asked to.
 This includes:
