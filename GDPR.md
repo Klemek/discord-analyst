@@ -27,7 +27,7 @@ Any data collected is only processed in order to produce a one-time report sent 
 
 Analyst-bot stores the collected data in files that are accessible by the software and its administrator only.
 
-Any collected data are retained maximum 18 months until deletion or when the bot is leaving a guild/server.
+Any collected data are retained maximum 30 days until deletion or when the bot is leaving a guild/server.
 
 ## Data sharing
 
