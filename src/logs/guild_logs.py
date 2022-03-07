@@ -8,28 +8,29 @@ import time
 import logging
 import asyncio
 import threading
-
+from dotenv import load_dotenv
 
 from . import ChannelLogs
 from utils import code_message, delta, deltas
 
-
-LOG_DIR = "logs"
-LOG_EXT = ".logz"
-
 current_analysis = []
 current_analysis_lock = threading.Lock()
-
 
 ALREADY_RUNNING = -100
 CANCELLED = -200
 NO_FILE = -300
 
-# 5 minutes, assume 'fast' arg
-MIN_MODIFICATION_TIME = 5 * 60
-# 30 days, remove log file
-MAX_MODIFICATION_TIME = 30 * 24 * 60 * 60
+load_dotenv()
 
+LOG_DIR = os.getenv("LOG_DIR", "logs")
+LOG_EXT = os.getenv("LOG_DIR", ".logz")
+CRYPT_KEY = os.getenv("CRYPT_KEY", "")
+
+# 5 minutes, assume 'fast' arg
+MIN_MODIFICATION_TIME = int(os.getenv("MAX_MODIFICATION_TIME", 5 * 60))
+
+# 30 days, remove log file
+MAX_MODIFICATION_TIME = int(os.getenv("MAX_MODIFICATION_TIME", 30 * 24 * 60 * 60))
 
 class Worker:
     def __init__(

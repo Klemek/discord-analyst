@@ -2,5 +2,5 @@ discord.py==1.7.0
 python-dotenv==0.15.0
 python-dateutil==2.8.1
 git+git://github.com/Klemek/miniscord.git
-numpy
 matplotlib
+cryptography
