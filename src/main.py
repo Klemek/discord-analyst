@@ -18,7 +18,7 @@ emojis.load_emojis()
 
 bot = Bot(
     "Discord Analyst",
-    "1.16.2",
+    "1.17.0",
     alias="%",
 )
 

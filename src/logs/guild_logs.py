@@ -9,6 +9,7 @@ import logging
 import asyncio
 import threading
 from dotenv import load_dotenv
+from cryptography.fernet import Fernet
 
 from . import ChannelLogs
 from utils import code_message, delta, deltas
@@ -23,7 +24,7 @@ NO_FILE = -300
 load_dotenv()
 
 LOG_DIR = os.getenv("LOG_DIR", "logs")
-LOG_EXT = os.getenv("LOG_DIR", ".logz")
+LOG_EXT = os.getenv("LOG_EXT", ".logz")
 CRYPT_KEY = os.getenv("CRYPT_KEY", "")
 
 # 5 minutes, assume 'fast' arg
@@ -130,29 +131,41 @@ class GuildLogs:
         channels = {}
         try:
             last_time = os.path.getmtime(self.log_file)
-            gziped_data = None
-            await code_message(progress, "Reading saved history (1/4)...")
+            encrypted_data = None
+            await code_message(progress, "Reading saved history (1/5)...")
             t0 = datetime.now()
             with open(self.log_file, mode="rb") as f:
-                gziped_data = f.read()
+                encrypted_data = f.read()
             logging.info(f"log {self.guild.id} > read in {delta(t0):,}ms")
             if self.check_cancelled():
                 return CANCELLED, 0
-            await code_message(progress, "Reading saved history (2/4)...")
+            await code_message(progress, "Reading saved history (2/5)...")
+            if CRYPT_KEY == "" or CRYPT_KEY is None:
+                gziped_data = encrypted_data
+            try:
+                t0 = datetime.now()
+                fernet = Fernet(CRYPT_KEY)
+                gziped_data = fernet.decrypt(encrypted_data)
+                logging.info(f"log {self.guild.id} > decrypted in {delta(t0):,}ms")
+            except:
+                gziped_data = encrypted_data
+            if self.check_cancelled():
+                return CANCELLED, 0                
+            await code_message(progress, "Reading saved history (3/5)...")
             t0 = datetime.now()
             json_data = gzip.decompress(gziped_data)
             del gziped_data
             logging.info(f"log {self.guild.id} > gzip decompress in {delta(t0):,}ms")
             if self.check_cancelled():
                 return CANCELLED, 0
-            await code_message(progress, "Reading saved history (3/4)...")
+            await code_message(progress, "Reading saved history (4/5)...")
             t0 = datetime.now()
             channels = json.loads(json_data)
             del json_data
             logging.info(f"log {self.guild.id} > json parse in {delta(t0):,}ms")
             if self.check_cancelled():
                 return CANCELLED, 0
-            await code_message(progress, "Reading saved history (4/4)...")
+            await code_message(progress, "Reading saved history (5/5)...")
             t0 = datetime.now()
             self.channels = {
                 int(id): ChannelLogs(channels[id], self) for id in channels
@@ -289,7 +302,7 @@ class GuildLogs:
                 return CANCELLED, 0
             await code_message(
                 progress,
-                f"Saving history (1/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
+                f"Saving history (1/4)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
             )
             t0 = datetime.now()
             json_data = bytes(json.dumps(self.dict()), "utf-8")
@@ -300,7 +313,7 @@ class GuildLogs:
                 return CANCELLED, 0
             await code_message(
                 progress,
-                f"Saving history (2/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
+                f"Saving history (2/4)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
             )
             t0 = datetime.now()
             gziped_data = gzip.compress(json_data)
@@ -312,12 +325,28 @@ class GuildLogs:
                 return CANCELLED, 0
             await code_message(
                 progress,
-                f"Saving history (3/3)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
+                f"Saving history (3/4)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
+            )
+            if CRYPT_KEY == "" or CRYPT_KEY is None:
+                encrypted_data = gziped_data
+            try:
+                t0 = datetime.now()
+                fernet = Fernet(CRYPT_KEY)
+                encrypted_data = fernet.encrypt(gziped_data)
+                logging.info(f"log {self.guild.id} > encrypted in {delta(t0):,}ms ->  {len(gziped_data) / deltas(t0):,.3f} b/s")
+            except:
+                encrypted_data = gziped_data
+            if self.check_cancelled():
+                return CANCELLED, 0
+            await code_message(
+                progress,
+                f"Saving history (4/4)...\n{real_total_msg:,} messages in {real_total_chan:,} channels",
             )
             t0 = datetime.now()
             with open(self.log_file, mode="wb") as f:
-                f.write(gziped_data)
+                f.write(encrypted_data)
             del gziped_data
+            del encrypted_data
             logging.info(
                 f"log {self.guild.id} > saved in {delta(t0):,}ms -> {real_total_msg / deltas(t0):,.3f} m/s"
             )
