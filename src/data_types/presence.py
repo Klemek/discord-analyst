@@ -54,16 +54,16 @@ class Presence:
             f"- **most visited channel**: {channel_mention(top_channel)} ({self.channel_usage[top_channel]:,} msg, {percent(self.channel_usage[top_channel]/channel_sum)})"
             if show_top_channel
             else "",
-            f"- **most contributed channel**: {channel_mention(found_in)} ({self.channel_usage[found_in]:,} msg, {percent(self.channel_usage[found_in]/self.channel_total[found_in])} of {type})"
+            f"- **most contributed channel**: {channel_mention(found_in)} ({self.channel_usage[found_in]:,} msg,)"
             if show_top_channel and member_specific
             else "",
-            f"- **was mentioned**: {plural(mention_sum, 'time')} ({percent(mention_sum/val_sum(self.mention_count))} of {type})"
+            f"- **was mentioned**: {plural(mention_sum, 'time')}"
             if member_specific and len(self.mentions) > 0
             else "",
             f"- **mostly mentioned by**: {mention(top_mention)} ({plural(self.mentions[top_mention], 'time')}, {percent(self.mentions[top_mention]/mention_sum)})"
             if member_specific and len(self.mentions) > 0
             else "",
-            f"- **mentioned others**: {plural(mention_others_sum, 'time')} ({percent(mention_others_sum/val_sum(self.mention_count))} of {type})"
+            f"- **mentioned others**: {plural(mention_others_sum, 'time')}"
             if len(self.mention_others) > 0 and member_specific
             else "",
             f"- **mostly mentioned**: {mention(top_mention_others)} ({plural(self.mention_others[top_mention_others], 'time')}, {percent(self.mention_others[top_mention_others]/mention_others_sum)})"
@@ -81,7 +81,7 @@ class Presence:
             f"- **reactions**: {plural(total_reaction_used, 'time')}"
             if len(self.reactions) > 0 and not member_specific
             else "",
-            f"- **reactions**: {plural(total_reaction_used, 'time')} ({percent(total_reaction_used/val_sum(self.used_reaction))} of {type})"
+            f"- **reactions**: {plural(total_reaction_used, 'time')}"
             if len(self.reactions) > 0 and member_specific
             else "",
             f"- **top reactions**: {mention(top_reaction_member)} ({plural(self.used_reaction[top_reaction_member], 'time')}, {percent(self.used_reaction[top_reaction_member]/val_sum(self.used_reaction))})"
