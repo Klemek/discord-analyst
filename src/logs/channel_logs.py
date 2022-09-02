@@ -66,8 +66,8 @@ class ChannelLogs:
         is_empty = self.last_message_id is None
         try:
             if is_empty:
-                sanity_check = len(await channel.history(limit=1).flatten())
-                if sanity_check != 1:
+                sanity_check = len([message async for message in channel.history(limit=1)])
+                if sanity_check < 1:
                     yield len(self.messages), True
                     return
             # load backward

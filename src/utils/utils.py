@@ -116,7 +116,7 @@ def escape_text(text: str) -> str:
     return discord.utils.escape_markdown(discord.utils.escape_mentions(text))
 
 
-class FakeMessage:
+class FakeMessage(discord.abc.Snowflake):
     def __init__(self, id: int):
         self.id = id
 
