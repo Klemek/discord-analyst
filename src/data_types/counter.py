@@ -4,7 +4,7 @@ from collections import defaultdict
 
 # Custom libs
 
-from utils import plural, from_now, percent, val_sum, top_key
+from utils import plural, from_now, percent, val_sum, top_key, utc_today
 
 
 class Counter:
@@ -25,7 +25,7 @@ class Counter:
         if self.last_used is None:
             return 0
         return self.all_usages() + 1 / (
-            100000 * ((datetime.today() - self.last_used).days + 1)
+            100000 * ((utc_today() - self.last_used).days + 1)
         )
 
     def all_usages(self) -> int:

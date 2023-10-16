@@ -4,7 +4,7 @@ import os
 import logging
 import discord
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import re
 import time
 import dateutil.parser
@@ -258,13 +258,18 @@ def parse_iso_datetime(str_date: str) -> datetime:
 RELATIVE_REGEX = r"(yesterday|today|\d*hours?|\d+h(ours?)?|\d*days?|\d+d(ays?)?|\d*weeks?|\d+w(eeks?)?|\d*months?|\d+m(onths?)?|\d*years?|\d+y(ears?)?)"
 
 
+def utc_now() -> datetime:
+    return datetime.now(tz=timezone.utc)
+
+def utc_today() -> datetime:
+    return datetime.now(tz=timezone.utc).date()
+
+
 def parse_relative_time(src: str) -> datetime:
-    today = datetime.utcnow().date()
-    today = datetime(today.year, today.month, today.day)
     if src == "today":
-        return today
+        return utc_today()
     elif src == "yesterday":
-        return today - relativedelta(days=1)
+        return utc_today() - relativedelta(days=1)
     else:
         m = re.match("(\d*)(\w+)", src)
         delta = None
@@ -280,7 +285,7 @@ def parse_relative_time(src: str) -> datetime:
             delta = relativedelta(months=value)
         elif unit == "y":
             delta = relativedelta(years=value)
-        return datetime.utcnow() - delta
+        return utc_now() - delta
 
 
 def parse_time(src: str) -> datetime:
@@ -344,7 +349,7 @@ def get_intro(
     """
     time_text = ""
     if start_datetime is not None:
-        stop_datetime = datetime.now() if stop_datetime is None else stop_datetime
+        stop_datetime = utc_now() if stop_datetime is None else stop_datetime
         time_text = f" (in {str_delta(stop_datetime - start_datetime)})"
     # Show all data (members, channels) when it's less than 5 units
     if len(members) == 0:

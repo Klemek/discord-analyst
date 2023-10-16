@@ -18,6 +18,7 @@ from utils import (
     command_cache,
     FilterLevel,
     SPLIT_TOKEN,
+    utc_now
 )
 from logs import (
     GuildLogs,
@@ -131,7 +132,7 @@ class Scanner(ABC):
                 self.start_date = None if len(dates) < 1 else min(dates)
                 self.stop_date = None if len(dates) < 2 else max(dates)
 
-                if self.start_date is not None and self.start_date > datetime.now():
+                if self.start_date is not None and self.start_date > utc_now():
                     await message.channel.send(
                         f"Start date is after today", reference=message
                     )
@@ -228,7 +229,7 @@ class Scanner(ABC):
                                 ),
                             )
                             if self.stop_date is None:
-                                self.stop_date = datetime.utcnow()
+                                self.stop_date = utc_now()
 
                         self.msg_count = 0
                         self.total_msg = 0

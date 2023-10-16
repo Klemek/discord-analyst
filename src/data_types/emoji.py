@@ -5,7 +5,7 @@ import discord
 
 # Custom libs
 
-from utils import mention, plural, from_now, top_key, percent
+from utils import mention, plural, from_now, top_key, percent, utc_today
 
 
 class Emoji:
@@ -44,14 +44,14 @@ class Emoji:
         )
 
     def life_days(self) -> int:
-        return (datetime.today() - self.emoji.created_at).days
+        return (utc_today() - self.emoji.created_at).days
 
     def use_days(self) -> int:
         # If never used, use creation date instead
         if self.last_used is None:
             return self.life_days()
         else:
-            return (datetime.today() - self.last_used).days
+            return (utc_today() - self.last_used).days
 
     def get_top_member(self) -> int:
         return top_key(self.members)
