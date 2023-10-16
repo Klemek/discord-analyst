@@ -25,7 +25,7 @@ class Counter:
         if self.last_used is None:
             return 0
         return self.all_usages() + 1 / (
-            100000 * ((utc_today() - self.last_used).days + 1)
+            100000 * (abs((utc_today() - self.last_used).days) + 1)
         )
 
     def all_usages(self) -> int:
