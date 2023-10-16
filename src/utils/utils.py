@@ -263,7 +263,7 @@ def utc_now() -> datetime:
 
 def utc_today() -> datetime:
     today = utc_now().date()
-    return datetime(today.year, today.month, today.day, tz=timezone.utc)
+    return datetime(today.year, today.month, today.day, tzinfo=timezone.utc)
 
 
 def parse_relative_time(src: str) -> datetime:
