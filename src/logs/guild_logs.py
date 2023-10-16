@@ -30,8 +30,8 @@ CRYPT_KEY = os.getenv("CRYPT_KEY", "")
 # 5 minutes, assume 'fast' arg
 MIN_MODIFICATION_TIME = int(os.getenv("MAX_MODIFICATION_TIME", 5 * 60))
 
-# 30 days, remove log file
-MAX_MODIFICATION_TIME = int(os.getenv("MAX_MODIFICATION_TIME", 30 * 24 * 60 * 60))
+# 90 days, remove log file
+MAX_MODIFICATION_TIME = int(os.getenv("MAX_MODIFICATION_TIME", 90 * 24 * 60 * 60))
 
 class Worker:
     def __init__(
